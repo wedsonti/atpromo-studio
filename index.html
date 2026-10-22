@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATpromo Studio — Gerador de Posts & Carrosséis de Ofertas</title>
+    <meta name="description" content="Fábrica padronizada de posts, stories e carrosséis de ofertas tech com extração inteligente via IA e exportação em alta definição.">
+    <meta property="og:title" content="ATpromo Studio — Gerador de Posts & Carrosséis de Ofertas">
+    <meta property="og:description" content="Fábrica padronizada de posts, stories e carrosséis de ofertas tech com extração inteligente via IA e exportação em alta definição.">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas para exportação fiel em PNG de alta resolução -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans, Montserrat & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        atcream: '#FAF6EE',
+                        atorange: '#FF6B1A',
+                        atink: '#141414',
+                        atpeach: '#FFE6D5',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Montserrat', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Dimensões proporcionais para exportação 1080p (Scale 3x = 1080x1350 ou 1080x1920) */
+        .slide-canvas-4-5 {
+            width: 360px;
+            height: 450px;
+            min-width: 360px;
+            min-height: 450px;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            background-color: #FAF6EE;
+            color: #141414;
+            font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+        }
+
+        .slide-canvas-9-16 {
+            width: 360px;
+            height: 640px;
+            min-width: 360px;
+            min-height: 640px;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            background-color: #FAF6EE;
+            color: #141414;
+            font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+        }
+
+        /* Caixas e Etiquetas Neo-Brutalistas Reais (@atpromoo) - 0px spread para renderização perfeita no html2canvas */
+        .neo-box-white {
+            background-color: #FFFFFF;
+            border: 3px solid #141414;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px 0px #141414;
+        }
+
+        .neo-row-white {
+            background-color: #FFFFFF;
+            border: 3px solid #141414;
+            border-radius: 14px;
+            box-shadow: 5px 5px 0px 0px #141414;
+        }
+
+        .neo-box-orange {
+            background-color: #FF6B1A;
+            border: 3px solid #141414;
+            border-radius: 20px;
+            box-shadow: 6px 6px 0px 0px #141414;
+        }
+
+        .neo-badge-condition {
+            background-color: #FF6B1A;
+            color: #141414;
+            border: 2px solid #141414;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0px 0px #141414;
+        }
+
+        /* Preço principal em branco puro com sombra sólida externa (NUNCA text-stroke) */
+        .price-hero-text {
+            color: #FFFFFF;
+            font-weight: 900;
+            text-shadow: 3px 3px 0px #141414;
+        }
+
+        /* Integração dos mascotes: SEM mix-blend-mode (o fundo #FAF6EE dos slides é idêntico ao das imagens) */
+        .mascot-clean {
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-[#FF6B1A] selection:text-white">
+
+    <!-- Notificação Toast Flutuante -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ========================================================================== -->
+    <!-- TELA DE LOGIN DE 1 USUÁRIO (BLOQUEIA O APP ATÉ AUTENTICAR EM /api/login) -->
+    <!-- ========================================================================== -->
+    <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-[#FAF6EE] text-[#141414] border-[3px] border-[#141414] rounded-2xl p-6 sm:p-8 shadow-[8px_8px_0px_#FF6B1A] relative overflow-hidden">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-24 h-24 rounded-2xl bg-[#FAF6EE] border-[3px] border-[#141414] shadow-[4px_4px_0px_#141414] flex items-center justify-center overflow-hidden mb-3 p-1">
+                    <img id="loginMascotPreview" src="/assets/aistudio/image_3e6c496d.png" alt="ATpromo Logo" class="w-full h-full object-contain">
+                </div>
+                <span class="px-2.5 py-0.5 rounded-md bg-[#FF6B1A] text-[#141414] font-display font-black text-[11px] uppercase border-2 border-[#141414] shadow-[2px_2px_0px_#141414]">
+                    @atpromoo Oficial
+                </span>
+                <h1 class="font-display font-black text-2xl text-[#141414] tracking-tight mt-2 uppercase">
+                    ATpromo Studio
+                </h1>
+                <p class="text-xs font-semibold text-neutral-600 mt-0.5">
+                    Gerador Editorial Neo-Brutalista de Posts & Carrosséis
+                </p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div id="loginErrorBox" class="hidden p-3 rounded-xl bg-red-100 border-2 border-[#141414] text-red-900 text-xs font-bold text-center shadow-[3px_3px_0px_#141414]">
+                    Usuário ou senha incorretos.
+                </div>
+
+                <div>
+                    <label for="loginUsername" class="block text-xs font-extrabold uppercase text-[#141414] mb-1">Usuário</label>
+                    <input
+                        type="text"
+                        id="loginUsername"
+                        autocomplete="username"
+                        required
+                        placeholder="admin"
+                        class="w-full bg-white border-[3px] border-[#141414] rounded-xl px-3.5 py-2.5 text-sm font-bold text-[#141414] placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B1A]"
+                    >
+                </div>
+
+                <div>
+                    <label for="loginPassword" class="block text-xs font-extrabold uppercase text-[#141414] mb-1">Senha</label>
+                    <div class="relative">
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            autocomplete="current-password"
+                            required
+                            placeholder="••••••••"
+                            class="w-full bg-white border-[3px] border-[#141414] rounded-xl pl-3.5 pr-10 py-2.5 text-sm font-bold text-[#141414] placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#FF6B1A]"
+                        >
+                        <button
+                            type="button"
+                            onclick="toggleLoginPasswordVisibility()"
+                            class="absolute inset-y-0 right-0 px-3 text-neutral-600 hover:text-[#141414] text-xs font-bold flex items-center"
+                            title="Mostrar/ocultar senha"
+                        >
+                            <span id="togglePassIcon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    id="btnLoginSubmit"
+                    class="w-full py-3 px-4 rounded-xl bg-[#FF6B1A] hover:bg-[#ff7b33] text-white font-display font-black text-sm uppercase tracking-wide border-[3px] border-[#141414] shadow-[4px_4px_0px_#141414] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#141414] transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                    <span>🔐</span>
+                    <span id="btnLoginSubmitText">Entrar no Estúdio</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================== -->
+    <!-- TOP HEADER -->
+    <!-- ========================================================================== -->
+    <header id="appHeader" class="hidden bg-slate-900 border-b border-slate-800 px-4 lg:px-6 py-3 sticky top-0 z-40">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Title + Status Conectado -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-[#FAF6EE] border-2 border-[#FF6B1A] flex items-center justify-center overflow-hidden shrink-0 p-0.5">
+                    <img id="headerMascotLogo" src="/assets/aistudio/image_3e6c496d.png" alt="Mascote ATpromo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h1 class="font-display font-black text-base sm:text-lg tracking-tight text-white">ATpromo Studio</h1>
+                        <span class="text-xs font-mono text-emerald-400 font-semibold" id="topUserConnectedStatus">
+                            • Usuário: admin (conectado)
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Design Editorial Neo-Brutalista Oficial (@atpromoo)</p>
+                </div>
+            </div>
+
+            <!-- Seletor de Formato -->
+            <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
+                <button onclick="setPostMode('carousel-x')" id="modeBtn-carousel-x" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer">
+                    📑 Carrossel 3 Slides (4:5)
+                </button>
+                <button onclick="setPostMode('single-feed')" id="modeBtn-single-feed" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                    🖼️ Post Único (4:5)
+                </button>
+                <button onclick="setPostMode('story')" id="modeBtn-story" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                    📱 Story (9:16)
+                </button>
+                <button onclick="setPostMode('multi-giro')" id="modeBtn-multi-giro" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                    🔥 Giro de Ofertas
+                </button>
+            </div>
+
+            <!-- Export Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="openVercelModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                    <span>🚀</span> <span class="hidden md:inline">Deploy Vercel</span>
+                </button>
+                <button onclick="downloadAllSlides()" id="btnDownloadAll" class="px-4 py-2 rounded-xl bg-[#FF6B1A] hover:bg-[#ff7b33] text-white font-display font-black text-xs sm:text-sm shadow-lg shadow-orange-600/25 transition flex items-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span id="downloadBtnLabel">Baixar Todos os 3 Slides (PNG)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================== -->
+    <!-- MAIN WORKSPACE -->
+    <!-- ========================================================================== -->
+    <main id="appMain" class="hidden flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 lg:p-6">
+
+        <!-- COLUNA ESQUERDA: BARRA LATERAL ESCURA DO GERADOR (5 Colunas) -->
+        <aside class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- SEÇÃO: 👤 LOGO & MASCOTE (PERSISTENTE NO LOCALSTORAGE) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">👤</span>
+                        <h2 class="font-display font-extrabold text-sm text-white uppercase tracking-wide">Logo & Mascote (@atpromoo)</h2>
+                    </div>
+                    <button onclick="resetDefaultMascots()" class="text-[11px] text-orange-400 hover:text-orange-300 underline font-semibold cursor-pointer">
+                        Restaurar Mascotes Oficiais
+                    </button>
+                </div>
+
+                <!-- 2 Slots de Upload Persistentes em Base64 no localStorage -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- SLOT 1: Mascote Notebook / Logo -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-14 h-14 rounded-lg bg-[#FAF6EE] border-2 border-[#141414] flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                <img id="slot1PreviewImg" src="/assets/aistudio/image_3e6c496d.png" alt="Slot 1 Mascote Notebook" class="w-full h-full object-contain">
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-mono uppercase text-orange-400 font-bold block">Slot 1 • Salvo no Navegador</span>
+                                <h3 class="text-xs font-bold text-white leading-tight">Mascote Notebook / Logo</h3>
+                                <p class="text-[10px] text-slate-400 mt-0.5 leading-snug">Avatar do Slide 1 e topo do Slide 2</p>
+                            </div>
+                        </div>
+                        <input type="file" id="slot1FileInput" accept="image/*" class="hidden" onchange="handleMascotSlotUpload(event, 1)">
+                        <button onclick="document.getElementById('slot1FileInput').click()" class="w-full py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition cursor-pointer">
+                            📤 Trocar Imagem (Slot 1)
+                        </button>
+                    </div>
+
+                    <!-- SLOT 2: Mascote Avatar Frontal -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-14 h-14 rounded-lg bg-[#FAF6EE] border-2 border-[#141414] flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                <img id="slot2PreviewImg" src="/assets/aistudio/avatar_atpromo_9_por_16_55c66a9b.png" alt="Slot 2 Mascote Avatar Frontal" class="w-full h-full object-contain">
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-mono uppercase text-emerald-400 font-bold block">Slot 2 • Salvo no Navegador</span>
+                                <h3 class="text-xs font-bold text-white leading-tight">Mascote Avatar Frontal</h3>
+                                <p class="text-[10px] text-slate-400 mt-0.5 leading-snug">Sticker redondo no Slide 3 (CTA)</p>
+                            </div>
+                        </div>
+                        <input type="file" id="slot2FileInput" accept="image/*" class="hidden" onchange="handleMascotSlotUpload(event, 2)">
+                        <button onclick="document.getElementById('slot2FileInput').click()" class="w-full py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition cursor-pointer">
+                            📤 Trocar Imagem (Slot 2)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OPÇÃO: 🖼️ Usar Imagem Pronta no Slide 3 (Post Institucional Pronto) -->
+                <div class="mt-3 pt-3 border-t border-slate-800/80 bg-slate-950/70 p-3 rounded-xl border border-slate-800">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm">🖼️</span>
+                            <div>
+                                <h4 class="text-xs font-bold text-white leading-tight">Usar Imagem Pronta no Slide 3</h4>
+                                <p class="text-[10px] text-slate-400 leading-snug">Seu post institucional pronto em tela cheia</p>
+                            </div>
+                        </div>
+                        <input type="file" id="slide3CustomFileInput" accept="image/*" class="hidden" onchange="handleSlide3CustomUpload(event)">
+                        <button onclick="document.getElementById('slide3CustomFileInput').click()" class="py-1 px-2.5 rounded-lg bg-[#FF6B1A] hover:bg-[#ff7b33] text-white text-[11px] font-extrabold shadow transition cursor-pointer shrink-0">
+                            📤 Enviar Post Pronto
+                        </button>
+                    </div>
+
+                    <div id="slide3CustomStatusContainer" class="flex items-center justify-between gap-2 pt-1 text-[11px]">
+                        <div class="flex items-center gap-1.5">
+                            <input type="checkbox" id="checkUseCustomSlide3" onchange="toggleSlide3Custom(this.checked)" class="accent-[#FF6B1A] w-3.5 h-3.5 cursor-pointer">
+                            <label for="checkUseCustomSlide3" class="text-slate-300 font-semibold cursor-pointer">Exibir imagem pronta no Slide 3</label>
+                        </div>
+                        <button id="btnRemoveCustomSlide3" onclick="removeSlide3Custom()" class="hidden text-red-400 hover:text-red-300 text-[10px] font-bold cursor-pointer">
+                            🗑️ Remover
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO 1: COLAR OFERTA BRUTA + SELETOR DE ÂNGULO CRIATIVO + EXTRAÇÃO IA -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-[#FF6B1A] text-white font-mono text-xs font-black flex items-center justify-center">1</span>
+                        <h2 class="font-display font-extrabold text-sm text-white uppercase tracking-wide">Oferta & Ângulo Criativo</h2>
+                    </div>
+                    <button onclick="loadRtxExample()" class="text-xs text-orange-400 hover:text-orange-300 underline font-semibold cursor-pointer">
+                        Restaurar Exemplo RTX
+                    </button>
+                </div>
+
+                <!-- SELETOR DE ÂNGULO DO POST (5 ESTILOS DE COPY) -->
+                <div class="mb-3">
+                    <label for="copyAngleSelect" class="block text-xs font-bold text-orange-400 mb-1">
+                        🎯 Ângulo do Post (Muda a Headline do Slide 1 e Argumentos do Slide 2)
+                    </label>
+                    <select
+                        id="copyAngleSelect"
+                        onchange="handleAngleChange(this.value)"
+                        class="w-full rounded-xl bg-slate-950 border border-slate-700 focus:border-[#FF6B1A] focus:outline-none px-3 py-2 text-xs font-bold text-white cursor-pointer"
+                    >
+                        <option value="price-alert">🔥 Alerta de Preço / Bug (Desconto agressivo e urgência)</option>
+                        <option value="contrarian">🛑 Opinião Contrária (Ex: Não compre 8GB... veja por que 16GB vale mais)</option>
+                        <option value="math-value">📊 Matemática do Custo-Benefício (Economia em R$, FPS e parcelas)</option>
+                        <option value="who-is-it-for">✅ Guia Rápido: Pra quem é? (Ideal para quem... / Ponto de atenção)</option>
+                        <option value="hidden-detail">🔍 O Detalhe que Ninguém Viu (GDDR7, construção MSI ou garantia)</option>
+                    </select>
+                </div>
+
+                <textarea id="rawOfferInput" rows="4" class="w-full rounded-xl bg-slate-950 border border-slate-800 focus:border-[#FF6B1A] focus:outline-none p-3 text-xs font-mono text-slate-200 leading-relaxed resize-y" placeholder="Cole aqui o texto da oferta do WhatsApp ou Telegram..."></textarea>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
+                    <button onclick="extractOfferInstant()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                        <span>🎯</span> Extração Local Rápida
+                    </button>
+                    <button onclick="extractOfferWithGemini()" id="btnGeminiExtract" class="py-2.5 px-3 rounded-xl bg-[#FF6B1A] hover:bg-[#ff7b33] text-white font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                        <span>✨</span> Extrair + Raio-X com IA
+                    </button>
+                </div>
+            </div>
+
+            <!-- PASSO 2: FOTO DO PRODUTO (CTRL+V OU UPLOAD) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-[#FF6B1A] text-white font-mono text-xs font-black flex items-center justify-center">2</span>
+                        <h2 class="font-display font-extrabold text-sm text-white uppercase tracking-wide">Foto do Produto (Ctrl+V ou Upload)</h2>
+                    </div>
+                    <button onclick="clearProductImageToPlaceholder()" class="text-xs text-slate-400 hover:text-orange-400 transition cursor-pointer">
+                        Limpar Foto
+                    </button>
+                </div>
+
+                <div id="imageDropzone" onclick="document.getElementById('fileUploadInput').click()" class="border-2 border-dashed border-slate-700 hover:border-[#FF6B1A] rounded-xl p-3 text-center cursor-pointer transition bg-slate-950/60 hover:bg-slate-950">
+                    <input type="file" id="fileUploadInput" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-orange-400 text-lg">
+                            📋
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-slate-200">Pressione <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-orange-400">Ctrl+V</kbd> para colar a foto real do produto</p>
+                            <p class="text-[11px] text-slate-400">Ou clique aqui para enviar do computador/celular (PNG, JPG, WebP)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-800/80">
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Tamanho da Foto (Zoom)</span>
+                            <span id="imgScaleValue" class="font-mono font-bold text-orange-400">100%</span>
+                        </div>
+                        <input type="range" id="imgScaleSlider" min="65" max="145" value="100" oninput="updateImageTransform()" class="w-full accent-[#FF6B1A] cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Modo de Fundo da Foto</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                            <button onclick="setPhotoBoxStyle('white-card')" id="photoStyle-white-card" class="py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer">
+                                ⬜ Fundo Branco
+                            </button>
+                            <button onclick="setPhotoBoxStyle('transparent')" id="photoStyle-transparent" class="py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">
+                                🌌 Sem Fundo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLE DE FORMATO E ADAPTAÇÃO DO QUADRO -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-800/80">
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Altura do Quadro</span>
+                            <span id="frameHeightValue" class="font-mono font-bold text-orange-400">126px</span>
+                        </div>
+                        <input type="range" id="frameHeightSlider" min="95" max="150" value="126" oninput="updateFrameHeightFromSlider(this.value)" class="w-full accent-[#FF6B1A] cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Enquadramento</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                            <button onclick="setPhotoFitMode('contain')" id="photoFit-contain" class="py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer">
+                                📐 Conter
+                            </button>
+                            <button onclick="setPhotoFitMode('cover')" id="photoFit-cover" class="py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">
+                                🖼️ Preencher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2.5 flex items-center justify-between gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                    <span class="text-[10.5px] font-bold text-slate-300 ml-1">Formato:</span>
+                    <div class="flex items-center gap-1">
+                        <button onclick="setPhotoAspectRatioMode('auto')" id="ratioBtn-auto" class="px-2 py-0.5 rounded text-[10.5px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer">
+                            ⚡ Auto-Adaptar
+                        </button>
+                        <button onclick="setPhotoAspectRatioMode('wide')" id="ratioBtn-wide" class="px-2 py-0.5 rounded text-[10.5px] font-bold text-slate-400 hover:text-white transition cursor-pointer">
+                            16:9 Larga
+                        </button>
+                        <button onclick="setPhotoAspectRatioMode('square')" id="ratioBtn-square" class="px-2 py-0.5 rounded text-[10.5px] font-bold text-slate-400 hover:text-white transition cursor-pointer">
+                            1:1 Quadrada
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO 3: EDIÇÃO FINA DOS TEXTOS DOS 3 SLIDES -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-[#FF6B1A] text-white font-mono text-xs font-black flex items-center justify-center">3</span>
+                        <h2 class="font-display font-extrabold text-sm text-white uppercase tracking-wide">Editar Textos dos Slides</h2>
+                    </div>
+                </div>
+
+                <!-- Abas Internas de Edição -->
+                <div class="flex border-b border-slate-800 mb-3 text-xs font-bold">
+                    <button onclick="switchEditorTab('tab-capa')" id="tabBtn-capa" class="px-3 py-2 border-b-2 border-[#FF6B1A] text-orange-400 cursor-pointer">
+                        Slide 1 (Capa)
+                    </button>
+                    <button onclick="switchEditorTab('tab-raiox')" id="tabBtn-raiox" class="px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer">
+                        Slide 2 (Vale a Pena?)
+                    </button>
+                    <button onclick="switchEditorTab('tab-cta')" id="tabBtn-cta" class="px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer">
+                        Slide 3 (CTA)
+                    </button>
+                </div>
+
+                <!-- ABA 1: SLIDE 1 (CAPA DA OFERTA) -->
+                <div id="tab-capa" class="space-y-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Gatilho em Destaque (#FF6B1A)</label>
+                            <input type="text" id="fieldBadge" oninput="syncFormToState()" placeholder="Vazou o preço:" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Título Principal (#141414)</label>
+                            <input type="text" id="fieldTitle" oninput="syncFormToState()" placeholder="RTX 5060 Ti 16GB GDDR7" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Submodelo (Barra Inferior Esquerda)</label>
+                            <input type="text" id="fieldSubtitle" oninput="syncFormToState()" placeholder="MSI VENTUS 2X OC • GDDR7" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Loja (Barra Inferior Direita)</label>
+                            <input type="text" id="fieldStore" oninput="syncFormToState()" placeholder="AMAZON" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Badge de Condição (Topo da Moldura)</label>
+                        <input type="text" id="fieldCondition" oninput="syncFormToState()" placeholder="⚠️ SEMINOVO • ESTOQUE LIMITADO" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-300 font-bold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-orange-400 font-bold mb-1">Preço Principal</label>
+                            <input type="text" id="fieldPrice" oninput="syncFormToState()" class="w-full bg-slate-950 border border-orange-500/50 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-mono font-extrabold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Preço Antigo (De)</label>
+                            <input type="text" id="fieldOldPrice" oninput="syncFormToState()" placeholder="R$ 3.899" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 font-mono focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Cupom (Opcional)</label>
+                            <input type="text" id="fieldCoupon" oninput="syncFormToState()" placeholder="Sem cupom" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-amber-400 font-mono uppercase focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Pílula Branca de Parcelamento</label>
+                        <input type="text" id="fieldInstallments" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+
+                    <div class="pt-1">
+                        <button onclick="addCurrentOfferToGiro()" class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-orange-400 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <span>➕</span> Adicionar Oferta ao modo "Giro de Ofertas"
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 2: SLIDE 2 (FAIXAS HORIZONTAIS COMPACTAS - VALE A PENA?) -->
+                <div id="tab-raiox" class="hidden space-y-2.5">
+                    <p class="text-[11px] text-slate-400">Use <code class="text-orange-400">EMOJI Título | Explicação</code> para cada faixa horizontal do <strong>Slide 2</strong>:</p>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Faixa Horizontal 01</label>
+                        <input type="text" id="fieldHighlight1" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Faixa Horizontal 02</label>
+                        <input type="text" id="fieldHighlight2" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Faixa Horizontal 03</label>
+                        <input type="text" id="fieldHighlight3" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Faixa Horizontal 04</label>
+                        <input type="text" id="fieldHighlight4" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Rodapé Central do Slide 2</label>
+                        <input type="text" id="fieldSiteUrl" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-mono focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- ABA 3: SLIDE 3 (POST ORIGINAL DO INSTAGRAM @atpromoo) -->
+                <div id="tab-cta" class="hidden space-y-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Arroba da Página</label>
+                            <input type="text" id="fieldBrandHandle" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Pergunta Abaixo do Mascote</label>
+                            <input type="text" id="fieldCtaHeadline" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Chamada Principal (Use / para quebrar as 3 linhas)</label>
+                        <input type="text" id="fieldCommentTrigger" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-bold focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Aviso na Legenda</label>
+                        <input type="text" id="fieldDisclaimer" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 focus:border-[#FF6B1A] focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SESSÃO DO USUÁRIO E BOTÃO LOGOUT NA BARRA LATERAL -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                        🔐
+                    </span>
+                    <div>
+                        <p id="sidebarUserStatus" class="text-xs font-bold text-white">Usuário: admin (conectado)</p>
+                        <p class="text-[11px] text-slate-400">Sessão ativa salva no navegador</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-display font-black text-xs uppercase tracking-wider shadow transition cursor-pointer">
+                    LOGOUT
+                </button>
+            </div>
+
+        </aside>
+
+        <!-- COLUNA DIREITA: PALCO DE PREVIEW DOS SLIDES + LEGENDA PRONTA (7 Colunas) -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+
+            <!-- PALCO DE VISUALIZAÇÃO AO VIVO -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <h2 id="previewStageTitle" class="font-display font-extrabold text-sm sm:text-base text-white">
+                            Carrossel Editorial @atpromoo (3 Slides • 1080x1350px)
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Design Editorial Limpo • Sem Text-Stroke • Lista Horizontal Compacta</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-mono text-slate-300 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                            Exportação: <strong class="text-[#FF6B1A]">PNG 1080p (3x)</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- CONTAINER HORIZONTAL DOS SLIDES -->
+                <div id="slidesStageContainer" class="flex items-start gap-6 overflow-x-auto pb-4 pt-1 px-1">
+                    <!-- Os slides são injetados dinamicamente via JavaScript -->
+                </div>
+            </div>
+
+            <!-- PAINEL DE LEGENDA PRONTA PARA INSTAGRAM -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📝</span>
+                        <div>
+                            <h3 class="font-display font-extrabold text-sm text-white uppercase tracking-wide">Legenda Padronizada (@atpromoo)</h3>
+                            <p class="text-[11px] text-slate-400">Pronta para copiar e publicar no Instagram</p>
+                        </div>
+                    </div>
+                    <button onclick="copyCaptionToClipboard()" class="px-4 py-2 rounded-xl bg-[#FF6B1A] hover:bg-[#ff7b33] text-white font-display font-black text-xs flex items-center gap-1.5 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                        <span>📋</span> <span id="btnCopyCaptionText">Copiar Legenda</span>
+                    </button>
+                </div>
+
+                <textarea id="generatedCaptionOutput" rows="7" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-3.5 text-xs font-sans text-slate-200 leading-relaxed focus:border-[#FF6B1A] focus:outline-none"></textarea>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL GUIA VERCEL -->
+    <div id="vercelModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 class="font-display font-bold text-base text-white flex items-center gap-2">
+                    <span>🚀</span> Deploy Gratuito na Vercel Configurado
+                </h3>
+                <button onclick="closeVercelModal()" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">✕</button>
+            </div>
+            <div class="space-y-3 my-4 text-xs text-slate-300 leading-relaxed">
+                <p>O projeto já possui <code class="px-1.5 py-0.5 rounded bg-slate-950 text-orange-400 font-mono">vercel.json</code> e exportação do Express em <code class="px-1.5 py-0.5 rounded bg-slate-950 text-orange-400 font-mono">server.ts</code> prontos para a Vercel:</p>
+                <ol class="list-decimal list-inside space-y-2 text-slate-200">
+                    <li>Suba este repositório no GitHub e importe na <strong>Vercel</strong>.</li>
+                    <li>Nas <strong>Environment Variables</strong> do projeto na Vercel, defina:
+                        <ul class="list-disc list-inside ml-4 mt-1 space-y-1 font-mono text-[11px] text-orange-300">
+                            <li>ADMIN_USER = admin</li>
+                            <li>ADMIN_PASS = atpromo123</li>
+                            <li>GEMINI_API_KEY = sua_chave_gemini</li>
+                        </ul>
+                    </li>
+                    <li>Os Mascotes customizados enviados nos Slots 1 e 2 e o seu login ficam salvos automaticamente no <code class="px-1 py-0.5 rounded bg-slate-950 text-emerald-400 font-mono">localStorage</code> do seu navegador!</li>
+                </ol>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeVercelModal()" class="px-4 py-2 rounded-xl bg-[#FF6B1A] hover:bg-[#ff7b33] text-white font-bold text-xs cursor-pointer">Entendi, fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
+    <script>
+        // ============================================================================
+        // 1. ASSETS DOS MASCOTES OFICIAIS (@atpromoo) E CONFIGURAÇÕES DE PERSISTÊNCIA
+        // ============================================================================
+        const DEFAULT_MASCOT_SLOT1_URL = '/assets/aistudio/image_3e6c496d.png';
+        const DEFAULT_MASCOT_SLOT2_URL = '/assets/aistudio/avatar_atpromo_9_por_16_55c66a9b.png';
+
+        const MASCOT_SLOT1_STORAGE_KEY = 'atpromo_mascot_slot1_v2_b64';
+        const MASCOT_SLOT2_STORAGE_KEY = 'atpromo_mascot_slot2_v2_b64';
+        const SLIDE3_CUSTOM_STORAGE_KEY = 'atpromo_slide3_custom_b64';
+        const SLIDE3_USE_CUSTOM_STORAGE_KEY = 'atpromo_slide3_use_custom';
+
+        // ============================================================================
+        // 2. ESTADO GLOBAL DA APLICAÇÃO (@atpromoo)
+        // ============================================================================
+        const DEFAULT_RAW_TEXT = `*🔥 VAZOU O PREÇO: RTX 5060TI 16GB POR APENAS R$3283! 🚀*
+_GPU NV RTX5060TI 16GB GDDR7 128BITS VENTUS 2X OC BLACK PLUS MSI 912-V535-088 (Seminovo)_
+
+R$ 3283
+ 10x sem Juros
+https://www.amazon.com.br/dp/B0HD2G4RNM?tag=atpromo-20
+
+Ofertas esgotam, verifique o frete!`;
+
+        let appState = {
+            postMode: 'carousel-x',      // 'carousel-x' | 'single-feed' | 'story' | 'multi-giro'
+            copyAngle: 'price-alert',    // 'price-alert' | 'contrarian' | 'math-value' | 'who-is-it-for' | 'hidden-detail'
+            photoBoxStyle: 'white-card', // 'white-card' | 'transparent'
+            photoFit: 'contain',         // 'contain' | 'cover'
+            photoFrameHeight: 126,       // Altura dinâmica do quadro (95 a 150px)
+            photoAspectRatioMode: 'auto',// 'auto' | 'wide' | 'square'
+            detectedRatio: 1.5,
+            imgScale: 100,
+            productImageSrc: '',         // Vazio por padrão para exibir o dropzone limpo de colar foto real
+            productImageTransparentSrc: '',
+
+            // Mascotes Persistentes (Slot 1 & Slot 2)
+            mascotSlot1Raw: DEFAULT_MASCOT_SLOT1_URL,
+            mascotSlot2Raw: DEFAULT_MASCOT_SLOT2_URL,
+
+            // Slide 3 Custom Image (Post Institucional Pronto)
+            slide3CustomImageSrc: '',
+            slide3UseCustom: false,
+
+            // Dados da Oferta Atual
+            badge: 'Vazou o preço:',
+            title: 'RTX 5060 Ti 16GB GDDR7',
+            subtitle: 'MSI VENTUS 2X OC • GDDR7',
+            store: 'AMAZON',
+            condition: '⚠️ SEMINOVO • ESTOQUE LIMITADO',
+            oldPrice: 'R$ 3.899',
+            price: 'R$ 3.283',
+            installments: '10x de R$ 328,30 sem Juros',
+            coupon: '',
+
+            // Identidade @atpromoo
+            brandHandle: '@atpromoo',
+            siteUrl: 'atpromo.vercel.app',
+            ctaHeadline: 'Tá esperando o *quê?*',
+            commentTrigger: '📲 Acesse nosso / grupo pelo link / na bio',
+            disclaimer: 'Ofertas esgotam rápido! Verifique o frete para sua região.',
+
+            // Destaques do Slide 2 (4 Faixas Horizontais Compactas: "EMOJI Título | Explicação")
+            highlights: [
+                '🚀 16GB de VRAM GDDR7 | Sobra memória para rodar tudo em Quad HD (1440p) e IA.',
+                '❄️ Construção MSI Ventus 2X OC | Dual Fan com overclock de fábrica e ótima refrigeração.',
+                '💳 Parcelamento Raro sem Juros | 10x de R$ 328,30 direto na Amazon sem acréscimo.',
+                '⚠️ Estoque Relâmpago Seminovo | Unidades reembaladas na Amazon esgotam em minutos.'
+            ],
+
+            // Lista de Produtos para o modo "Giro de Ofertas"
+            giroProducts: [
+                {
+                    badge: 'Vazou o preço:',
+                    title: 'RTX 5060 Ti 16GB GDDR7',
+                    subtitle: 'MSI VENTUS 2X OC • GDDR7',
+                    oldPrice: 'R$ 3.899',
+                    price: 'R$ 3.283',
+                    installments: '10x de R$ 328,30 sem Juros',
+                    store: 'AMAZON',
+                    condition: '⚠️ SEMINOVO • ESTOQUE LIMITADO',
+                    image: ''
+                },
+                {
+                    badge: 'Menor preço:',
+                    title: 'Ryzen 7 5700X3D AM4',
+                    subtitle: '8-CORE 16-THREADS • 100MB CACHE',
+                    oldPrice: 'R$ 1.699',
+                    price: 'R$ 1.299',
+                    installments: '10x de R$ 129,90 sem Juros',
+                    store: 'AMAZON',
+                    condition: '✅ NOVO • GARANTIA OFICIAL',
+                    image: ''
+                }
+            ],
+
+            caption: `🔥 VAZOU O PREÇO! RTX 5060 Ti de 16GB GDDR7 (MSI Ventus 2X OC Black Plus) saindo por apenas R$ 3.283 em até 10x SEM JUROS na Amazon! 🚀
+
+⚠️ Atenção: Unidade na condição Seminovo — oportunidade única pelo modelo de 16GB GDDR7 parcelado sem juros!
+
+🚀 16GB de VRAM GDDR7: Sobra memória para Quad HD e IA
+❄️ Construção MSI Ventus 2X OC: Dual Fan de alta eficiência
+💳 Parcelamento Raro: 10x de R$ 328,30 sem juros na Amazon
+⚠️ Estoque Relâmpago: Unidades seminovas esgotam em minutos
+
+📲 Acesse nosso grupo pelo link na bio (@atpromoo) para garantir antes que acabe! 👇
+
+*Ofertas esgotam rápido! Verifique o frete para sua região.
+
+#hardware #pcgamer #rtx5060ti #placadevideo #ofertas #promocao #setupgamer #atpromoo`
+        };
+
+        // ============================================================================
+        // 3. CARREGAMENTO DOS MASCOTES E IMAGEM PRONTA DO SLIDE 3
+        // ============================================================================
+        function updateMascotsUI() {
+            const s1 = document.getElementById('slot1PreviewImg');
+            const s2 = document.getElementById('slot2PreviewImg');
+            const headerLogo = document.getElementById('headerMascotLogo');
+            const loginLogo = document.getElementById('loginMascotPreview');
+
+            if (s1) s1.src = appState.mascotSlot1Raw;
+            if (s2) s2.src = appState.mascotSlot2Raw;
+            if (headerLogo) headerLogo.src = appState.mascotSlot1Raw;
+            if (loginLogo) loginLogo.src = appState.mascotSlot1Raw;
+        }
+
+        async function loadMascotsFromLocalStorage() {
+            const savedSlot1 = localStorage.getItem(MASCOT_SLOT1_STORAGE_KEY);
+            const savedSlot2 = localStorage.getItem(MASCOT_SLOT2_STORAGE_KEY);
+            const savedSlide3 = localStorage.getItem(SLIDE3_CUSTOM_STORAGE_KEY);
+            const savedSlide3Use = localStorage.getItem(SLIDE3_USE_CUSTOM_STORAGE_KEY);
+
+            appState.mascotSlot1Raw = savedSlot1 || DEFAULT_MASCOT_SLOT1_URL;
+            appState.mascotSlot2Raw = savedSlot2 || DEFAULT_MASCOT_SLOT2_URL;
+
+            if (savedSlide3) {
+                appState.slide3CustomImageSrc = savedSlide3;
+                appState.slide3UseCustom = (savedSlide3Use === 'true');
+            }
+            updateSlide3CustomUI();
+            updateMascotsUI();
+            renderSlidesStage();
+        }
+
+        function handleMascotSlotUpload(event, slotNumber) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64DataUrl = e.target.result;
+                if (slotNumber === 1) {
+                    appState.mascotSlot1Raw = base64DataUrl;
+                    try { localStorage.setItem(MASCOT_SLOT1_STORAGE_KEY, base64DataUrl); } catch {}
+                    showToast('Mascote Slot 1 (Notebook/Logo) salvo no navegador!');
+                } else {
+                    appState.mascotSlot2Raw = base64DataUrl;
+                    try { localStorage.setItem(MASCOT_SLOT2_STORAGE_KEY, base64DataUrl); } catch {}
+                    showToast('Mascote Slot 2 (Avatar Frontal) salvo no navegador!');
+                }
+                updateMascotsUI();
+                renderSlidesStage();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetDefaultMascots() {
+            localStorage.removeItem(MASCOT_SLOT1_STORAGE_KEY);
+            localStorage.removeItem(MASCOT_SLOT2_STORAGE_KEY);
+            appState.mascotSlot1Raw = DEFAULT_MASCOT_SLOT1_URL;
+            appState.mascotSlot2Raw = DEFAULT_MASCOT_SLOT2_URL;
+            updateMascotsUI();
+            renderSlidesStage();
+            showToast('Mascotes oficiais @atpromoo restaurados!');
+        }
+
+        // ============================================================================
+        // CONTROLE DA IMAGEM PRONTA DO SLIDE 3 (POST INSTITUCIONAL PRONTO)
+        // ============================================================================
+        function handleSlide3CustomUpload(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const b64 = e.target.result;
+                appState.slide3CustomImageSrc = b64;
+                appState.slide3UseCustom = true;
+                try {
+                    localStorage.setItem(SLIDE3_CUSTOM_STORAGE_KEY, b64);
+                    localStorage.setItem(SLIDE3_USE_CUSTOM_STORAGE_KEY, 'true');
+                } catch {}
+                updateSlide3CustomUI();
+                renderSlidesStage();
+                showToast('Post institucional pronto carregado no Slide 3!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleSlide3Custom(isChecked) {
+            appState.slide3UseCustom = isChecked;
+            try {
+                localStorage.setItem(SLIDE3_USE_CUSTOM_STORAGE_KEY, isChecked ? 'true' : 'false');
+            } catch {}
+            updateSlide3CustomUI();
+            renderSlidesStage();
+        }
+
+        function removeSlide3Custom() {
+            appState.slide3CustomImageSrc = '';
+            appState.slide3UseCustom = false;
+            try {
+                localStorage.removeItem(SLIDE3_CUSTOM_STORAGE_KEY);
+                localStorage.setItem(SLIDE3_USE_CUSTOM_STORAGE_KEY, 'false');
+            } catch {}
+            updateSlide3CustomUI();
+            renderSlidesStage();
+            showToast('Imagem pronta removida. Restaurado para layout sticker padrão.', 'info');
+        }
+
+        function updateSlide3CustomUI() {
+            const checkbox = document.getElementById('checkUseCustomSlide3');
+            const removeBtn = document.getElementById('btnRemoveCustomSlide3');
+            if (checkbox) checkbox.checked = Boolean(appState.slide3UseCustom && appState.slide3CustomImageSrc);
+            if (removeBtn) {
+                if (appState.slide3CustomImageSrc) {
+                    removeBtn.classList.remove('hidden');
+                } else {
+                    removeBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        // ============================================================================
+        // 4. AUTENTICAÇÃO DE 1 USUÁRIO (LOCALSTORAGE + /api/login)
+        // ============================================================================
+        const AUTH_STORAGE_KEY = 'atpromo_auth_session';
+        let isAuthenticated = false;
+
+        function getSavedAuthSession() {
+            try {
+                const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed.username === 'string' && typeof parsed.password === 'string') {
+                    return parsed;
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        function getAuthHeaders() {
+            const session = getSavedAuthSession();
+            if (!session) return {};
+            return {
+                'x-auth-user': session.username,
+                'x-auth-pass': session.password,
+                'Authorization': 'Basic ' + btoa(`${session.username}:${session.password}`)
+            };
+        }
+
+        function unlockAppUI(username) {
+            isAuthenticated = true;
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appMain').classList.remove('hidden');
+
+            const userLabel = `Usuário: ${username || 'admin'} (conectado)`;
+            const topStatus = document.getElementById('topUserConnectedStatus');
+            const sideStatus = document.getElementById('sidebarUserStatus');
+            if (topStatus) topStatus.textContent = `• ${userLabel}`;
+            if (sideStatus) sideStatus.textContent = userLabel;
+
+            renderSlidesStage();
+        }
+
+        function lockAppUI() {
+            isAuthenticated = false;
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('appMain').classList.add('hidden');
+            const passInput = document.getElementById('loginPassword');
+            if (passInput) passInput.value = '';
+        }
+
+        function toggleLoginPasswordVisibility() {
+            const passInput = document.getElementById('loginPassword');
+            const icon = document.getElementById('togglePassIcon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                passInput.type = 'password';
+                icon.textContent = '👁️';
+            }
+        }
+
+        async function handleLoginSubmit(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            const errorBox = document.getElementById('loginErrorBox');
+            const submitBtn = document.getElementById('btnLoginSubmit');
+            const submitText = document.getElementById('btnLoginSubmitText');
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            errorBox.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitText.textContent = 'Autenticando...';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok || !data.ok) {
+                    errorBox.textContent = data.error || 'Usuário ou senha incorretos.';
+                    errorBox.classList.remove('hidden');
+                    return;
+                }
+
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+                    username,
+                    password,
+                    loggedAt: Date.now()
+                }));
+
+                unlockAppUI(username);
+                showToast(`Bem-vindo, ${username}! Sessão salva no navegador.`);
+            } catch (err) {
+                errorBox.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+                errorBox.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Entrar no Estúdio';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            lockAppUI();
+            showToast('Logout realizado com sucesso.', 'info');
+        }
+
+        window.onload = async function () {
+            document.getElementById('rawOfferInput').value = DEFAULT_RAW_TEXT;
+            populateFormFromState();
+            await loadMascotsFromLocalStorage();
+
+            window.addEventListener('paste', handleGlobalClipboardPaste);
+
+            const savedSession = getSavedAuthSession();
+            if (savedSession) {
+                unlockAppUI(savedSession.username);
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            username: savedSession.username,
+                            password: savedSession.password
+                        })
+                    });
+                    if (res.status === 401) {
+                        localStorage.removeItem(AUTH_STORAGE_KEY);
+                        lockAppUI();
+                    }
+                } catch {}
+            } else {
+                lockAppUI();
+            }
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success'
+                ? 'bg-[#FAF6EE] border-[#141414] text-[#141414]'
+                : type === 'warning'
+                ? 'bg-amber-200 border-[#141414] text-[#141414]'
+                : 'bg-white border-[#141414] text-[#141414]';
+
+            toast.className = `px-4 py-3 rounded-xl border-[3px] shadow-[4px_4px_0px_#FF6B1A] text-xs font-extrabold flex items-center gap-2.5 transition-all duration-300 ${bgClass}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '⚡'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // ============================================================================
+        // 5. SINCRONIZAÇÃO DOS CAMPOS COM O PREVIEW AO VIVO
+        // ============================================================================
+        function populateFormFromState() {
+            document.getElementById('fieldBadge').value = appState.badge;
+            document.getElementById('fieldStore').value = appState.store;
+            document.getElementById('fieldCondition').value = appState.condition;
+            document.getElementById('fieldTitle').value = appState.title;
+            document.getElementById('fieldSubtitle').value = appState.subtitle;
+            document.getElementById('fieldOldPrice').value = appState.oldPrice;
+            document.getElementById('fieldPrice').value = appState.price;
+            document.getElementById('fieldCoupon').value = appState.coupon;
+            document.getElementById('fieldInstallments').value = appState.installments;
+            document.getElementById('fieldBrandHandle').value = appState.brandHandle;
+            document.getElementById('fieldSiteUrl').value = appState.siteUrl;
+            document.getElementById('fieldCtaHeadline').value = appState.ctaHeadline;
+            document.getElementById('fieldCommentTrigger').value = appState.commentTrigger;
+            document.getElementById('fieldDisclaimer').value = appState.disclaimer;
+
+            document.getElementById('fieldHighlight1').value = appState.highlights[0] || '';
+            document.getElementById('fieldHighlight2').value = appState.highlights[1] || '';
+            document.getElementById('fieldHighlight3').value = appState.highlights[2] || '';
+            document.getElementById('fieldHighlight4').value = appState.highlights[3] || '';
+
+            document.getElementById('generatedCaptionOutput').value = appState.caption;
+        }
+
+        function syncFormToState() {
+            appState.badge = document.getElementById('fieldBadge').value;
+            appState.store = document.getElementById('fieldStore').value;
+            appState.condition = document.getElementById('fieldCondition').value;
+            appState.title = document.getElementById('fieldTitle').value;
+            appState.subtitle = document.getElementById('fieldSubtitle').value;
+            appState.oldPrice = document.getElementById('fieldOldPrice').value;
+            appState.price = document.getElementById('fieldPrice').value;
+            appState.coupon = document.getElementById('fieldCoupon').value;
+            appState.installments = document.getElementById('fieldInstallments').value;
+            appState.brandHandle = document.getElementById('fieldBrandHandle').value;
+            appState.siteUrl = document.getElementById('fieldSiteUrl').value;
+            appState.ctaHeadline = document.getElementById('fieldCtaHeadline').value;
+            appState.commentTrigger = document.getElementById('fieldCommentTrigger').value;
+            appState.disclaimer = document.getElementById('fieldDisclaimer').value;
+
+            appState.highlights = [
+                document.getElementById('fieldHighlight1').value,
+                document.getElementById('fieldHighlight2').value,
+                document.getElementById('fieldHighlight3').value,
+                document.getElementById('fieldHighlight4').value
+            ];
+
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0] = {
+                    badge: appState.badge,
+                    title: appState.title,
+                    subtitle: appState.subtitle,
+                    oldPrice: appState.oldPrice,
+                    price: appState.price,
+                    installments: appState.installments,
+                    store: appState.store,
+                    condition: appState.condition,
+                    image: appState.productImageSrc
+                };
+            }
+
+            renderSlidesStage();
+        }
+
+        // ============================================================================
+        // 6. UPLOAD E COLAGEM (CTRL+V) DE FOTOS DE PRODUTOS
+        // ============================================================================
+        function handleGlobalClipboardPaste(e) {
+            if (!isAuthenticated) return;
+            const items = (e.clipboardData || e.originalEvent.clipboardData)?.items;
+            if (!items) return;
+
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        applyNewProductImage(event.target.result);
+                        showToast('Foto real do produto colada via Ctrl+V!');
+                    };
+                    reader.readAsDataURL(blob);
+                    return;
+                }
+            }
+        }
+
+        function handleImageFileSelect(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                applyNewProductImage(e.target.result);
+                showToast('Foto do produto adicionada ao Slide 1!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyNewProductImage(dataUrl) {
+            appState.productImageSrc = dataUrl;
+            appState.productImageTransparentSrc = dataUrl;
+            setPhotoBoxStyle('white-card');
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0].image = dataUrl;
+                appState.giroProducts[0].imageTransparent = dataUrl;
+            }
+
+            // Detecta a proporção natural da imagem para auto-adaptar o quadro
+            const probe = new Image();
+            probe.onload = function () {
+                const w = probe.naturalWidth || probe.width || 1;
+                const h = probe.naturalHeight || probe.height || 1;
+                const ratio = w / h;
+                appState.detectedRatio = ratio;
+
+                if (appState.photoAspectRatioMode === 'auto') {
+                    // Fotos panorâmicas (GPUs, teclados, barras de som: ratio >= 1.55) -> 110px
+                    // Fotos quadradas ou verticais (gabinetes, smartphones, caixas: ratio <= 1.15) -> 142px
+                    // Médias (notebooks, monitores: 1.15 a 1.55) -> 126px
+                    let autoH = 126;
+                    if (ratio >= 1.55) {
+                        autoH = 110;
+                    } else if (ratio <= 1.15) {
+                        autoH = 142;
+                    } else {
+                        autoH = 126;
+                    }
+                    appState.photoFrameHeight = autoH;
+                    syncFrameHeightUI(autoH);
+                }
+                renderSlidesStage();
+            };
+            probe.src = dataUrl;
+
+            renderSlidesStage();
+        }
+
+        function updateFrameHeightFromSlider(val) {
+            const h = parseInt(val, 10);
+            appState.photoFrameHeight = h;
+            const valEl = document.getElementById('frameHeightValue');
+            if (valEl) valEl.textContent = `${h}px`;
+            renderSlidesStage();
+        }
+
+        function syncFrameHeightUI(h) {
+            const slider = document.getElementById('frameHeightSlider');
+            const valEl = document.getElementById('frameHeightValue');
+            if (slider) slider.value = h;
+            if (valEl) valEl.textContent = `${h}px`;
+        }
+
+        function setPhotoFitMode(fit) {
+            appState.photoFit = fit;
+            const btnContain = document.getElementById('photoFit-contain');
+            const btnCover = document.getElementById('photoFit-cover');
+            if (btnContain && btnCover) {
+                if (fit === 'contain') {
+                    btnContain.className = 'py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                    btnCover.className = 'py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer';
+                } else {
+                    btnCover.className = 'py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                    btnContain.className = 'py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer';
+                }
+            }
+            renderSlidesStage();
+        }
+
+        function setPhotoAspectRatioMode(mode) {
+            appState.photoAspectRatioMode = mode;
+            const btnAuto = document.getElementById('ratioBtn-auto');
+            const btnWide = document.getElementById('ratioBtn-wide');
+            const btnSquare = document.getElementById('ratioBtn-square');
+
+            [btnAuto, btnWide, btnSquare].forEach(btn => {
+                if (btn) btn.className = 'px-2 py-0.5 rounded text-[10.5px] font-bold text-slate-400 hover:text-white transition cursor-pointer';
+            });
+
+            if (mode === 'auto') {
+                if (btnAuto) btnAuto.className = 'px-2 py-0.5 rounded text-[10.5px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                if (appState.detectedRatio) {
+                    let autoH = 126;
+                    if (appState.detectedRatio >= 1.55) autoH = 110;
+                    else if (appState.detectedRatio <= 1.15) autoH = 142;
+                    appState.photoFrameHeight = autoH;
+                    syncFrameHeightUI(autoH);
+                }
+            } else if (mode === 'wide') {
+                if (btnWide) btnWide.className = 'px-2 py-0.5 rounded text-[10.5px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                appState.photoFrameHeight = 110;
+                syncFrameHeightUI(110);
+            } else if (mode === 'square') {
+                if (btnSquare) btnSquare.className = 'px-2 py-0.5 rounded text-[10.5px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                appState.photoFrameHeight = 142;
+                syncFrameHeightUI(142);
+            }
+            renderSlidesStage();
+        }
+
+        function clearProductImageToPlaceholder() {
+            appState.productImageSrc = '';
+            appState.productImageTransparentSrc = '';
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0].image = '';
+            }
+            renderSlidesStage();
+            showToast('Área de foto limpa. Clique ou dê Ctrl+V para colar a foto real do produto!', 'info');
+        }
+
+        function updateImageTransform() {
+            const val = document.getElementById('imgScaleSlider').value;
+            appState.imgScale = parseInt(val, 10);
+            document.getElementById('imgScaleValue').textContent = `${val}%`;
+            renderSlidesStage();
+        }
+
+        function setPhotoBoxStyle(style) {
+            appState.photoBoxStyle = style;
+            const btnWhite = document.getElementById('photoStyle-white-card');
+            const btnTrans = document.getElementById('photoStyle-transparent');
+            if (btnWhite && btnTrans) {
+                if (style === 'white-card') {
+                    btnWhite.className = 'py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                    btnTrans.className = 'py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer';
+                } else {
+                    btnTrans.className = 'py-1 px-2 rounded text-[11px] font-bold bg-[#FF6B1A] text-white transition cursor-pointer';
+                    btnWhite.className = 'py-1 px-2 rounded text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer';
+                }
+            }
+            renderSlidesStage();
+        }
+
+        // ============================================================================
+        // 7. SELETOR DE "ÂNGULO CRIATIVO" (5 ESTILOS DE COPY) + PARSER LOCAL & IA
+        // ============================================================================
+        function handleAngleChange(newAngle) {
+            appState.copyAngle = newAngle;
+            applyAngleCopyPreset(
+                newAngle,
+                appState.title || 'RTX 5060 Ti 16GB GDDR7',
+                appState.subtitle || 'MSI VENTUS 2X OC • GDDR7',
+                appState.price || 'R$ 3.283',
+                appState.oldPrice || 'R$ 3.899',
+                appState.installments || '10x de R$ 328,30 sem Juros',
+                appState.store || 'AMAZON',
+                appState.condition || '⚠️ SEMINOVO • ESTOQUE LIMITADO'
+            );
+            populateFormFromState();
+            syncFormToState();
+            showToast('Ângulo criativo atualizado nos slides!');
+        }
+
+        function applyAngleCopyPreset(angle, cleanTitle, cleanSubtitle, formattedPrice, formattedOldPrice, installmentsText, detectedStore, conditionTag) {
+            if (angle === 'contrarian') {
+                appState.badge = 'Esqueça placa de 8GB:';
+                appState.title = `Por que a ${cleanTitle} vale muito mais`;
+                appState.highlights = [
+                    `🛑 8GB já trava em jogos novos | Com 16GB GDDR7 você roda tudo no Ultra sem gargalo de VRAM.`,
+                    `❄️ Projeto ${cleanSubtitle} | Construção superior que mantém temperaturas baixas em uso pesado.`,
+                    `💳 Preço de versão básica | Saindo por ${formattedPrice} (${installmentsText}) na ${detectedStore}.`,
+                    `⚠️ Oportunidade Seminovo | Reembalado oficial na ${detectedStore} com garantia e preço de ocasião.`
+                ];
+            } else if (angle === 'math-value') {
+                appState.badge = 'Matemática rápida:';
+                appState.title = `${cleanTitle} pelo menor custo por FPS`;
+                appState.highlights = [
+                    `📊 Economia Direta no Bolso | De ${formattedOldPrice || 'R$ 3.899'} por ${formattedPrice} nesta oferta.`,
+                    `💳 Sem Juros no Cartão | Parcelamento em ${installmentsText} sem perder o valor promocional.`,
+                    `🚀 Longevidade de Setup | ${cleanSubtitle} pronta para vários anos sem precisar de upgrade.`,
+                    `✅ Compra Segura ${detectedStore} | Entrega rápida e proteção total ao comprador.`
+                ];
+            } else if (angle === 'who-is-it-for') {
+                appState.badge = 'Guia rápido:';
+                appState.title = `Pra quem é a ${cleanTitle}?`;
+                appState.highlights = [
+                    `🎮 Ideal para Gamers exigentes | Perfeita para rodar jogos atuais em Quad HD (1440p) com folga.`,
+                    `💻 Criadores, Edição e IA | Memória de sobra para renderização, edição de vídeo e IA local.`,
+                    `💳 Para quem busca parcelamento | ${formattedPrice} em ${installmentsText} direto na ${detectedStore}.`,
+                    `⚠️ Ponto de Atenção | ${conditionTag} — estoque super restrito que acaba rápido.`
+                ];
+            } else if (angle === 'hidden-detail') {
+                appState.badge = 'O detalhe que ninguém viu:';
+                appState.title = `O segredo dessa ${cleanTitle}`;
+                appState.highlights = [
+                    `🔍 Nova Memória GDDR7 | Largura de banda muito mais rápida que a geração GDDR6 anterior.`,
+                    `❄️ Engenharia ${cleanSubtitle} | Sistema térmico otimizado com overclock de fábrica.`,
+                    `🛡️ Garantia na ${detectedStore} | Mesmo na condição seminovo, conta com cobertura oficial da loja.`,
+                    `🔥 Preço fora da curva | ${formattedPrice} (${installmentsText}) é valor raríssimo para essa ficha técnica.`
+                ];
+            } else {
+                // Default: price-alert ("🔥 Alerta de Preço / Bug")
+                appState.badge = 'Vazou o preço:';
+                appState.title = cleanTitle;
+                appState.highlights = [
+                    `🚀 Desempenho de Ponta | ${cleanTitle} (${cleanSubtitle}) pelo menor valor monitorado.`,
+                    `❄️ Construção Premium | Acabamento reforçado e refrigeração silenciosa de alta eficiência.`,
+                    `💳 Pagamento Facilitado | Sai por ${formattedPrice} (${installmentsText}) na ${detectedStore}.`,
+                    `⚠️ Alerta de Estoque | ${conditionTag} — unidades costumam esgotar em poucos minutos.`
+                ];
+            }
+        }
+
+        function extractOfferInstant() {
+            const raw = document.getElementById('rawOfferInput').value.trim();
+            if (!raw) {
+                showToast('Cole o texto da oferta primeiro!', 'warning');
+                return;
+            }
+
+            const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+            // 1. Detectar Loja pelo Link
+            let detectedStore = 'AMAZON';
+            if (/amazon\.com\.br|amzn\.to/i.test(raw)) detectedStore = 'AMAZON';
+            else if (/mercadolivre\.com|meli\.la/i.test(raw)) detectedStore = 'MERCADO LIVRE';
+            else if (/shopee\.com/i.test(raw)) detectedStore = 'SHOPEE';
+            else if (/kabum\.com/i.test(raw)) detectedStore = 'KABUM!';
+            else if (/terabyteshop/i.test(raw)) detectedStore = 'TERABYTE';
+            else if (/pichau\.com/i.test(raw)) detectedStore = 'PICHAU';
+            else if (/aliexpress/i.test(raw)) detectedStore = 'ALIEXPRESS';
+            else if (/magazineluiza|magalu/i.test(raw)) detectedStore = 'MAGALU';
+
+            // 2. Detectar Preço
+            let numericPrice = 0;
+            let formattedPrice = appState.price;
+            const priceMatch = raw.match(/R\$\s*([\d.]+(?:,\d{2})?)/i);
+            if (priceMatch) {
+                const cleanNumStr = priceMatch[1].replace(/\./g, '').replace(',', '.');
+                numericPrice = parseFloat(cleanNumStr);
+                if (!isNaN(numericPrice)) {
+                    formattedPrice = 'R$ ' + Math.round(numericPrice).toLocaleString('pt-BR');
+                }
+            }
+
+            let formattedOldPrice = '';
+            if (numericPrice > 0) {
+                const estimatedOld = Math.round((numericPrice * 1.18) / 10) * 10 - 1;
+                formattedOldPrice = 'R$ ' + estimatedOld.toLocaleString('pt-BR');
+            }
+
+            // 3. Detectar Parcelamento
+            let installmentsText = 'À vista no PIX ou parcelado';
+            const instMatch = raw.match(/(\d{1,2})\s*x\s*(?:de\s*R\$\s*([\d.,]+))?\s*(sem\s*juros)?/i);
+            if (instMatch) {
+                const count = parseInt(instMatch[1], 10);
+                const semJuros = instMatch[3] ? 'sem Juros' : '';
+                if (numericPrice > 0 && count > 0) {
+                    const parcelVal = (numericPrice / count).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    installmentsText = `${count}x de R$ ${parcelVal} ${semJuros}`.trim();
+                } else {
+                    installmentsText = `Em até ${count}x ${semJuros}`.trim();
+                }
+            }
+
+            // 4. Detectar Condição
+            let conditionTag = '⚡ ESTOQUE LIMITADO';
+            if (/seminovo/i.test(raw)) conditionTag = '⚠️ SEMINOVO • ESTOQUE LIMITADO';
+            else if (/reembalado|open\s*box/i.test(raw)) conditionTag = '⚠️ REEMBALADO • GARANTIA OFICIAL';
+            else if (/importado|estoque\s*no\s*brasil/i.test(raw)) conditionTag = '🇧🇷 ESTOQUE NO BRASIL';
+
+            // 5. Detectar Cupom
+            let couponCode = '';
+            const cupomMatch = raw.match(/cupom\s*[:\-]?\s*([A-Z0-9]{4,15})/i);
+            if (cupomMatch) {
+                couponCode = cupomMatch[1].toUpperCase();
+            }
+
+            // 6. Extrair Produto e Submodelo
+            let techLine = lines.find(l => l.startsWith('_') || /GB|RTX|RX|RYZEN|SSD|DDR|HZ|BITS/i.test(l)) || lines[0];
+            techLine = techLine.replace(/^_+|_+$/g, '').replace(/^\*+|\*+$/g, '').replace(/\(seminovo\)/gi, '').trim();
+
+            let cleanTitle = techLine;
+            let cleanSubtitle = `OFERTA VERIFICADA • ${detectedStore}`;
+            if (/RTX\s*5060\s*TI/i.test(raw)) {
+                cleanTitle = 'RTX 5060 Ti 16GB GDDR7';
+                cleanSubtitle = 'MSI VENTUS 2X OC • GDDR7';
+            } else if (cleanTitle.length > 28) {
+                const words = cleanTitle.split(/\s+/);
+                cleanTitle = words.slice(0, 4).join(' ');
+                cleanSubtitle = words.slice(4, 10).join(' ').toUpperCase();
+            }
+
+            appState.store = detectedStore;
+            appState.condition = conditionTag;
+            appState.subtitle = cleanSubtitle;
+            appState.oldPrice = formattedOldPrice;
+            appState.price = formattedPrice;
+            appState.installments = installmentsText;
+            appState.coupon = couponCode;
+
+            applyAngleCopyPreset(
+                appState.copyAngle,
+                cleanTitle,
+                cleanSubtitle,
+                formattedPrice,
+                formattedOldPrice,
+                installmentsText,
+                detectedStore,
+                conditionTag
+            );
+
+            appState.caption = `${appState.badge} ${appState.title} (${cleanSubtitle}) saindo por apenas ${formattedPrice} (${installmentsText}) na ${detectedStore}! 🚀\n\n` +
+                (conditionTag.includes('SEMINOVO') ? `⚠️ Atenção: Unidade na condição Seminovo — oportunidade única nesse valor e parcelado sem juros!\n\n` : '') +
+                `${appState.highlights.map(h => h.replace(' | ', ': ')).join('\n')}` +
+                (couponCode ? `\n🎟️ Cupom: ${couponCode}` : '') +
+                `\n\n📲 Acesse nosso grupo pelo link na bio (${appState.brandHandle}) 👇\n\n*${appState.disclaimer}\n\n#ofertas #tecnologia #pcgamer #hardware #promocao #atpromoo`;
+
+            populateFormFromState();
+            syncFormToState();
+            showToast('Oferta extraída no estilo Editorial @atpromoo!');
+        }
+
+        async function extractOfferWithGemini() {
+            const raw = document.getElementById('rawOfferInput').value.trim();
+            if (!raw) {
+                showToast('Cole o texto da oferta antes de extrair!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnGeminiExtract');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin">⏳</span> Analisando com IA...`;
+
+            try {
+                const response = await fetch('/api/extract-offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        raw,
+                        angle: appState.copyAngle
+                    })
+                });
+
+                if (response.status === 401) {
+                    handleLogout();
+                    showToast('Sessão expirada. Faça login novamente.', 'warning');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Fallback para extração local');
+                }
+
+                const parsed = await response.json();
+
+                appState.badge = parsed.badge || appState.badge;
+                appState.condition = parsed.condition || appState.condition;
+                appState.title = parsed.title || appState.title;
+                appState.subtitle = (parsed.subtitle || appState.subtitle).toUpperCase();
+                appState.oldPrice = parsed.oldPrice || appState.oldPrice;
+                appState.price = parsed.price || appState.price;
+                appState.installments = parsed.installments || appState.installments;
+                appState.store = (parsed.store || appState.store).toUpperCase();
+                appState.coupon = parsed.coupon || '';
+                if (Array.isArray(parsed.highlights) && parsed.highlights.length >= 4) {
+                    appState.highlights = parsed.highlights.slice(0, 4);
+                }
+                appState.caption = parsed.caption || appState.caption;
+
+                populateFormFromState();
+                syncFormToState();
+                showToast('IA Gemini gerou os 3 slides no ângulo selecionado!');
+            } catch (err) {
+                extractOfferInstant();
+                showToast('Extraído com o motor inteligente local!', 'info');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        function loadRtxExample() {
+            document.getElementById('rawOfferInput').value = DEFAULT_RAW_TEXT;
+            appState.store = 'AMAZON';
+            appState.condition = '⚠️ SEMINOVO • ESTOQUE LIMITADO';
+            appState.subtitle = 'MSI VENTUS 2X OC • GDDR7';
+            appState.oldPrice = 'R$ 3.899';
+            appState.price = 'R$ 3.283';
+            appState.installments = '10x de R$ 328,30 sem Juros';
+            appState.coupon = '';
+            applyAngleCopyPreset(
+                appState.copyAngle,
+                'RTX 5060 Ti 16GB GDDR7',
+                'MSI VENTUS 2X OC • GDDR7',
+                'R$ 3.283',
+                'R$ 3.899',
+                '10x de R$ 328,30 sem Juros',
+                'AMAZON',
+                '⚠️ SEMINOVO • ESTOQUE LIMITADO'
+            );
+            populateFormFromState();
+            syncFormToState();
+            showToast('Exemplo RTX 5060 Ti carregado!');
+        }
+
+        // ============================================================================
+        // 8. FORMATAÇÃO EDITORIAL DE TEXTOS (SEM TEXT-STROKE, SUPORTE A *ITÁLICO LARANJA*)
+        // ============================================================================
+        function formatEditorialTextWithOrangeItalics(str) {
+            const safe = escapeHtml(str || '');
+            // Converte trechos entre *asteriscos* em itálico laranja (#FF6B1A) sólido sem stroke
+            return safe.replace(/\*([^*]+)\*/g, '<em class="italic text-[#FF6B1A] font-black">$1</em>');
+        }
+
+        function parseHorizontalHighlightRow(itemStr, index) {
+            const raw = (itemStr || '').trim();
+            const numLabel = String(index + 1).padStart(2, '0');
+
+            // Extrai emoji inicial se houver
+            let iconOrNum = numLabel;
+            let body = raw;
+            const emojiMatch = raw.match(/^([^\w\sÀ-ú]+)\s*(.*)$/);
+            if (emojiMatch && emojiMatch[2]) {
+                iconOrNum = emojiMatch[1].trim();
+                body = emojiMatch[2].trim();
+            }
+
+            // Divide em Título Curto e Linha Explicativa (por "|" ou ":" ou "-")
+            let rowTitle = body;
+            let rowDesc = '';
+            if (body.includes('|')) {
+                const parts = body.split('|');
+                rowTitle = parts[0].trim();
+                rowDesc = parts.slice(1).join(' ').trim();
+            } else if (body.includes(':')) {
+                const parts = body.split(':');
+                rowTitle = parts[0].trim();
+                rowDesc = parts.slice(1).join(':').trim();
+            } else if (body.includes(' - ')) {
+                const parts = body.split(' - ');
+                rowTitle = parts[0].trim();
+                rowDesc = parts.slice(1).join(' - ').trim();
+            } else {
+                rowTitle = body;
+                rowDesc = 'Verificado pelo monitoramento @atpromoo.';
+            }
+
+            return { iconOrNum, numLabel, rowTitle, rowDesc };
+        }
+
+        function getMascotCssClass() {
+            return appState.mascotBlendMode === 'sticker' ? 'mascot-sticker' : 'mascot-multiply';
+        }
+
+        // ============================================================================
+        // 9. RENDERIZAÇÃO DOS 3 SLIDES OFICIAIS (@atpromoo)
+        // ============================================================================
+        function renderSlidesStage() {
+            const container = document.getElementById('slidesStageContainer');
+            if (!container) return;
+
+            const stageTitle = document.getElementById('previewStageTitle');
+            const downloadLabel = document.getElementById('downloadBtnLabel');
+
+            let slidesHtml = '';
+
+            if (appState.postMode === 'carousel-x') {
+                stageTitle.textContent = 'Carrossel Editorial @atpromoo (3 Slides • 1080x1350px)';
+                downloadLabel.textContent = 'Baixar Todos os 3 Slides (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildSlide1CoverHtml(true), 'Slide 1 — Capa Editorial', 'atpromoo-slide-01-capa.png');
+                slidesHtml += wrapSlideWithActions(buildSlide2ValeAPenaHtml(), 'Slide 2 — Vale a Pena? (Faixas)', 'atpromoo-slide-02-vale-a-pena.png');
+                slidesHtml += wrapSlideWithActions(buildSlide3CtaHtml(), 'Slide 3 — CTA Fixo (@atpromoo)', 'atpromoo-slide-03-cta.png');
+
+            } else if (appState.postMode === 'single-feed') {
+                stageTitle.textContent = 'Post Único Feed @atpromoo (4:5 • 1080x1350px)';
+                downloadLabel.textContent = 'Baixar Post Feed (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildSlide1CoverHtml(false), 'Post Único (Feed 4:5)', 'atpromoo-post-unico.png');
+
+            } else if (appState.postMode === 'story') {
+                stageTitle.textContent = 'Story Vertical @atpromoo (9:16 • 1080x1920px)';
+                downloadLabel.textContent = 'Baixar Story 9:16 (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildStoryNeoBrutalistHtml(), 'Story Vertical (9:16)', 'atpromoo-story-oferta.png');
+
+            } else if (appState.postMode === 'multi-giro') {
+                const totalSlides = appState.giroProducts.length + 1;
+                stageTitle.textContent = `Carrossel Giro de Ofertas @atpromoo (${totalSlides} Slides • 1080x1350px)`;
+                downloadLabel.textContent = `Baixar Todos os ${totalSlides} Slides (PNG)`;
+
+                appState.giroProducts.forEach((prod, idx) => {
+                    slidesHtml += wrapSlideWithActions(
+                        buildGiroProductSlideHtml(prod, idx + 1),
+                        `Slide ${idx + 1} — ${prod.title}`,
+                        `atpromoo-giro-0${idx + 1}.png`
+                    );
+                });
+
+                slidesHtml += wrapSlideWithActions(
+                    buildSlide3CtaHtml(),
+                    `Slide ${totalSlides} — CTA Final`,
+                    `atpromoo-giro-0${totalSlides}-cta.png`
+                );
+            }
+
+            container.innerHTML = slidesHtml;
+        }
+
+        function wrapSlideWithActions(slideInnerHtml, label, filename) {
+            return `
+            <div class="flex flex-col items-center gap-2.5 shrink-0">
+                <div class="flex items-center justify-between w-full px-1">
+                    <span class="text-xs font-extrabold text-slate-200">${label}</span>
+                    <button onclick="downloadSingleSlide(this, '${filename}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-[#FF6B1A] text-slate-200 hover:text-white text-[11px] font-bold transition flex items-center gap-1 border border-slate-700 cursor-pointer">
+                        <span>⬇️</span> Baixar PNG
+                    </button>
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-800">
+                    ${slideInnerHtml}
+                </div>
+            </div>`;
+        }
+
+        // ============================================================================
+        // SLIDE 1: CAPA EDITORIAL LIMPA + IMPACTO (@atpromoo) - 100% DESOBSTRUÍDO
+        // ============================================================================
+        function buildSlide1CoverHtml(showArrasta) {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+            const hasProductPhoto = Boolean(appState.productImageSrc && appState.productImageSrc.trim() !== '');
+            const activeProductImg = isWhiteBox
+                ? appState.productImageSrc
+                : (appState.productImageTransparentSrc || appState.productImageSrc);
+
+            return `
+            <div class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-4 py-3 bg-[#FAF6EE]">
+                
+                <!-- 1. TOPO: Mascote com Notebook + Headline Editorial (mesmo estilo do Slide 2) -->
+                <div class="w-[90%] mx-auto flex items-center gap-3 pt-0.5">
+                    <div class="w-[74px] h-[68px] shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                            src="${appState.mascotSlot1Raw}"
+                            alt="Mascote com Notebook"
+                            class="w-full h-full object-contain"
+                            crossorigin="anonymous"
+                        />
+                    </div>
+                    <div class="flex flex-col items-start min-w-0 flex-1">
+                        <span class="font-display font-extrabold text-[11px] text-[#141414]/70 tracking-tight block">
+                            ${escapeHtml(appState.brandHandle)}
+                        </span>
+                        <h2 class="font-display font-black text-[18px] leading-[1.14] tracking-tight text-[#141414] mt-0.5">
+                            ${appState.badge ? `<span class="text-[#FF6B1A] italic">${escapeHtml(appState.badge)}</span> ` : ''}
+                            <span>${formatEditorialTextWithOrangeItalics(appState.title)}</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 3. CARD DO PRODUTO (100% DESOBSTRUÍDO): Caixa branca 88% com faixa laranja interna no topo, foto central e rodapé interno -->
+                <div class="neo-box-white w-[88%] mx-auto overflow-hidden flex flex-col my-0.5">
+                    <!-- Topo interno: Faixa Laranja de ponta a ponta com border-bottom: 3px solid #141414 -->
+                    ${appState.condition ? `
+                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                            <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                ${escapeHtml(appState.condition)}
+                            </span>
+                        </div>
+                    ` : ''}
+
+                    <!-- Centro: Área Ampla da Foto com adaptação dinâmica ao formato da imagem -->
+                    <div
+                        onclick="document.getElementById('fileUploadInput').click()"
+                        class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden transition-all duration-150"
+                        style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
+                        title="Clique ou dê Ctrl+V para colar a foto do produto"
+                    >
+                        ${hasProductPhoto ? `
+                            <img
+                                src="${activeProductImg}"
+                                alt="Produto"
+                                style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});"
+                                crossorigin="anonymous"
+                            />
+                        ` : `
+                            <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-3 py-1.5 hover:border-[#FF6B1A] transition">
+                                <span class="text-lg mb-0.5">📋</span>
+                                <p class="font-display font-extrabold text-[10.5px] text-[#141414] leading-snug">
+                                    Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto real
+                                </p>
+                                <span class="text-[9px] font-semibold text-neutral-400">Quadro auto-adaptável ao formato da imagem</span>
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- Rodapé Interno: border-top: 3px solid #141414 -->
+                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between gap-2">
+                        <span class="font-display font-extrabold text-[9px] uppercase tracking-wide text-[#141414] truncate">
+                            ${escapeHtml(appState.subtitle || appState.title)}
+                        </span>
+                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase shrink-0">
+                            🛒 ${escapeHtml(appState.store)}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 4. BLOCO DE PREÇO (LARANJA): Centralizado, mesma largura 88%, fundo #FF6B1A, borda 3px solid #141414 e sombra 6px 6px 0px 0px #141414 -->
+                <div class="neo-box-orange w-[88%] mx-auto py-2 px-3 flex flex-col items-center justify-center text-center my-0.5">
+                    ${appState.oldPrice ? `
+                        <span class="font-display font-extrabold text-[10px] uppercase tracking-wider text-[#141414] line-through leading-none mb-0.5">
+                            DE ${escapeHtml(appState.oldPrice)}
+                        </span>
+                    ` : ''}
+
+                    <!-- Preço Principal Gigante em Branco Puro (#FFFFFF) com sombra sólida externa -->
+                    <div class="font-display text-[29px] leading-none tracking-tight price-hero-text">
+                        ${escapeHtml(appState.price)}
+                    </div>
+
+                    <!-- Pílula Branca com parcelamento -->
+                    <div class="mt-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414]">
+                        <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">
+                            ${escapeHtml(appState.installments)}
+                        </span>
+                    </div>
+
+                    ${appState.coupon ? `
+                        <div class="mt-1 px-2 py-0.5 rounded bg-[#141414] text-[#FAF6EE] font-mono font-extrabold text-[8.5px] uppercase">
+                            CUPOM: ${escapeHtml(appState.coupon)}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- 5. RODAPÉ: "Arrasta ➔" -->
+                <div class="w-full flex items-center justify-end px-2 pt-0.5">
+                    ${showArrasta ? `
+                        <span class="font-display font-black text-[11.5px] text-[#141414] tracking-tight">
+                            Arrasta ➔
+                        </span>
+                    ` : `
+                        <span class="font-display font-extrabold text-[10px] text-[#141414]">
+                            🔗 Link na Bio
+                        </span>
+                    `}
+                </div>
+            </div>`;
+        }
+
+        // ============================================================================
+        // SLIDE 2: LISTA HORIZONTAL COMPACTA (SEM ESPAÇOS VAZIOS — "💡 VALE A PENA?")
+        // ============================================================================
+        function buildSlide2ValeAPenaHtml() {
+            return `
+            <div class="exportable-slide slide-canvas-4-5 flex flex-col justify-between px-5 py-3.5 bg-[#FAF6EE]">
+                
+                <!-- TOPO: Mascote com Notebook + Título "💡 VALE A PENA?" + Pílula Laranja -->
+                <div class="flex items-center gap-3 pt-0.5">
+                    <div class="w-[74px] h-[68px] shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                            src="${appState.mascotSlot1Raw}"
+                            alt="Mascote com Notebook"
+                            class="w-full h-full object-contain"
+                            crossorigin="anonymous"
+                        />
+                    </div>
+                    <div class="flex flex-col items-start min-w-0">
+                        <h2 class="font-display font-black text-[21px] leading-none text-[#141414] uppercase tracking-tight">
+                            💡 VALE A PENA?
+                        </h2>
+                        <div class="mt-1.5 px-2.5 py-0.5 rounded-full bg-[#FF6B1A] border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414] max-w-full">
+                            <span class="font-display font-extrabold text-[9.5px] text-[#141414] uppercase tracking-wide block truncate">
+                                ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CENTRO: 4 FAIXAS HORIZONTAIS COMPACTAS (neo-row-white com box-shadow 5px 5px 0px 0px #141414) -->
+                <div class="flex flex-col gap-2 my-auto py-1">
+                    ${appState.highlights.slice(0, 4).map((item, idx) => {
+                        const parsed = parseHorizontalHighlightRow(item, idx);
+                        return `
+                        <div class="neo-row-white px-3 py-2 flex items-center gap-2.5">
+                            <!-- Quadrado laranja claro (#FFE6D5) com borda preta -->
+                            <div class="w-8 h-8 rounded-lg bg-[#FFE6D5] border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414] flex items-center justify-center shrink-0 font-display font-black text-xs text-[#141414]">
+                                ${escapeHtml(parsed.iconOrNum)}
+                            </div>
+                            <!-- Título curto em negrito + linha explicativa -->
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-tight truncate">
+                                    ${escapeHtml(parsed.rowTitle)}
+                                </h3>
+                                <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-[1.25] mt-0.5 line-clamp-2">
+                                    ${escapeHtml(parsed.rowDesc)}
+                                </p>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+
+                <!-- RODAPÉ: "atpromo.vercel.app" centralizado e "Arrasta ➔" no canto inferior direito -->
+                <div class="relative flex items-center justify-center pt-0.5">
+                    <span class="font-display font-bold text-[11px] text-[#141414]/80">
+                        ${escapeHtml(appState.siteUrl)}
+                    </span>
+                    <span class="absolute right-0 font-display font-black text-[12px] text-[#141414]">
+                        Arrasta ➔
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        // ============================================================================
+        // SLIDE 3: FIEL AO POST ORIGINAL DO INSTAGRAM (@atpromoo) OU POST PRONTO
+        // ============================================================================
+        function buildSlide3CtaHtml() {
+            // Se o usuário fez upload do seu post institucional pronto, exibe em tela cheia
+            if (appState.slide3UseCustom && appState.slide3CustomImageSrc) {
+                return `
+                <div class="exportable-slide slide-canvas-4-5 relative overflow-hidden p-0 bg-[#FAF6EE] flex items-center justify-center">
+                    <img
+                        src="${appState.slide3CustomImageSrc}"
+                        alt="Post Institucional Slide 3"
+                        class="w-full h-full object-cover"
+                        crossorigin="anonymous"
+                    />
+                </div>`;
+            }
+
+            const ctaLines = (appState.commentTrigger || '📲 Acesse nosso / grupo pelo link / na bio')
+                .split('/')
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            return `
+            <div class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center text-center px-5 py-3.5 bg-[#FAF6EE]">
+                
+                <!-- 1. TOPO: @atpromoo discreto -->
+                <div>
+                    <span class="font-display font-bold text-[13px] tracking-tight text-[#141414]/70">
+                        ${escapeHtml(appState.brandHandle)}
+                    </span>
+                </div>
+
+                <!-- 2. CENTRO: Moldura redonda estilo Sticker (rosto e ombros sem cintura cortada) + Logo ATpromo -->
+                <div class="my-auto flex flex-col items-center">
+                    <div class="w-[160px] h-[160px] rounded-full border-[4px] border-[#141414] shadow-[6px_6px_0px_0px_#141414] overflow-hidden bg-white mx-auto flex items-center justify-center">
+                        <img
+                            src="${appState.mascotSlot2Raw}"
+                            alt="Mascote Oficial ATpromo"
+                            class="w-full h-full object-cover"
+                            style="object-position: center 10%;"
+                            crossorigin="anonymous"
+                        />
+                    </div>
+
+                    <!-- Logo ATpromo logo abaixo -->
+                    <div class="mt-2 flex items-center justify-center">
+                        <span class="font-display font-black text-[22px] tracking-tight leading-none">
+                            <span class="text-[#FF6B1A]">AT</span><span class="text-[#141414]">promo</span>
+                        </span>
+                    </div>
+
+                    <!-- Frase abaixo do mascote -->
+                    <p class="font-display font-extrabold text-[17px] text-[#141414] tracking-tight mt-1">
+                        ${formatEditorialTextWithOrangeItalics(appState.ctaHeadline)}
+                    </p>
+
+                    <!-- Seta curva desenhada à mão -->
+                    <div class="my-0.5 flex justify-center">
+                        <svg width="30" height="34" viewBox="0 0 38 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 3 C14 12, 14 24, 19 36" stroke="#141414" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                            <path d="M10 29 C14 34, 17 38, 19.5 40 C22 36, 25 31, 29 28" stroke="#141414" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                    </div>
+
+                    <!-- Chamada de Ação em 3 linhas -->
+                    <div>
+                        <h2 class="font-display font-black text-[20px] leading-[1.12] tracking-tight text-[#141414]">
+                            ${ctaLines.map(line => `<span class="block">${formatEditorialTextWithOrangeItalics(line)}</span>`).join('')}
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 3. RODAPÉ: @atpromoo -->
+                <div class="pt-0.5">
+                    <span class="font-display font-bold text-[12px] text-[#141414]/75">
+                        ${escapeHtml(appState.brandHandle)}
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        // ============================================================================
+        // MODO STORY VERTICAL (9:16 - EDITORIAL @atpromoo)
+        // ============================================================================
+        function buildStoryNeoBrutalistHtml() {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+            const hasProductPhoto = Boolean(appState.productImageSrc && appState.productImageSrc.trim() !== '');
+            const activeProductImg = isWhiteBox
+                ? appState.productImageSrc
+                : (appState.productImageTransparentSrc || appState.productImageSrc);
+
+            return `
+            <div class="exportable-slide slide-canvas-9-16 flex flex-col justify-between p-5 bg-[#FAF6EE]">
+                <div class="flex items-center justify-center gap-2.5 pt-1">
+                    <div class="w-10 h-10 rounded-full border-2 border-[#141414] overflow-hidden bg-white shadow-[2px_2px_0px_0px_#141414] shrink-0 flex items-center justify-center">
+                        <img src="${appState.mascotSlot1Raw}" alt="Mascote" class="w-full h-full object-cover" style="object-position: 40% 12%; transform: scale(1.6);" crossorigin="anonymous" />
+                    </div>
+                    <span class="font-display font-black text-[15px] tracking-tight text-[#141414]">${escapeHtml(appState.brandHandle)}</span>
+                </div>
+
+                <div class="text-center my-1">
+                    <h2 class="font-display font-black text-[22px] leading-[1.14] text-[#141414]">
+                        ${appState.badge ? `<span class="text-[#FF6B1A] italic">${escapeHtml(appState.badge)}</span> ` : ''}
+                        <span>${formatEditorialTextWithOrangeItalics(appState.title)}</span>
+                    </h2>
+                </div>
+
+                <div class="neo-box-white w-[90%] mx-auto overflow-hidden flex flex-col my-1">
+                    ${appState.condition ? `
+                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                            <span class="font-display font-black text-[10px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                ${escapeHtml(appState.condition)}
+                            </span>
+                        </div>
+                    ` : ''}
+
+                    <div onclick="document.getElementById('fileUploadInput').click()" class="w-full h-[185px] p-3 flex items-center justify-center bg-white cursor-pointer">
+                        ${hasProductPhoto ? `
+                            <img src="${activeProductImg}" alt="Produto" style="max-height:165px; max-width:92%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                        ` : `
+                            <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-4">
+                                <span class="text-2xl mb-1">📋</span>
+                                <p class="font-display font-extrabold text-xs text-[#141414]">Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto do produto</p>
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
+                        <span class="font-display font-extrabold text-[9.5px] uppercase text-[#141414] truncate">${escapeHtml(appState.subtitle)}</span>
+                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[9px] uppercase">🛒 ${escapeHtml(appState.store)}</span>
+                    </div>
+                </div>
+
+                <div class="neo-box-orange w-[90%] mx-auto py-2.5 px-4 flex flex-col items-center justify-center text-center my-1">
+                    ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
+                    <div class="font-display text-[34px] leading-none price-hero-text">${escapeHtml(appState.price)}</div>
+                    <div class="mt-1.5 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] font-display font-extrabold text-[11px] text-[#141414]">
+                        ${escapeHtml(appState.installments)}
+                    </div>
+                </div>
+
+                <div class="neo-box-white py-2.5 px-4 text-center my-1">
+                    <p class="font-display font-black text-xs uppercase text-[#141414]">🔗 CLIQUE NO LINK AQUI 👇</p>
+                    <p class="text-[10px] font-bold text-neutral-600 mt-0.5">(Cole a figurinha de Link do Instagram aqui)</p>
+                </div>
+
+                <div class="text-center pt-1">
+                    <span class="font-display font-bold text-xs text-[#141414]/75">${escapeHtml(appState.siteUrl)}</span>
+                </div>
+            </div>`;
+        }
+
+        function buildGiroProductSlideHtml(prod, slideNumber) {
+            const hasPhoto = Boolean(prod.image && prod.image.trim() !== '');
+
+            return `
+            <div class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-4 py-3 bg-[#FAF6EE]">
+                <div class="w-[90%] mx-auto flex items-center gap-3 pt-0.5">
+                    <div class="w-[74px] h-[68px] shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                            src="${appState.mascotSlot1Raw}"
+                            alt="Mascote com Notebook"
+                            class="w-full h-full object-contain"
+                            crossorigin="anonymous"
+                        />
+                    </div>
+                    <div class="flex flex-col items-start min-w-0 flex-1">
+                        <span class="font-display font-extrabold text-[11px] text-[#141414]/70 tracking-tight block">
+                            ${escapeHtml(appState.brandHandle)}
+                        </span>
+                        <h2 class="font-display font-black text-[17px] leading-[1.14] text-[#141414] mt-0.5">
+                            <span class="text-[#FF6B1A] italic">${escapeHtml(prod.badge || `Oferta #${slideNumber}:`)}</span>
+                            <span> ${escapeHtml(prod.title)}</span>
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="neo-box-white w-[88%] mx-auto overflow-hidden flex flex-col my-0.5">
+                    ${prod.condition ? `
+                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                            <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                ${escapeHtml(prod.condition)}
+                            </span>
+                        </div>
+                    ` : ''}
+
+                    <div class="w-full flex items-center justify-center bg-white overflow-hidden transition-all duration-150" style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};">
+                        ${hasPhoto ? `
+                            <img src="${prod.image}" alt="Produto" style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'};" crossorigin="anonymous"/>
+                        ` : `
+                            <span class="text-xs font-bold text-neutral-400">Cole a foto do produto (Ctrl+V)</span>
+                        `}
+                    </div>
+                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
+                        <span class="font-display font-extrabold text-[9px] uppercase text-[#141414] truncate">${escapeHtml(prod.subtitle)}</span>
+                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase">🛒 ${escapeHtml(prod.store)}</span>
+                    </div>
+                </div>
+
+                <div class="neo-box-orange w-[88%] mx-auto py-2 px-3 flex flex-col items-center justify-center text-center my-0.5">
+                    <div class="font-display text-[29px] leading-none price-hero-text">${escapeHtml(prod.price)}</div>
+                    <div class="mt-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414]">
+                        <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">${escapeHtml(prod.installments)}</span>
+                    </div>
+                </div>
+
+                <div class="w-full flex items-center justify-end px-2 pt-0.5">
+                    <span class="font-display font-black text-[11.5px] text-[#141414]">Arrasta ➔</span>
+                </div>
+            </div>`;
+        }
+
+        function addCurrentOfferToGiro() {
+            appState.giroProducts.push({
+                badge: appState.badge,
+                title: appState.title,
+                subtitle: appState.subtitle,
+                oldPrice: appState.oldPrice,
+                price: appState.price,
+                installments: appState.installments,
+                store: appState.store,
+                condition: appState.condition,
+                image: appState.productImageSrc
+            });
+            setPostMode('multi-giro');
+            showToast(`Produto adicionado ao Giro! Total: ${appState.giroProducts.length} produtos.`);
+        }
+
+        // ============================================================================
+        // 10. EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080x1350) VIA HTML2CANVAS
+        // ============================================================================
+        async function downloadSingleSlide(btnElement, filename) {
+            const wrapper = btnElement.closest('.flex-col');
+            const slideEl = wrapper.querySelector('.exportable-slide');
+            if (!slideEl) return;
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '⏳ Gerando...';
+            btnElement.disabled = true;
+
+            try {
+                const canvas = await html2canvas(slideEl, {
+                    scale: 3, // 360px * 3 = 1080px exatos (1080x1350)
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#FAF6EE'
+                });
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast(`Slide "${filename}" exportado em 1080p!`);
+            } catch (err) {
+                showToast('Erro ao exportar imagem.', 'warning');
+            } finally {
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        }
+
+        async function downloadAllSlides() {
+            const slideElements = document.querySelectorAll('.exportable-slide');
+            if (!slideElements.length) return;
+
+            const btn = document.getElementById('btnDownloadAll');
+            const label = document.getElementById('downloadBtnLabel');
+            const originalLabel = label.textContent;
+            btn.disabled = true;
+
+            try {
+                for (let i = 0; i < slideElements.length; i++) {
+                    label.textContent = `Exportando Slide ${i + 1}/${slideElements.length}...`;
+                    const canvas = await html2canvas(slideElements[i], {
+                        scale: 3,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#FAF6EE'
+                    });
+                    const link = document.createElement('a');
+                    link.download = `atpromoo-slide-0${i + 1}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    await new Promise(r => setTimeout(r, 450));
+                }
+                showToast(`Todos os ${slideElements.length} slides foram baixados em 1080p!`);
+            } catch (e) {
+                showToast('Erro durante a exportação dos slides.', 'warning');
+            } finally {
+                label.textContent = originalLabel;
+                btn.disabled = false;
+            }
+        }
+
+        // ============================================================================
+        // 11. UTILITÁRIOS DE UI
+        // ============================================================================
+        function setPostMode(mode) {
+            appState.postMode = mode;
+            const modes = ['carousel-x', 'single-feed', 'story', 'multi-giro'];
+            modes.forEach(m => {
+                const btn = document.getElementById(`modeBtn-${m}`);
+                if (m === mode) {
+                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
+                } else {
+                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer';
+                }
+            });
+            renderSlidesStage();
+        }
+
+        function switchEditorTab(tabId) {
+            ['tab-capa', 'tab-raiox', 'tab-cta'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            ['capa', 'raiox', 'cta'].forEach(shortId => {
+                const btn = document.getElementById(`tabBtn-${shortId}`);
+                if (`tab-${shortId}` === tabId) {
+                    btn.className = 'px-3 py-2 border-b-2 border-[#FF6B1A] text-orange-400 cursor-pointer';
+                } else {
+                    btn.className = 'px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer';
+                }
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+        }
+
+        function copyCaptionToClipboard() {
+            const textarea = document.getElementById('generatedCaptionOutput');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+
+            const btnText = document.getElementById('btnCopyCaptionText');
+            btnText.textContent = 'Copiado! ✓';
+            showToast('Legenda copiada para a área de transferência!');
+            setTimeout(() => {
+                btnText.textContent = 'Copiar Legenda';
+            }, 2200);
+        }
+
+        function openVercelModal() {
+            const m = document.getElementById('vercelModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeVercelModal() {
+            const m = document.getElementById('vercelModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

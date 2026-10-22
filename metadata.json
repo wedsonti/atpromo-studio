@@ -1,0 +1,8 @@
+{
+  "name": "ATpromo Studio — Gerador de Posts & Carrosséis de Ofertas",
+  "description": "Fábrica padronizada de posts, stories e carrosséis de ofertas tech com extração inteligente via IA e exportação em alta definição.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
