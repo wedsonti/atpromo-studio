@@ -107,11 +107,10 @@
             border-radius: 8px;
         }
 
-        /* Preço principal em branco puro com sombra sólida externa (NUNCA text-stroke) */
+        /* Preço principal em branco puro (renderizado com camada dupla física anti-corte) */
         .price-hero-text {
             color: #FFFFFF;
             font-weight: 900;
-            text-shadow: 3px 3px 0px #141414;
         }
 
         /* Integração dos mascotes: SEM mix-blend-mode (o fundo #FAF6EE dos slides é idêntico ao das imagens) */
@@ -1819,7 +1818,7 @@ Ofertas esgotam, verifique o frete!`;
 
                         <!-- Rodapé Interno: border-top: 3px solid #141414 -->
                         <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between gap-2">
-                            <span class="font-display font-extrabold text-[9px] uppercase tracking-wide text-[#141414] truncate">
+                            <span class="font-display font-extrabold text-[9px] uppercase tracking-wide text-[#141414] block leading-normal overflow-visible">
                                 ${escapeHtml(appState.subtitle || appState.title)}
                             </span>
                             <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase shrink-0">
@@ -1834,21 +1833,26 @@ Ofertas esgotam, verifique o frete!`;
                     <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
                     <div class="neo-box-orange relative w-full py-2 px-3 flex flex-col items-center justify-center text-center">
                         ${appState.oldPrice ? `
-                            <span class="font-display font-extrabold text-[10px] uppercase tracking-wider text-[#141414] line-through leading-none mb-0.5">
+                            <span class="font-display font-extrabold text-[10px] uppercase tracking-wider text-[#141414] line-through leading-normal mb-0.5 block">
                                 DE ${escapeHtml(appState.oldPrice)}
                             </span>
                         ` : ''}
 
-                        <!-- Preço Principal Gigante em Branco Puro (#FFFFFF) com sombra sólida externa -->
-                        <div class="font-display text-[29px] leading-none tracking-tight price-hero-text">
-                            ${escapeHtml(appState.price)}
+                        <!-- Preço Principal em Camada Dupla Física (Indestrutível no html2canvas) -->
+                        <div class="relative inline-block my-0.5">
+                            <span class="absolute top-[2.5px] left-[2.5px] font-display font-black text-[30px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">
+                                ${escapeHtml(appState.price)}
+                            </span>
+                            <span class="relative font-display font-black text-[30px] leading-tight text-white block">
+                                ${escapeHtml(appState.price)}
+                            </span>
                         </div>
 
                         <!-- Pílula Branca com parcelamento e sombra física 2px -->
                         <div class="relative mt-1 inline-block">
                             <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
-                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414]">
-                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">
+                            <div class="relative px-3 py-1 rounded-full bg-white border-2 border-[#141414] flex items-center justify-center">
+                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-normal">
                                     ${escapeHtml(appState.installments)}
                                 </span>
                             </div>
@@ -1895,13 +1899,13 @@ Ofertas esgotam, verifique o frete!`;
                         />
                     </div>
                     <div class="flex flex-col items-start min-w-0">
-                        <h2 class="font-display font-black text-[21px] leading-none text-[#141414] uppercase tracking-tight">
+                        <h2 class="font-display font-black text-[21px] leading-tight text-[#141414] uppercase tracking-tight">
                             💡 VALE A PENA?
                         </h2>
-                        <div class="relative mt-1.5 max-w-full inline-block">
+                        <div class="relative mt-1 max-w-full inline-block">
                             <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
-                            <div class="relative px-2.5 py-0.5 rounded-full bg-[#FF6B1A] border-2 border-[#141414]">
-                                <span class="font-display font-extrabold text-[9.5px] text-[#141414] uppercase tracking-wide block truncate">
+                            <div class="relative px-2.5 py-1 rounded-full bg-[#FF6B1A] border-2 border-[#141414]">
+                                <span class="font-display font-extrabold text-[9.5px] text-[#141414] uppercase tracking-wide block leading-normal overflow-visible">
                                     ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
                                 </span>
                             </div>
@@ -1926,10 +1930,10 @@ Ofertas esgotam, verifique o frete!`;
                                 </div>
                                 <!-- Título curto em negrito + linha explicativa -->
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-tight truncate">
+                                    <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-snug">
                                         ${escapeHtml(parsed.rowTitle)}
                                     </h3>
-                                    <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-[1.25] mt-0.5 line-clamp-2">
+                                    <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-snug mt-0.5">
                                         ${escapeHtml(parsed.rowDesc)}
                                     </p>
                                 </div>
@@ -1984,9 +1988,9 @@ Ofertas esgotam, verifique o frete!`;
 
                 <!-- 2. CENTRO: Moldura redonda estilo Sticker com Sombra Dura Física + Logo ATpromo -->
                 <div class="my-auto flex flex-col items-center">
-                    <div class="relative w-[160px] h-[160px] mx-auto">
-                        <div style="position: absolute; top: 6px; left: 6px; width: 160px; height: 160px; background-color: #141414; border-radius: 9999px;"></div>
-                        <div class="relative w-[160px] h-[160px] rounded-full border-[4px] border-[#141414] overflow-hidden bg-white flex items-center justify-center">
+                    <div class="relative w-[156px] h-[156px] mx-auto">
+                        <div style="position: absolute; top: 4px; left: 4px; width: 156px; height: 156px; background-color: #141414; border-radius: 9999px;"></div>
+                        <div class="relative w-[156px] h-[156px] rounded-full border-[3px] border-[#141414] overflow-hidden bg-white flex items-center justify-center">
                             <img
                                 src="${appState.mascotSlot2Raw}"
                                 alt="Mascote Oficial ATpromo"
@@ -2112,11 +2116,17 @@ Ofertas esgotam, verifique o frete!`;
                 <div class="relative w-[90%] mx-auto my-1">
                     <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
                     <div class="neo-box-orange relative w-full py-2.5 px-4 flex flex-col items-center justify-center text-center">
-                        ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
-                        <div class="font-display text-[34px] leading-none price-hero-text">${escapeHtml(appState.price)}</div>
-                        <div class="relative mt-1.5 inline-block">
+                        ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through leading-normal mb-0.5 block">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
+                        
+                        <!-- Preço Story em Camada Dupla Física -->
+                        <div class="relative inline-block my-0.5">
+                            <span class="absolute top-[3px] left-[3px] font-display font-black text-[34px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(appState.price)}</span>
+                            <span class="relative font-display font-black text-[34px] leading-tight text-white block">${escapeHtml(appState.price)}</span>
+                        </div>
+
+                        <div class="relative mt-1 inline-block">
                             <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
-                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] font-display font-extrabold text-[11px] text-[#141414]">
+                            <div class="relative px-3 py-1 rounded-full bg-white border-2 border-[#141414] font-display font-extrabold text-[11px] text-[#141414] leading-normal">
                                 ${escapeHtml(appState.installments)}
                             </div>
                         </div>
@@ -2127,13 +2137,13 @@ Ofertas esgotam, verifique o frete!`;
                 <div class="relative w-[90%] mx-auto my-1">
                     <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #141414; border-radius: 16px;"></div>
                     <div class="relative bg-white border-[3px] border-[#141414] rounded-[16px] py-2.5 px-4 text-center">
-                        <p class="font-display font-black text-xs uppercase text-[#141414]">🔗 CLIQUE NO LINK AQUI 👇</p>
-                        <p class="text-[10px] font-bold text-neutral-600 mt-0.5">(Cole a figurinha de Link do Instagram aqui)</p>
+                        <p class="font-display font-black text-xs uppercase text-[#141414] leading-normal">🔗 CLIQUE NO LINK AQUI 👇</p>
+                        <p class="text-[10px] font-bold text-neutral-600 mt-0.5 leading-normal">(Cole a figurinha de Link do Instagram aqui)</p>
                     </div>
                 </div>
 
                 <div class="text-center pt-1">
-                    <span class="font-display font-bold text-xs text-[#141414]/75">${escapeHtml(appState.siteUrl)}</span>
+                    <span class="font-display font-bold text-xs text-[#141414]/75 leading-normal">${escapeHtml(appState.siteUrl)}</span>
                 </div>
             </div>`;
         }
@@ -2169,7 +2179,7 @@ Ofertas esgotam, verifique o frete!`;
                     <div class="neo-box-white relative w-full overflow-hidden flex flex-col">
                         ${prod.condition ? `
                             <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
-                                <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-normal">
                                     ${escapeHtml(prod.condition)}
                                 </span>
                             </div>
@@ -2182,9 +2192,9 @@ Ofertas esgotam, verifique o frete!`;
                                 <span class="text-xs font-bold text-neutral-400">Cole a foto do produto (Ctrl+V)</span>
                             `}
                         </div>
-                        <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
-                            <span class="font-display font-extrabold text-[9px] uppercase text-[#141414] truncate">${escapeHtml(prod.subtitle)}</span>
-                            <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase">🛒 ${escapeHtml(prod.store)}</span>
+                        <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between gap-2">
+                            <span class="font-display font-extrabold text-[9px] uppercase text-[#141414] block leading-normal overflow-visible">${escapeHtml(prod.subtitle)}</span>
+                            <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase shrink-0">🛒 ${escapeHtml(prod.store)}</span>
                         </div>
                     </div>
                 </div>
@@ -2193,11 +2203,16 @@ Ofertas esgotam, verifique o frete!`;
                 <div class="relative w-[88%] mx-auto my-0.5">
                     <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
                     <div class="neo-box-orange relative w-full py-2 px-3 flex flex-col items-center justify-center text-center">
-                        <div class="font-display text-[29px] leading-none price-hero-text">${escapeHtml(prod.price)}</div>
+                        <!-- Preço Giro em Camada Dupla Física -->
+                        <div class="relative inline-block my-0.5">
+                            <span class="absolute top-[2.5px] left-[2.5px] font-display font-black text-[29px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(prod.price)}</span>
+                            <span class="relative font-display font-black text-[29px] leading-tight text-white block">${escapeHtml(prod.price)}</span>
+                        </div>
+
                         <div class="relative mt-1 inline-block">
                             <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
-                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414]">
-                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">${escapeHtml(prod.installments)}</span>
+                            <div class="relative px-3 py-1 rounded-full bg-white border-2 border-[#141414] flex items-center justify-center">
+                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-normal">${escapeHtml(prod.installments)}</span>
                             </div>
                         </div>
                     </div>
@@ -2230,8 +2245,17 @@ Ofertas esgotam, verifique o frete!`;
         // ============================================================================
         async function renderSlideToCanvas(slideEl) {
             // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat) estarem 100% carregadas
-            if (document.fonts && document.fonts.ready) {
+            if (document.fonts) {
                 await document.fonts.ready;
+                try {
+                    await Promise.all([
+                        document.fonts.load('900 30px "Plus Jakarta Sans"'),
+                        document.fonts.load('800 21px "Plus Jakarta Sans"'),
+                        document.fonts.load('800 11px "Plus Jakarta Sans"'),
+                        document.fonts.load('600 10px "Plus Jakarta Sans"'),
+                        document.fonts.load('700 10px "Plus Jakarta Sans"')
+                    ]);
+                } catch {}
             }
 
             // 2. Determinar dimensões proporcionais
@@ -2319,14 +2343,19 @@ Ofertas esgotam, verifique o frete!`;
                 }
             }
 
-            // 6. Normalizar line-clamp no clone para o Slide 2 (evita falha de -webkit-box no html2canvas)
-            clone.querySelectorAll('.line-clamp-2').forEach(el => {
-                el.style.display = 'block';
-                el.style.webkitLineClamp = 'unset';
-                el.style.webkitBoxOrient = 'unset';
-                el.style.overflow = 'hidden';
-                el.style.maxHeight = '27px';
-                el.style.lineHeight = '1.25';
+            // 6. Normalizar TODOS os elementos de texto no clone (elimina qualquer clipping/slicing do html2canvas)
+            clone.querySelectorAll('*').forEach(el => {
+                if (el.style && el.style.textShadow) {
+                    el.style.textShadow = 'none';
+                }
+
+                if (['H1', 'H2', 'H3', 'H4', 'P', 'SPAN'].includes(el.tagName)) {
+                    el.style.overflow = 'visible';
+                    el.style.textOverflow = 'clip';
+                    el.style.maxHeight = 'none';
+                    el.style.webkitLineClamp = 'unset';
+                    el.style.webkitBoxOrient = 'unset';
+                }
             });
 
             sandbox.appendChild(clone);
@@ -2342,8 +2371,8 @@ Ofertas esgotam, verifique o frete!`;
             });
             await Promise.all(imgLoadPromises);
 
-            // Delay estratégico para acomodação dos estilos computados
-            await new Promise(r => setTimeout(r, 80));
+            // Delay estratégico para acomodação dos estilos computados e fontes
+            await new Promise(r => setTimeout(r, 120));
 
             // 8. Renderizar canvas com html2canvas em alta resolução (3x = 1080x1350 ou 1080x1920)
             try {
