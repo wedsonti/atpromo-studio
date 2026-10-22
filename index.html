@@ -81,26 +81,23 @@
             font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
         }
 
-        /* Caixas e Etiquetas Neo-Brutalistas Reais (@atpromoo) - 0px spread para renderização perfeita no html2canvas */
+        /* Caixas e Etiquetas Neo-Brutalistas Reais (@atpromoo) - Sombras sólidas perfeitas */
         .neo-box-white {
             background-color: #FFFFFF;
             border: 3px solid #141414;
             border-radius: 20px;
-            box-shadow: 6px 6px 0px 0px #141414;
         }
 
         .neo-row-white {
             background-color: #FFFFFF;
             border: 3px solid #141414;
             border-radius: 14px;
-            box-shadow: 5px 5px 0px 0px #141414;
         }
 
         .neo-box-orange {
             background-color: #FF6B1A;
             border: 3px solid #141414;
             border-radius: 20px;
-            box-shadow: 6px 6px 0px 0px #141414;
         }
 
         .neo-badge-condition {
@@ -108,7 +105,6 @@
             color: #141414;
             border: 2px solid #141414;
             border-radius: 8px;
-            box-shadow: 3px 3px 0px 0px #141414;
         }
 
         /* Preço principal em branco puro com sombra sólida externa (NUNCA text-stroke) */
@@ -583,8 +579,33 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Chamada Principal (Use / para quebrar as 3 linhas)</label>
-                        <input type="text" id="fieldCommentTrigger" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[11px] text-slate-400">Chamada Principal (Use / para quebrar as 3 linhas)</label>
+                            <span class="text-[10px] text-orange-400 font-semibold">*palavra* = destaque</span>
+                        </div>
+                        <input type="text" id="fieldCommentTrigger" oninput="syncFormToState()" placeholder="Comente *EU QUERO* / ou acesse pelo / link da bio" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-bold focus:border-[#FF6B1A] focus:outline-none">
+                        
+                        <!-- Atalhos de automação ManyChat / Instagram -->
+                        <div class="mt-1.5 pt-1 border-t border-slate-800/80">
+                            <p class="text-[10px] text-slate-400 mb-1 font-semibold">Atalhos rápidos para sua automação do Instagram:</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="setCommentTriggerPreset('Comente *EU QUERO* / ou acesse pelo / link da bio')" class="px-2 py-1 rounded-md bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 text-[10px] font-extrabold transition cursor-pointer">
+                                    💬 EU QUERO
+                                </button>
+                                <button type="button" onclick="setCommentTriggerPreset('Comente *QUERO* / ou acesse pelo / link da bio')" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] font-bold transition cursor-pointer">
+                                    ⚡ QUERO
+                                </button>
+                                <button type="button" onclick="setCommentTriggerPreset('Comente *LINK* / pra receber direto / no seu Direct')" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] font-bold transition cursor-pointer">
+                                    🔗 LINK
+                                </button>
+                                <button type="button" onclick="setCommentTriggerPreset('Comente *ZAP* / pra entrar no grupo / pelo WhatsApp')" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] font-bold transition cursor-pointer">
+                                    📲 ZAP
+                                </button>
+                                <button type="button" onclick="setCommentTriggerPreset('Comente *GRUPO* / pra entrar no / grupo de promoções')" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[10px] font-bold transition cursor-pointer">
+                                    👥 GRUPO
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[11px] text-slate-400 mb-1">Aviso na Legenda</label>
@@ -747,7 +768,7 @@ Ofertas esgotam, verifique o frete!`;
             brandHandle: '@atpromoo',
             siteUrl: 'atpromo.vercel.app',
             ctaHeadline: 'Tá esperando o *quê?*',
-            commentTrigger: '📲 Acesse nosso / grupo pelo link / na bio',
+            commentTrigger: 'Comente *EU QUERO* / ou acesse pelo / link da bio',
             disclaimer: 'Ofertas esgotam rápido! Verifique o frete para sua região.',
 
             // Destaques do Slide 2 (4 Faixas Horizontais Compactas: "EMOJI Título | Explicação")
@@ -793,7 +814,7 @@ Ofertas esgotam, verifique o frete!`;
 💳 Parcelamento Raro: 10x de R$ 328,30 sem juros na Amazon
 ⚠️ Estoque Relâmpago: Unidades seminovas esgotam em minutos
 
-📲 Acesse nosso grupo pelo link na bio (@atpromoo) para garantir antes que acabe! 👇
+💬 Comente EU QUERO que eu te mando o link direto no Direct, ou acesse pelo link da bio (@atpromoo)! 👇
 
 *Ofertas esgotam rápido! Verifique o frete para sua região.
 
@@ -920,6 +941,14 @@ Ofertas esgotam, verifique o frete!`;
                     removeBtn.classList.add('hidden');
                 }
             }
+        }
+
+        function setCommentTriggerPreset(presetText) {
+            const input = document.getElementById('fieldCommentTrigger');
+            if (input) input.value = presetText;
+            appState.commentTrigger = presetText;
+            renderSlidesStage();
+            showToast('Gatilho de comentário atualizado!');
         }
 
         // ============================================================================
@@ -1750,78 +1779,87 @@ Ofertas esgotam, verifique o frete!`;
                     </div>
                 </div>
 
-                <!-- 3. CARD DO PRODUTO (100% DESOBSTRUÍDO): Caixa branca 88% com faixa laranja interna no topo, foto central e rodapé interno -->
-                <div class="neo-box-white w-[88%] mx-auto overflow-hidden flex flex-col my-0.5">
-                    <!-- Topo interno: Faixa Laranja de ponta a ponta com border-bottom: 3px solid #141414 -->
-                    ${appState.condition ? `
-                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
-                            <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
-                                ${escapeHtml(appState.condition)}
+                <!-- 3. CARD DO PRODUTO (100% DESOBSTRUÍDO) COM SOMBRA DURA FÍSICA -->
+                <div class="relative w-[88%] mx-auto my-0.5">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-white relative w-full overflow-hidden flex flex-col">
+                        <!-- Topo interno: Faixa Laranja de ponta a ponta com border-bottom: 3px solid #141414 -->
+                        ${appState.condition ? `
+                            <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                                <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                    ${escapeHtml(appState.condition)}
+                                </span>
+                            </div>
+                        ` : ''}
+
+                        <!-- Centro: Área Ampla da Foto com adaptação dinâmica ao formato da imagem -->
+                        <div
+                            onclick="document.getElementById('fileUploadInput').click()"
+                            class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden transition-all duration-150"
+                            style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
+                            title="Clique ou dê Ctrl+V para colar a foto do produto"
+                        >
+                            ${hasProductPhoto ? `
+                                <img
+                                    src="${activeProductImg}"
+                                    alt="Produto"
+                                    style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});"
+                                    crossorigin="anonymous"
+                                />
+                            ` : `
+                                <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-3 py-1.5 hover:border-[#FF6B1A] transition">
+                                    <span class="text-lg mb-0.5">📋</span>
+                                    <p class="font-display font-extrabold text-[10.5px] text-[#141414] leading-snug">
+                                        Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto real
+                                    </p>
+                                    <span class="text-[9px] font-semibold text-neutral-400">Quadro auto-adaptável ao formato da imagem</span>
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- Rodapé Interno: border-top: 3px solid #141414 -->
+                        <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between gap-2">
+                            <span class="font-display font-extrabold text-[9px] uppercase tracking-wide text-[#141414] truncate">
+                                ${escapeHtml(appState.subtitle || appState.title)}
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase shrink-0">
+                                🛒 ${escapeHtml(appState.store)}
                             </span>
                         </div>
-                    ` : ''}
-
-                    <!-- Centro: Área Ampla da Foto com adaptação dinâmica ao formato da imagem -->
-                    <div
-                        onclick="document.getElementById('fileUploadInput').click()"
-                        class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden transition-all duration-150"
-                        style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
-                        title="Clique ou dê Ctrl+V para colar a foto do produto"
-                    >
-                        ${hasProductPhoto ? `
-                            <img
-                                src="${activeProductImg}"
-                                alt="Produto"
-                                style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});"
-                                crossorigin="anonymous"
-                            />
-                        ` : `
-                            <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-3 py-1.5 hover:border-[#FF6B1A] transition">
-                                <span class="text-lg mb-0.5">📋</span>
-                                <p class="font-display font-extrabold text-[10.5px] text-[#141414] leading-snug">
-                                    Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto real
-                                </p>
-                                <span class="text-[9px] font-semibold text-neutral-400">Quadro auto-adaptável ao formato da imagem</span>
-                            </div>
-                        `}
-                    </div>
-
-                    <!-- Rodapé Interno: border-top: 3px solid #141414 -->
-                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between gap-2">
-                        <span class="font-display font-extrabold text-[9px] uppercase tracking-wide text-[#141414] truncate">
-                            ${escapeHtml(appState.subtitle || appState.title)}
-                        </span>
-                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase shrink-0">
-                            🛒 ${escapeHtml(appState.store)}
-                        </span>
                     </div>
                 </div>
 
-                <!-- 4. BLOCO DE PREÇO (LARANJA): Centralizado, mesma largura 88%, fundo #FF6B1A, borda 3px solid #141414 e sombra 6px 6px 0px 0px #141414 -->
-                <div class="neo-box-orange w-[88%] mx-auto py-2 px-3 flex flex-col items-center justify-center text-center my-0.5">
-                    ${appState.oldPrice ? `
-                        <span class="font-display font-extrabold text-[10px] uppercase tracking-wider text-[#141414] line-through leading-none mb-0.5">
-                            DE ${escapeHtml(appState.oldPrice)}
-                        </span>
-                    ` : ''}
+                <!-- 4. BLOCO DE PREÇO (LARANJA) COM SOMBRA DURA FÍSICA -->
+                <div class="relative w-[88%] mx-auto my-0.5">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-orange relative w-full py-2 px-3 flex flex-col items-center justify-center text-center">
+                        ${appState.oldPrice ? `
+                            <span class="font-display font-extrabold text-[10px] uppercase tracking-wider text-[#141414] line-through leading-none mb-0.5">
+                                DE ${escapeHtml(appState.oldPrice)}
+                            </span>
+                        ` : ''}
 
-                    <!-- Preço Principal Gigante em Branco Puro (#FFFFFF) com sombra sólida externa -->
-                    <div class="font-display text-[29px] leading-none tracking-tight price-hero-text">
-                        ${escapeHtml(appState.price)}
-                    </div>
-
-                    <!-- Pílula Branca com parcelamento -->
-                    <div class="mt-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414]">
-                        <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">
-                            ${escapeHtml(appState.installments)}
-                        </span>
-                    </div>
-
-                    ${appState.coupon ? `
-                        <div class="mt-1 px-2 py-0.5 rounded bg-[#141414] text-[#FAF6EE] font-mono font-extrabold text-[8.5px] uppercase">
-                            CUPOM: ${escapeHtml(appState.coupon)}
+                        <!-- Preço Principal Gigante em Branco Puro (#FFFFFF) com sombra sólida externa -->
+                        <div class="font-display text-[29px] leading-none tracking-tight price-hero-text">
+                            ${escapeHtml(appState.price)}
                         </div>
-                    ` : ''}
+
+                        <!-- Pílula Branca com parcelamento e sombra física 2px -->
+                        <div class="relative mt-1 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
+                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414]">
+                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">
+                                    ${escapeHtml(appState.installments)}
+                                </span>
+                            </div>
+                        </div>
+
+                        ${appState.coupon ? `
+                            <div class="mt-1 px-2 py-0.5 rounded bg-[#141414] text-[#FAF6EE] font-mono font-extrabold text-[8.5px] uppercase">
+                                CUPOM: ${escapeHtml(appState.coupon)}
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
 
                 <!-- 5. RODAPÉ: "Arrasta ➔" -->
@@ -1860,32 +1898,41 @@ Ofertas esgotam, verifique o frete!`;
                         <h2 class="font-display font-black text-[21px] leading-none text-[#141414] uppercase tracking-tight">
                             💡 VALE A PENA?
                         </h2>
-                        <div class="mt-1.5 px-2.5 py-0.5 rounded-full bg-[#FF6B1A] border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414] max-w-full">
-                            <span class="font-display font-extrabold text-[9.5px] text-[#141414] uppercase tracking-wide block truncate">
-                                ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
-                            </span>
+                        <div class="relative mt-1.5 max-w-full inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
+                            <div class="relative px-2.5 py-0.5 rounded-full bg-[#FF6B1A] border-2 border-[#141414]">
+                                <span class="font-display font-extrabold text-[9.5px] text-[#141414] uppercase tracking-wide block truncate">
+                                    ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- CENTRO: 4 FAIXAS HORIZONTAIS COMPACTAS (neo-row-white com box-shadow 5px 5px 0px 0px #141414) -->
+                <!-- CENTRO: 4 FAIXAS HORIZONTAIS COMPACTAS COM SOMBRA DURA FÍSICA -->
                 <div class="flex flex-col gap-2 my-auto py-1">
                     ${appState.highlights.slice(0, 4).map((item, idx) => {
                         const parsed = parseHorizontalHighlightRow(item, idx);
                         return `
-                        <div class="neo-row-white px-3 py-2 flex items-center gap-2.5">
-                            <!-- Quadrado laranja claro (#FFE6D5) com borda preta -->
-                            <div class="w-8 h-8 rounded-lg bg-[#FFE6D5] border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414] flex items-center justify-center shrink-0 font-display font-black text-xs text-[#141414]">
-                                ${escapeHtml(parsed.iconOrNum)}
-                            </div>
-                            <!-- Título curto em negrito + linha explicativa -->
-                            <div class="min-w-0 flex-1">
-                                <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-tight truncate">
-                                    ${escapeHtml(parsed.rowTitle)}
-                                </h3>
-                                <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-[1.25] mt-0.5 line-clamp-2">
-                                    ${escapeHtml(parsed.rowDesc)}
-                                </p>
+                        <div class="relative w-full">
+                            <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #141414; border-radius: 14px;"></div>
+                            <div class="neo-row-white relative px-3 py-2 flex items-center gap-2.5">
+                                <!-- Quadrado laranja claro (#FFE6D5) com borda preta e sombra física 2px -->
+                                <div class="relative shrink-0">
+                                    <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 8px;"></div>
+                                    <div class="relative w-8 h-8 rounded-lg bg-[#FFE6D5] border-2 border-[#141414] flex items-center justify-center font-display font-black text-xs text-[#141414]">
+                                        ${escapeHtml(parsed.iconOrNum)}
+                                    </div>
+                                </div>
+                                <!-- Título curto em negrito + linha explicativa -->
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-tight truncate">
+                                        ${escapeHtml(parsed.rowTitle)}
+                                    </h3>
+                                    <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-[1.25] mt-0.5 line-clamp-2">
+                                        ${escapeHtml(parsed.rowDesc)}
+                                    </p>
+                                </div>
                             </div>
                         </div>`;
                     }).join('')}
@@ -1920,7 +1967,7 @@ Ofertas esgotam, verifique o frete!`;
                 </div>`;
             }
 
-            const ctaLines = (appState.commentTrigger || '📲 Acesse nosso / grupo pelo link / na bio')
+            const ctaLines = (appState.commentTrigger || 'Comente *EU QUERO* / ou acesse pelo / link da bio')
                 .split('/')
                 .map(s => s.trim())
                 .filter(Boolean);
@@ -1935,16 +1982,19 @@ Ofertas esgotam, verifique o frete!`;
                     </span>
                 </div>
 
-                <!-- 2. CENTRO: Moldura redonda estilo Sticker (rosto e ombros sem cintura cortada) + Logo ATpromo -->
+                <!-- 2. CENTRO: Moldura redonda estilo Sticker com Sombra Dura Física + Logo ATpromo -->
                 <div class="my-auto flex flex-col items-center">
-                    <div class="w-[160px] h-[160px] rounded-full border-[4px] border-[#141414] shadow-[6px_6px_0px_0px_#141414] overflow-hidden bg-white mx-auto flex items-center justify-center">
-                        <img
-                            src="${appState.mascotSlot2Raw}"
-                            alt="Mascote Oficial ATpromo"
-                            class="w-full h-full object-cover"
-                            style="object-position: center 10%;"
-                            crossorigin="anonymous"
-                        />
+                    <div class="relative w-[160px] h-[160px] mx-auto">
+                        <div style="position: absolute; top: 6px; left: 6px; width: 160px; height: 160px; background-color: #141414; border-radius: 9999px;"></div>
+                        <div class="relative w-[160px] h-[160px] rounded-full border-[4px] border-[#141414] overflow-hidden bg-white flex items-center justify-center">
+                            <img
+                                src="${appState.mascotSlot2Raw}"
+                                alt="Mascote Oficial ATpromo"
+                                class="w-full h-full object-cover"
+                                style="object-position: center 10%;"
+                                crossorigin="anonymous"
+                            />
+                        </div>
                     </div>
 
                     <!-- Logo ATpromo logo abaixo -->
@@ -1997,57 +2047,89 @@ Ofertas esgotam, verifique o frete!`;
 
             return `
             <div class="exportable-slide slide-canvas-9-16 flex flex-col justify-between p-5 bg-[#FAF6EE]">
-                <div class="flex items-center justify-center gap-2.5 pt-1">
-                    <div class="w-10 h-10 rounded-full border-2 border-[#141414] overflow-hidden bg-white shadow-[2px_2px_0px_0px_#141414] shrink-0 flex items-center justify-center">
-                        <img src="${appState.mascotSlot1Raw}" alt="Mascote" class="w-full h-full object-cover" style="object-position: 40% 12%; transform: scale(1.6);" crossorigin="anonymous" />
+                <!-- 1. TOPO: Mascote com Notebook (sem círculo) + Headline Editorial (@atpromoo) -->
+                <div class="w-[92%] mx-auto flex items-center gap-3 pt-1">
+                    <div class="w-[78px] h-[72px] shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                            src="${appState.mascotSlot1Raw}"
+                            alt="Mascote com Notebook"
+                            class="w-full h-full object-contain"
+                            crossorigin="anonymous"
+                        />
                     </div>
-                    <span class="font-display font-black text-[15px] tracking-tight text-[#141414]">${escapeHtml(appState.brandHandle)}</span>
+                    <div class="flex flex-col items-start min-w-0 flex-1">
+                        <span class="font-display font-extrabold text-[12px] text-[#141414]/70 tracking-tight block">
+                            ${escapeHtml(appState.brandHandle)}
+                        </span>
+                        <h2 class="font-display font-black text-[19px] leading-[1.14] tracking-tight text-[#141414] mt-0.5">
+                            ${appState.badge ? `<span class="text-[#FF6B1A] italic">${escapeHtml(appState.badge)}</span> ` : ''}
+                            <span>${formatEditorialTextWithOrangeItalics(appState.title)}</span>
+                        </h2>
+                    </div>
                 </div>
 
-                <div class="text-center my-1">
-                    <h2 class="font-display font-black text-[22px] leading-[1.14] text-[#141414]">
-                        ${appState.badge ? `<span class="text-[#FF6B1A] italic">${escapeHtml(appState.badge)}</span> ` : ''}
-                        <span>${formatEditorialTextWithOrangeItalics(appState.title)}</span>
-                    </h2>
-                </div>
-
-                <div class="neo-box-white w-[90%] mx-auto overflow-hidden flex flex-col my-1">
-                    ${appState.condition ? `
-                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
-                            <span class="font-display font-black text-[10px] uppercase tracking-wider text-[#141414] block leading-tight">
-                                ${escapeHtml(appState.condition)}
-                            </span>
-                        </div>
-                    ` : ''}
-
-                    <div onclick="document.getElementById('fileUploadInput').click()" class="w-full h-[185px] p-3 flex items-center justify-center bg-white cursor-pointer">
-                        ${hasProductPhoto ? `
-                            <img src="${activeProductImg}" alt="Produto" style="max-height:165px; max-width:92%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
-                        ` : `
-                            <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-4">
-                                <span class="text-2xl mb-1">📋</span>
-                                <p class="font-display font-extrabold text-xs text-[#141414]">Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto do produto</p>
+                <!-- Card do Produto Story com Sombra Física -->
+                <div class="relative w-[90%] mx-auto my-1">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-white relative w-full overflow-hidden flex flex-col">
+                        ${appState.condition ? `
+                            <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                                <span class="font-display font-black text-[10px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                    ${escapeHtml(appState.condition)}
+                                </span>
                             </div>
-                        `}
-                    </div>
+                        ` : ''}
 
-                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
-                        <span class="font-display font-extrabold text-[9.5px] uppercase text-[#141414] truncate">${escapeHtml(appState.subtitle)}</span>
-                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[9px] uppercase">🛒 ${escapeHtml(appState.store)}</span>
+                        <div
+                            onclick="document.getElementById('fileUploadInput').click()"
+                            class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden transition-all duration-150"
+                            style="height: 185px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
+                            title="Clique ou dê Ctrl+V para colar a foto do produto"
+                        >
+                            ${hasProductPhoto ? `
+                                <img
+                                    src="${activeProductImg}"
+                                    alt="Produto"
+                                    style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});"
+                                    crossorigin="anonymous"
+                                />
+                            ` : `
+                                <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-4">
+                                    <span class="text-2xl mb-1">📋</span>
+                                    <p class="font-display font-extrabold text-xs text-[#141414]">Clique ou dê <span class="text-[#FF6B1A]">Ctrl+V</span> para colar a foto do produto</p>
+                                </div>
+                            `}
+                        </div>
+
+                        <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
+                            <span class="font-display font-extrabold text-[9.5px] uppercase text-[#141414] truncate">${escapeHtml(appState.subtitle)}</span>
+                            <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[9px] uppercase">🛒 ${escapeHtml(appState.store)}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="neo-box-orange w-[90%] mx-auto py-2.5 px-4 flex flex-col items-center justify-center text-center my-1">
-                    ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
-                    <div class="font-display text-[34px] leading-none price-hero-text">${escapeHtml(appState.price)}</div>
-                    <div class="mt-1.5 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] font-display font-extrabold text-[11px] text-[#141414]">
-                        ${escapeHtml(appState.installments)}
+                <!-- Bloco de Preço Story com Sombra Física -->
+                <div class="relative w-[90%] mx-auto my-1">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-orange relative w-full py-2.5 px-4 flex flex-col items-center justify-center text-center">
+                        ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
+                        <div class="font-display text-[34px] leading-none price-hero-text">${escapeHtml(appState.price)}</div>
+                        <div class="relative mt-1.5 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
+                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] font-display font-extrabold text-[11px] text-[#141414]">
+                                ${escapeHtml(appState.installments)}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="neo-box-white py-2.5 px-4 text-center my-1">
-                    <p class="font-display font-black text-xs uppercase text-[#141414]">🔗 CLIQUE NO LINK AQUI 👇</p>
-                    <p class="text-[10px] font-bold text-neutral-600 mt-0.5">(Cole a figurinha de Link do Instagram aqui)</p>
+                <!-- Card de Link Story com Sombra Física -->
+                <div class="relative w-[90%] mx-auto my-1">
+                    <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #141414; border-radius: 16px;"></div>
+                    <div class="relative bg-white border-[3px] border-[#141414] rounded-[16px] py-2.5 px-4 text-center">
+                        <p class="font-display font-black text-xs uppercase text-[#141414]">🔗 CLIQUE NO LINK AQUI 👇</p>
+                        <p class="text-[10px] font-bold text-neutral-600 mt-0.5">(Cole a figurinha de Link do Instagram aqui)</p>
+                    </div>
                 </div>
 
                 <div class="text-center pt-1">
@@ -2081,32 +2163,43 @@ Ofertas esgotam, verifique o frete!`;
                     </div>
                 </div>
 
-                <div class="neo-box-white w-[88%] mx-auto overflow-hidden flex flex-col my-0.5">
-                    ${prod.condition ? `
-                        <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
-                            <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
-                                ${escapeHtml(prod.condition)}
-                            </span>
-                        </div>
-                    ` : ''}
+                <!-- Card Produto Giro com Sombra Física -->
+                <div class="relative w-[88%] mx-auto my-0.5">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-white relative w-full overflow-hidden flex flex-col">
+                        ${prod.condition ? `
+                            <div class="w-full py-1 px-3 bg-[#FF6B1A] border-b-[3px] border-[#141414] text-center">
+                                <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-[#141414] block leading-tight">
+                                    ${escapeHtml(prod.condition)}
+                                </span>
+                            </div>
+                        ` : ''}
 
-                    <div class="w-full flex items-center justify-center bg-white overflow-hidden transition-all duration-150" style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};">
-                        ${hasPhoto ? `
-                            <img src="${prod.image}" alt="Produto" style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'};" crossorigin="anonymous"/>
-                        ` : `
-                            <span class="text-xs font-bold text-neutral-400">Cole a foto do produto (Ctrl+V)</span>
-                        `}
-                    </div>
-                    <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
-                        <span class="font-display font-extrabold text-[9px] uppercase text-[#141414] truncate">${escapeHtml(prod.subtitle)}</span>
-                        <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase">🛒 ${escapeHtml(prod.store)}</span>
+                        <div class="w-full flex items-center justify-center bg-white overflow-hidden transition-all duration-150" style="height: ${appState.photoFrameHeight || 126}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};">
+                            ${hasPhoto ? `
+                                <img src="${prod.image}" alt="Produto" style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'};" crossorigin="anonymous"/>
+                            ` : `
+                                <span class="text-xs font-bold text-neutral-400">Cole a foto do produto (Ctrl+V)</span>
+                            `}
+                        </div>
+                        <div class="w-full px-3 py-1.5 bg-[#FAF6EE] border-t-[3px] border-[#141414] flex items-center justify-between">
+                            <span class="font-display font-extrabold text-[9px] uppercase text-[#141414] truncate">${escapeHtml(prod.subtitle)}</span>
+                            <span class="px-2 py-0.5 rounded bg-[#141414] text-white font-display font-extrabold text-[8.5px] uppercase">🛒 ${escapeHtml(prod.store)}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="neo-box-orange w-[88%] mx-auto py-2 px-3 flex flex-col items-center justify-center text-center my-0.5">
-                    <div class="font-display text-[29px] leading-none price-hero-text">${escapeHtml(prod.price)}</div>
-                    <div class="mt-1 px-3 py-0.5 rounded-full bg-white border-2 border-[#141414] shadow-[2px_2px_0px_0px_#141414]">
-                        <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">${escapeHtml(prod.installments)}</span>
+                <!-- Bloco Preço Giro com Sombra Física -->
+                <div class="relative w-[88%] mx-auto my-0.5">
+                    <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                    <div class="neo-box-orange relative w-full py-2 px-3 flex flex-col items-center justify-center text-center">
+                        <div class="font-display text-[29px] leading-none price-hero-text">${escapeHtml(prod.price)}</div>
+                        <div class="relative mt-1 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
+                            <div class="relative px-3 py-0.5 rounded-full bg-white border-2 border-[#141414]">
+                                <span class="font-display font-extrabold text-[10px] text-[#141414] block leading-tight">${escapeHtml(prod.installments)}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2133,8 +2226,150 @@ Ofertas esgotam, verifique o frete!`;
         }
 
         // ============================================================================
-        // 10. EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080x1350) VIA HTML2CANVAS
+        // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p) FIEL VIA HTML2CANVAS
         // ============================================================================
+        async function renderSlideToCanvas(slideEl) {
+            // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat) estarem 100% carregadas
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+            // 2. Determinar dimensões proporcionais
+            const isStory = slideEl.classList.contains('slide-canvas-9-16') || appState.postMode === 'story';
+            const targetWidth = 360;
+            const targetHeight = isStory ? 640 : 450;
+
+            // 3. Criar contêiner sandbox off-screen isolado no document.body (sem interferência de scroll ou zoom da tela)
+            const sandbox = document.createElement('div');
+            sandbox.style.position = 'fixed';
+            sandbox.style.top = '0px';
+            sandbox.style.left = '-99999px';
+            sandbox.style.width = targetWidth + 'px';
+            sandbox.style.height = targetHeight + 'px';
+            sandbox.style.zIndex = '-9999';
+            sandbox.style.opacity = '1';
+            sandbox.style.pointerEvents = 'none';
+            sandbox.style.overflow = 'hidden';
+            sandbox.style.backgroundColor = '#FAF6EE';
+
+            // 4. Clonar o elemento do slide para renderização isolada
+            const clone = slideEl.cloneNode(true);
+            clone.style.width = targetWidth + 'px';
+            clone.style.height = targetHeight + 'px';
+            clone.style.minWidth = targetWidth + 'px';
+            clone.style.minHeight = targetHeight + 'px';
+            clone.style.maxWidth = targetWidth + 'px';
+            clone.style.maxHeight = targetHeight + 'px';
+            clone.style.transform = 'none';
+            clone.style.margin = '0';
+            clone.style.boxSizing = 'border-box';
+            clone.style.position = 'relative';
+
+            // 5. Ajustar imagens no clone para eliminar distorção (html2canvas não suporta object-fit: contain/cover nativo)
+            const origImages = Array.from(slideEl.querySelectorAll('img'));
+            const cloneImages = Array.from(clone.querySelectorAll('img'));
+
+            for (let i = 0; i < cloneImages.length; i++) {
+                const cloneImg = cloneImages[i];
+                const origImg = origImages[i];
+                if (!origImg) continue;
+
+                const parentEl = origImg.parentElement;
+                const parentW = parentEl ? (parentEl.clientWidth || 300) : 300;
+                const parentH = parentEl ? (parentEl.clientHeight || 126) : 126;
+
+                const natW = origImg.naturalWidth || origImg.width || parentW;
+                const natH = origImg.naturalHeight || origImg.height || parentH;
+
+                if (natW > 0 && natH > 0 && parentW > 0 && parentH > 0) {
+                    const isCover = (origImg.style.objectFit === 'cover' || origImg.classList.contains('object-cover'));
+                    const imgAspect = natW / natH;
+                    const parentAspect = parentW / parentH;
+
+                    let finalW, finalH;
+                    if (isCover) {
+                        if (imgAspect > parentAspect) {
+                            finalH = parentH;
+                            finalW = parentH * imgAspect;
+                        } else {
+                            finalW = parentW;
+                            finalH = parentW / imgAspect;
+                        }
+                    } else { // contain
+                        if (imgAspect > parentAspect) {
+                            finalW = parentW;
+                            finalH = parentW / imgAspect;
+                        } else {
+                            finalH = parentH;
+                            finalW = parentH * imgAspect;
+                        }
+                    }
+
+                    cloneImg.style.width = Math.round(finalW) + 'px';
+                    cloneImg.style.height = Math.round(finalH) + 'px';
+                    cloneImg.style.maxWidth = 'none';
+                    cloneImg.style.maxHeight = 'none';
+                    cloneImg.style.objectFit = 'fill';
+                    cloneImg.style.display = 'block';
+                    cloneImg.style.margin = 'auto';
+
+                    if (origImg.style.transform) {
+                        cloneImg.style.transform = origImg.style.transform;
+                    }
+                }
+            }
+
+            // 6. Normalizar line-clamp no clone para o Slide 2 (evita falha de -webkit-box no html2canvas)
+            clone.querySelectorAll('.line-clamp-2').forEach(el => {
+                el.style.display = 'block';
+                el.style.webkitLineClamp = 'unset';
+                el.style.webkitBoxOrient = 'unset';
+                el.style.overflow = 'hidden';
+                el.style.maxHeight = '27px';
+                el.style.lineHeight = '1.25';
+            });
+
+            sandbox.appendChild(clone);
+            document.body.appendChild(sandbox);
+
+            // 7. Aguardar carregamento de todas as imagens presentes no clone
+            const imgLoadPromises = Array.from(clone.querySelectorAll('img')).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(res => {
+                    img.onload = res;
+                    img.onerror = res;
+                });
+            });
+            await Promise.all(imgLoadPromises);
+
+            // Delay estratégico para acomodação dos estilos computados
+            await new Promise(r => setTimeout(r, 80));
+
+            // 8. Renderizar canvas com html2canvas em alta resolução (3x = 1080x1350 ou 1080x1920)
+            try {
+                const canvas = await html2canvas(clone, {
+                    scale: 3,
+                    width: targetWidth,
+                    height: targetHeight,
+                    windowWidth: targetWidth,
+                    windowHeight: targetHeight,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#FAF6EE',
+                    scrollX: 0,
+                    scrollY: 0,
+                    x: 0,
+                    y: 0,
+                    logging: false
+                });
+                return canvas;
+            } finally {
+                if (sandbox.parentElement) {
+                    sandbox.parentElement.removeChild(sandbox);
+                }
+            }
+        }
+
         async function downloadSingleSlide(btnElement, filename) {
             const wrapper = btnElement.closest('.flex-col');
             const slideEl = wrapper.querySelector('.exportable-slide');
@@ -2145,18 +2380,14 @@ Ofertas esgotam, verifique o frete!`;
             btnElement.disabled = true;
 
             try {
-                const canvas = await html2canvas(slideEl, {
-                    scale: 3, // 360px * 3 = 1080px exatos (1080x1350)
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#FAF6EE'
-                });
+                const canvas = await renderSlideToCanvas(slideEl);
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                showToast(`Slide "${filename}" exportado em 1080p!`);
+                showToast(`Slide "${filename}" exportado em 1080p com sucesso!`);
             } catch (err) {
+                console.error('Erro ao exportar:', err);
                 showToast('Erro ao exportar imagem.', 'warning');
             } finally {
                 btnElement.innerHTML = originalText;
@@ -2176,20 +2407,16 @@ Ofertas esgotam, verifique o frete!`;
             try {
                 for (let i = 0; i < slideElements.length; i++) {
                     label.textContent = `Exportando Slide ${i + 1}/${slideElements.length}...`;
-                    const canvas = await html2canvas(slideElements[i], {
-                        scale: 3,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#FAF6EE'
-                    });
+                    const canvas = await renderSlideToCanvas(slideElements[i]);
                     const link = document.createElement('a');
                     link.download = `atpromoo-slide-0${i + 1}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     await new Promise(r => setTimeout(r, 450));
                 }
-                showToast(`Todos os ${slideElements.length} slides foram baixados em 1080p!`);
+                showToast(`Todos os ${slideElements.length} slides foram baixados em 1080p fiel!`);
             } catch (e) {
+                console.error('Erro na exportação dos slides:', e);
                 showToast('Erro durante a exportação dos slides.', 'warning');
             } finally {
                 label.textContent = originalLabel;

@@ -110,7 +110,7 @@ Regras obrigatórias de formatação dos campos JSON:
   2. "❄️ Construção MSI Ventus 2X OC | Dual Fan com overclock de fábrica e excelente refrigeração."
   3. "💳 Parcelamento Raro sem Juros | Sai por 10x de R$ 328,30 sem acréscimo direto na Amazon."
   4. "⚠️ Atenção ao Estoque Seminovo | Unidades reembaladas na Amazon com garantia costumam esgotar rápido."
-- caption: Legenda completa para Instagram da @atpromoo adaptada ao ângulo escolhido, com bullets, preço, aviso se for seminovo, chamada para acessar o grupo pelo link na bio (@atpromoo) e hashtags.`;
+- caption: Legenda completa para Instagram da @atpromoo adaptada ao ângulo escolhido, com bullets de destaques, preço, aviso se for seminovo, chamada forte para o seguidor comentar "EU QUERO" para receber o link direto no direct ou acessar pelo link na bio (@atpromoo) e hashtags relevantes de hardware/games.`;
 }
 
 app.post("/api/login", (req, res) => {
