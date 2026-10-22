@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATpromo Studio — Gerador de Posts & Carrosséis de Ofertas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas para exportação fiel em PNG de alta resolução -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts: Inter, Montserrat & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Padrão de grade tecnológica sutil para o fundo dos slides */
+        .tech-grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Dimensões exatas proporcionais para exportação 1080p (Scale 3x = 1080x1350 ou 1080x1920) */
+        .slide-canvas-4-5 {
+            width: 360px;
+            height: 450px;
+            min-width: 360px;
+            min-height: 450px;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .slide-canvas-9-16 {
+            width: 360px;
+            height: 640px;
+            min-width: 360px;
+            min-height: 640px;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Sombra suave para destacar produto */
+        .product-drop-shadow {
+            filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.65));
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-orange-500 selection:text-white">
+
+    <!-- Notificação Toast Flutuante (Substitui qualquer alert) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- TOP HEADER -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 py-3 sticky top-0 z-40">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/20 font-display font-black text-white text-lg tracking-tighter">
+                    AT
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-display font-extrabold text-base sm:text-lg tracking-tight text-white">ATpromo Studio</h1>
+                        <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 border border-orange-500/30 font-semibold">Vercel Ready</span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Fábrica Padronizada de Posts & Carrosséis de Ofertas Tech (Colar Texto + Ctrl+V na Foto)</p>
+                </div>
+            </div>
+
+            <!-- Mode Selector Pills -->
+            <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
+                <button onclick="setPostMode('carousel-x')" id="modeBtn-carousel-x" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap bg-orange-500 text-white shadow">
+                    📑 Carrossel Raio-X (3 Slides)
+                </button>
+                <button onclick="setPostMode('single-feed')" id="modeBtn-single-feed" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap text-slate-400 hover:text-white">
+                    🖼️ Post Único (4:5)
+                </button>
+                <button onclick="setPostMode('story')" id="modeBtn-story" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap text-slate-400 hover:text-white">
+                    📱 Story (9:16)
+                </button>
+                <button onclick="setPostMode('multi-giro')" id="modeBtn-multi-giro" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap text-slate-400 hover:text-white">
+                    🔥 Giro de Ofertas (Multi)
+                </button>
+            </div>
+
+            <!-- Export Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="openVercelModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center gap-1.5" title="Como hospedar grátis na Vercel">
+                    <span>🚀</span> <span class="hidden md:inline">Guia Vercel</span>
+                </button>
+                <button onclick="downloadAllSlides()" id="btnDownloadAll" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-display font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/25 transition flex items-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span id="downloadBtnLabel">Baixar Todos os Slides (PNG)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 lg:p-6">
+
+        <!-- COLUNA ESQUERDA: CONTROLES E ENTRADA DE DADOS (5 Colunas no Desktop) -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- PASSO 1: COLAR OFERTA BRUTA -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 font-mono text-xs font-bold flex items-center justify-center border border-orange-500/30">1</span>
+                        <h2 class="font-display font-bold text-sm text-white uppercase tracking-wide">Colar Oferta do Grupo (Texto Bruto)</h2>
+                    </div>
+                    <button onclick="loadRtxExample()" class="text-xs text-orange-400 hover:text-orange-300 underline font-medium">
+                        Restaurar Exemplo RTX 5060 Ti
+                    </button>
+                </div>
+
+                <textarea id="rawOfferInput" rows="6" class="w-full rounded-xl bg-slate-950 border border-slate-800 focus:border-orange-500 focus:outline-none p-3 text-xs font-mono text-slate-200 leading-relaxed resize-y" placeholder="Cole aqui a mensagem da oferta do WhatsApp ou Telegram..."></textarea>
+
+                <!-- Botões de Extração -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
+                    <button onclick="extractOfferInstant()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                        <span>🎯</span> Extração Instantânea (Local)
+                    </button>
+                    <button onclick="extractOfferWithGemini()" id="btnGeminiExtract" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                        <span>✨</span> Extrair + Raio-X com IA
+                    </button>
+                </div>
+
+                <!-- Configuração de Chave API p/ Vercel (Opcional) -->
+                <div class="mt-3 pt-2.5 border-t border-slate-800/80">
+                    <button onclick="toggleApiKeyBox()" class="text-[11px] text-slate-400 hover:text-slate-200 flex items-center justify-between w-full">
+                        <span>🔑 Configurar Chave Gemini API (Salva no seu navegador p/ Vercel)</span>
+                        <span id="apiKeyStatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Opcional</span>
+                    </button>
+                    <div id="apiKeyBox" class="hidden mt-2 flex gap-2">
+                        <input type="password" id="userApiKeyInput" placeholder="Cole sua AIzaSy... do Google AI Studio" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:border-orange-500 focus:outline-none">
+                        <button onclick="saveUserApiKey()" class="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold">Salvar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO 2: IMAGEM DO PRODUTO (CTRL+V / UPLOAD) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 font-mono text-xs font-bold flex items-center justify-center border border-orange-500/30">2</span>
+                        <h2 class="font-display font-bold text-sm text-white uppercase tracking-wide">Foto do Produto (Ctrl+V ou Upload)</h2>
+                    </div>
+                    <button onclick="resetToDefaultGpuImage()" class="text-xs text-slate-400 hover:text-orange-400 transition">
+                        Usar Arte GPU Padrão
+                    </button>
+                </div>
+
+                <!-- Dropzone -->
+                <div id="imageDropzone" onclick="document.getElementById('fileUploadInput').click()" class="border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-950/60 hover:bg-slate-950">
+                    <input type="file" id="fileUploadInput" accept="image/*" class="hidden" onchange="handleImageFileSelect(event)">
+                    <div class="flex items-center justify-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-orange-400 text-lg">
+                            📋
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-semibold text-slate-200">Pressione <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-orange-400">Ctrl+V</kbd> em qualquer lugar para colar a foto</p>
+                            <p class="text-[11px] text-slate-400">Ou clique aqui para escolher do celular/PC (PNG, JPG, WebP)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles Rápidos da Imagem -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-800/80">
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Tamanho da Foto (Zoom)</span>
+                            <span id="imgScaleValue" class="font-mono text-orange-400">105%</span>
+                        </div>
+                        <input type="range" id="imgScaleSlider" min="60" max="150" value="105" oninput="updateImageTransform()" class="w-full accent-orange-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                            <span>Modo de Fundo da Foto</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                            <button onclick="setPhotoBoxStyle('white-card')" id="photoStyle-white-card" class="py-1 px-2 rounded text-[11px] font-semibold bg-orange-500 text-white transition">
+                                ⬜ Card Branco
+                            </button>
+                            <button onclick="setPhotoBoxStyle('transparent')" id="photoStyle-transparent" class="py-1 px-2 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition">
+                                🌌 Fundo Livre
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO 3: EDIÇÃO FINA DOS TEXTOS E TEMA -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 font-mono text-xs font-bold flex items-center justify-center border border-orange-500/30">3</span>
+                        <h2 class="font-display font-bold text-sm text-white uppercase tracking-wide">Edição em Tempo Real & Cores</h2>
+                    </div>
+                    <!-- Seletor de Temas -->
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="setVisualTheme('orange')" title="Tema ATpromo Orange" class="w-5 h-5 rounded-full bg-orange-500 ring-2 ring-offset-2 ring-offset-slate-900 ring-orange-400"></button>
+                        <button onclick="setVisualTheme('red')" title="Tema Gamer Crimson" class="w-5 h-5 rounded-full bg-red-600 hover:ring-2 ring-offset-2 ring-offset-slate-900 ring-red-400"></button>
+                        <button onclick="setVisualTheme('cyber')" title="Tema Prime Blue/Gold" class="w-5 h-5 rounded-full bg-sky-500 hover:ring-2 ring-offset-2 ring-offset-slate-900 ring-sky-400"></button>
+                    </div>
+                </div>
+
+                <!-- Abas Internas de Edição -->
+                <div class="flex border-b border-slate-800 mb-3 text-xs font-semibold">
+                    <button onclick="switchEditorTab('tab-capa')" id="tabBtn-capa" class="px-3 py-2 border-b-2 border-orange-500 text-orange-400">
+                        Slide 1 (Oferta Principal)
+                    </button>
+                    <button onclick="switchEditorTab('tab-raiox')" id="tabBtn-raiox" class="px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+                        Slide 2 (Raio-X)
+                    </button>
+                    <button onclick="switchEditorTab('tab-cta')" id="tabBtn-cta" class="px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+                        Slide 3 & Marca
+                    </button>
+                </div>
+
+                <!-- ABA 1: DADOS DA CAPA -->
+                <div id="tab-capa" class="space-y-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Selo / Gatilho Topo</label>
+                            <input type="text" id="fieldBadge" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-semibold focus:border-orange-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Loja / Origem</label>
+                            <input type="text" id="fieldStore" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-semibold focus:border-orange-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Nome Limpo do Produto (Destaque)</label>
+                        <input type="text" id="fieldTitle" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold focus:border-orange-500 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Subtítulo Técnico</label>
+                            <input type="text" id="fieldSubtitle" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Alerta / Condição (ex: Seminovo)</label>
+                            <input type="text" id="fieldCondition" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 font-semibold focus:border-orange-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Preço Antigo (De)</label>
+                            <input type="text" id="fieldOldPrice" oninput="syncFormToState()" placeholder="Ex: R$ 3.899" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 font-mono focus:border-orange-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-emerald-400 font-semibold mb-1">Preço Oferta (Por)</label>
+                            <input type="text" id="fieldPrice" oninput="syncFormToState()" class="w-full bg-slate-950 border border-emerald-500/50 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:border-emerald-400 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Cupom (Opcional)</label>
+                            <input type="text" id="fieldCoupon" oninput="syncFormToState()" placeholder="Sem cupom" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-amber-400 font-mono uppercase focus:border-orange-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Linha de Parcelamento / PIX</label>
+                        <input type="text" id="fieldInstallments" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                    </div>
+
+                    <!-- Botão extra quando estiver no modo Giro de Ofertas -->
+                    <div class="pt-2">
+                        <button onclick="addCurrentOfferToGiro()" class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-orange-400 flex items-center justify-center gap-1.5 transition">
+                            <span>➕</span> Adicionar este Produto ao Carrossel "Giro de Ofertas"
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA 2: SLIDE 2 (RAIO-X TÉCNICO) -->
+                <div id="tab-raiox" class="hidden space-y-2.5">
+                    <p class="text-[11px] text-slate-400">Estes 4 pontos aparecem no <strong>Slide 2 do Carrossel</strong> explicando por que a oferta vale a pena:</p>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Destaque 1 (Especificação Principal)</label>
+                        <input type="text" id="fieldHighlight1" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Destaque 2 (Construção / Modelo)</label>
+                        <input type="text" id="fieldHighlight2" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Destaque 3 (Condição de Pagamento)</label>
+                        <input type="text" id="fieldHighlight3" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Destaque 4 (Alerta de Estoque / Dica)</label>
+                        <input type="text" id="fieldHighlight4" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-orange-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- ABA 3: SLIDE 3 & IDENTIDADE DA PÁGINA -->
+                <div id="tab-cta" class="hidden space-y-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Arroba / Nome da Página</label>
+                            <input type="text" id="fieldBrandHandle" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-semibold focus:border-orange-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Gatilho de Comentário (CTA)</label>
+                            <input type="text" id="fieldCommentTrigger" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-orange-400 font-bold focus:border-orange-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Aviso de Rodapé Fixo</label>
+                        <input type="text" id="fieldDisclaimer" oninput="syncFormToState()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-400 focus:border-orange-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- COLUNA DIREITA: PALCO DE PREVIEW DOS SLIDES + LEGENDA PRONTA (7 Colunas no Desktop) -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+
+            <!-- PALCO DE VISUALIZAÇÃO AO VIVO -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <h2 id="previewStageTitle" class="font-display font-bold text-sm sm:text-base text-white">
+                                Pré-visualização ao Vivo — Carrossel Raio-X (3 Slides • 1080x1350)
+                            </h2>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-0.5">Clique em "Baixar Slide" abaixo de cada card ou baixe o pacote completo no topo.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-mono text-slate-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                            Resolução Final: <strong class="text-slate-200">Alta Definição (3x)</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- CONTAINER HORIZONTAL DOS SLIDES -->
+                <div id="slidesStageContainer" class="flex items-start gap-6 overflow-x-auto pb-4 pt-1 px-1">
+                    <!-- Os slides são injetados dinamicamente via JavaScript aqui -->
+                </div>
+            </div>
+
+            <!-- PAINEL DE LEGENDA PRONTA PARA INSTAGRAM / TIKTOK -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📝</span>
+                        <div>
+                            <h3 class="font-display font-bold text-sm text-white uppercase tracking-wide">Legenda Padronizada para o Post</h3>
+                            <p class="text-[11px] text-slate-400">Gerada automaticamente com gatilho de urgência, parcelamento e chamada para o Link da Bio</p>
+                        </div>
+                    </div>
+                    <button onclick="copyCaptionToClipboard()" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                        <span>📋</span> <span id="btnCopyCaptionText">Copiar Legenda</span>
+                    </button>
+                </div>
+
+                <textarea id="generatedCaptionOutput" rows="7" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-3.5 text-xs font-sans text-slate-200 leading-relaxed focus:border-orange-500 focus:outline-none"></textarea>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL GUIA VERCEL (Gratuito) -->
+    <div id="vercelModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 class="font-display font-bold text-base text-white flex items-center gap-2">
+                    <span>🚀</span> Como Hospedar Grátis na Vercel em 2 Minutos
+                </h3>
+                <button onclick="closeVercelModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <div class="space-y-3 my-4 text-xs text-slate-300 leading-relaxed">
+                <p>Como este aplicativo é um <strong>Arquivo Único (100% Front-end)</strong>, ele roda de graça para sempre no plano <em>Hobby</em> da Vercel sem precisar de servidor pago:</p>
+                <ol class="list-decimal list-inside space-y-2 text-slate-200">
+                    <li>Salve este código em uma pasta no seu computador com o nome exato de <code class="px-1.5 py-0.5 rounded bg-slate-950 text-orange-400 font-mono">index.html</code>.</li>
+                    <li>Crie um repositório gratuito no <strong>GitHub</strong> e suba esse arquivo <code class="px-1.5 py-0.5 rounded bg-slate-950 text-orange-400 font-mono">index.html</code> (ou arraste a pasta direto no site <em>app.netlify.com/drop</em> ou na <em>Vercel</em>).</li>
+                    <li>Para usar a extração com IA na Vercel sem expor sua chave no código público, basta abrir seu site, clicar em <strong>"🔑 Configurar Chave Gemini API"</strong> ali no Passo 1 e colar sua chave gratuita do <em>Google AI Studio</em>. Ela fica salva apenas no seu navegador!</li>
+                </ol>
+                <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px]">
+                    💡 <strong>Dica:</strong> Mesmo sem chave de API, o botão <strong>"🎯 Extração Instantânea (Local)"</strong> funciona 100% offline lendo o preço, parcelamento, condição (Seminovo) e link da loja automaticamente!
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeVercelModal()" class="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs">Entendi, fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
+    <script>
+        // ============================================================================
+        // 1. ARTE SVG PADRÃO REALISTA DA GPU (MSI RTX 5060 Ti VENTUS 2X BLACK PLUS)
+        // ============================================================================
+        const DEFAULT_GPU_SVG_DATA_URI = "data:image/svg+xml;utf8," + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 420" width="100%" height="100%">
+            <defs>
+                <linearGradient id="shroudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#27272a"/>
+                    <stop offset="50%" stop-color="#18181b"/>
+                    <stop offset="100%" stop-color="#09090b"/>
+                </linearGradient>
+                <linearGradient id="metalAccent" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#52525b"/>
+                    <stop offset="100%" stop-color="#27272a"/>
+                </linearGradient>
+                <linearGradient id="copperPipe" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#d97706"/>
+                    <stop offset="50%" stop-color="#fbbf24"/>
+                    <stop offset="100%" stop-color="#b45309"/>
+                </linearGradient>
+                <linearGradient id="greenNvidia" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#10b981"/>
+                    <stop offset="100%" stop-color="#84cc16"/>
+                </linearGradient>
+                <radialGradient id="fanHub" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#3f3f46"/>
+                    <stop offset="70%" stop-color="#18181b"/>
+                    <stop offset="100%" stop-color="#09090b"/>
+                </radialGradient>
+            </defs>
+
+            <!-- Heatpipes superiores de cobre/níquel -->
+            <rect x="130" y="38" width="420" height="10" rx="5" fill="url(#copperPipe)" opacity="0.85"/>
+            <rect x="160" y="26" width="350" height="8" rx="4" fill="#71717a"/>
+
+            <!-- PCIe Gold Finger na base -->
+            <rect x="150" y="368" width="240" height="18" rx="2" fill="#f59e0b"/>
+            <g fill="#78350f" opacity="0.45">
+                <rect x="160" y="368" width="4" height="18"/><rect x="172" y="368" width="4" height="18"/><rect x="184" y="368" width="4" height="18"/><rect x="196" y="368" width="4" height="18"/><rect x="208" y="368" width="8" height="12"/><rect x="224" y="368" width="4" height="18"/><rect x="236" y="368" width="4" height="18"/><rect x="248" y="368" width="4" height="18"/><rect x="260" y="368" width="4" height="18"/><rect x="272" y="368" width="4" height="18"/><rect x="284" y="368" width="4" height="18"/><rect x="296" y="368" width="4" height="18"/><rect x="308" y="368" width="4" height="18"/><rect x="320" y="368" width="4" height="18"/><rect x="332" y="368" width="4" height="18"/><rect x="344" y="368" width="4" height="18"/><rect x="356" y="368" width="4" height="18"/><rect x="368" y="368" width="4" height="18"/>
+            </g>
+
+            <!-- Bracket Metálico Esquerdo -->
+            <path d="M55,30 L78,30 L78,385 L55,385 L55,355 L66,355 L66,50 L55,50 Z" fill="#a1a1aa"/>
+            <rect x="74" y="55" width="12" height="295" fill="#52525b"/>
+
+            <!-- Corpo Principal da Carena (MSI Ventus 2X Angular Shroud) -->
+            <polygon points="82,48 595,48 625,85 625,335 595,368 82,368" fill="url(#shroudGrad)" stroke="#3f3f46" stroke-width="3"/>
+
+            <!-- Aletas Heatsink Visíveis nas Bordas -->
+            <g stroke="#52525b" stroke-width="2" opacity="0.6">
+                <line x1="95" y1="54" x2="585" y2="54"/>
+                <line x1="95" y1="362" x2="585" y2="362"/>
+            </g>
+
+            <!-- Detalhes Geométricos Ventus Cinza Metálico -->
+            <polygon points="82,48 210,48 165,115 82,115" fill="url(#metalAccent)" opacity="0.7"/>
+            <polygon points="480,48 595,48 625,85 535,125" fill="url(#metalAccent)" opacity="0.7"/>
+            <polygon points="82,368 205,368 165,300 82,300" fill="url(#metalAccent)" opacity="0.5"/>
+            <polygon points="460,368 595,368 625,335 520,295" fill="url(#metalAccent)" opacity="0.6"/>
+            <polygon points="325,58 380,58 360,358 305,358" fill="#27272a" opacity="0.8"/>
+
+            <!-- Barra Superior GeForce RTX -->
+            <rect x="110" y="52" width="465" height="28" rx="4" fill="#09090b" stroke="#27272a"/>
+            <text x="130" y="71" fill="#ffffff" font-family="Montserrat, sans-serif" font-weight="900" font-size="15" letter-spacing="2">MSI</text>
+            <rect x="178" y="58" width="3" height="16" fill="#f97316"/>
+            <text x="192" y="70" fill="#a1a1aa" font-family="Montserrat, sans-serif" font-weight="700" font-size="12" letter-spacing="1.5">VENTUS 2X BLACK OC</text>
+            <rect x="425" y="56" width="138" height="20" rx="3" fill="url(#greenNvidia)"/>
+            <text x="436" y="70" fill="#052e16" font-family="Montserrat, sans-serif" font-weight="900" font-size="12" letter-spacing="1">GEFORCE RTX</text>
+
+            <!-- FAN 1 (Esquerda) -->
+            <g transform="translate(222, 212)">
+                <circle cx="0" cy="0" r="116" fill="#09090b" stroke="#3f3f46" stroke-width="4"/>
+                <circle cx="0" cy="0" r="108" fill="none" stroke="#27272a" stroke-width="2" stroke-dasharray="14 8"/>
+                <!-- Pás da Ventoinha Torx Fan -->
+                <g fill="#27272a" stroke="#3f3f46" stroke-width="1.5">
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(40)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(80)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(120)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(160)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(200)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(240)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(280)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(320)"/>
+                </g>
+                <circle cx="0" cy="0" r="34" fill="url(#fanHub)" stroke="#52525b" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" fill="#e4e4e7" font-family="Montserrat, sans-serif" font-weight="900" font-style="italic" font-size="16">msi</text>
+            </g>
+
+            <!-- FAN 2 (Direita) -->
+            <g transform="translate(478, 212)">
+                <circle cx="0" cy="0" r="116" fill="#09090b" stroke="#3f3f46" stroke-width="4"/>
+                <circle cx="0" cy="0" r="108" fill="none" stroke="#27272a" stroke-width="2" stroke-dasharray="14 8"/>
+                <g fill="#27272a" stroke="#3f3f46" stroke-width="1.5">
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(40)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(80)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(120)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(160)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(200)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(240)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(280)"/>
+                    <path d="M0,0 C25,-45 65,-85 95,-50 C70,-20 40,-5 0,0 Z" transform="rotate(320)"/>
+                </g>
+                <circle cx="0" cy="0" r="34" fill="url(#fanHub)" stroke="#52525b" stroke-width="2"/>
+                <text x="0" y="5" text-anchor="middle" fill="#e4e4e7" font-family="Montserrat, sans-serif" font-weight="900" font-style="italic" font-size="16">msi</text>
+            </g>
+
+            <!-- Badge Flutuante 16GB GDDR7 -->
+            <rect x="465" y="330" width="148" height="32" rx="6" fill="#10b981" stroke="#059669" stroke-width="2"/>
+            <text x="539" y="351" text-anchor="middle" fill="#022c22" font-family="Montserrat, sans-serif" font-weight="900" font-size="14">16GB GDDR7</text>
+        </svg>`);
+
+        // ============================================================================
+        // 2. ESTADO GLOBAL DA APLICAÇÃO (Pré-carregado com a oferta real do Teo)
+        // ============================================================================
+        const DEFAULT_RAW_TEXT = `*🔥 VAZOU O PREÇO: RTX 5060TI 16GB POR APENAS R$3283! 🚀*
+_GPU NV RTX5060TI 16GB GDDR7 128BITS VENTUS 2X OC BLACK PLUS MSI 912-V535-088 (Seminovo)_
+
+R$ 3283
+ 10x sem Juros
+https://www.amazon.com.br/dp/B0HD2G4RNM?tag=atpromo-20
+
+Orfertas esgotam, verifique o frete!`;
+
+        let appState = {
+            postMode: 'carousel-x', // 'carousel-x' | 'single-feed' | 'story' | 'multi-giro'
+            theme: 'orange',        // 'orange' | 'red' | 'cyber'
+            photoBoxStyle: 'transparent', // 'white-card' | 'transparent'
+            imgScale: 105,
+            productImageSrc: DEFAULT_GPU_SVG_DATA_URI,
+
+            // Dados da Oferta Atual
+            badge: '🔥 VAZOU O PREÇO',
+            store: 'Amazon Brasil',
+            condition: 'SEMINOVO • ESTOQUE LIMITADO',
+            title: 'MSI GeForce RTX 5060 Ti 16GB',
+            subtitle: 'GDDR7 • Ventus 2X OC Black Plus • 128-Bit',
+            oldPrice: 'R$ 3.899',
+            price: 'R$ 3.283',
+            installments: 'em até 10x de R$ 328,30 sem juros',
+            coupon: '',
+            brandHandle: '@atpromo',
+            commentTrigger: 'EU QUERO',
+            disclaimer: 'Ofertas esgotam rápido! Verifique o frete para sua região.',
+
+            // Destaques do Slide 2 (Raio-X)
+            highlights: [
+                '16GB de VRAM GDDR7: Sobrando memória para rodar tudo em Quad HD (1440p) e projetos de IA.',
+                'Construção MSI Ventus 2X OC: Dual Fan com overclock de fábrica e excelente refrigeração.',
+                'Parcelamento Raro: 10x de R$ 328,30 sem juros direto na Amazon (Seminovo garantido).',
+                'Estoque Relâmpago: Unidades seminovas na Amazon costumam esgotar em poucos minutos.'
+            ],
+
+            // Lista de Produtos para o modo "Giro de Ofertas" (Multi-produtos)
+            giroProducts: [
+                {
+                    title: 'MSI GeForce RTX 5060 Ti 16GB',
+                    subtitle: 'GDDR7 • Ventus 2X OC (Seminovo)',
+                    oldPrice: 'R$ 3.899',
+                    price: 'R$ 3.283',
+                    installments: '10x de R$ 328,30 sem juros',
+                    store: 'Amazon Brasil',
+                    badge: '🔥 VAZOU O PREÇO',
+                    image: DEFAULT_GPU_SVG_DATA_URI
+                },
+                {
+                    title: 'Processador AMD Ryzen 7 5700X3D',
+                    subtitle: '8-Core 16-Threads • 100MB Cache AM4',
+                    oldPrice: 'R$ 1.699',
+                    price: 'R$ 1.299',
+                    installments: '10x de R$ 129,90 sem juros',
+                    store: 'Amazon Brasil',
+                    badge: '⚡ REI DO CUSTO-BENEFÍCIO',
+                    image: DEFAULT_GPU_SVG_DATA_URI
+                }
+            ],
+
+            caption: `🔥 VAZOU O PREÇO! RTX 5060 Ti de 16GB GDDR7 (MSI Ventus 2X OC Black Plus) saindo por apenas R$ 3.283 em até 10x SEM JUROS na Amazon! 🚀
+
+⚠️ Atenção: Unidade na condição Seminovo — por isso o valor tão abaixo da média para o modelo de 16GB GDDR7 e ainda parcelado sem juros!
+
+✅ 16GB GDDR7 (128-bit)
+✅ Modelo MSI Ventus 2X OC Black Plus
+✅ R$ 3.283 em até 10x de R$ 328,30 sem juros
+
+🔗 Quer o link direto? Acesse o LINK NA BIO para entrar no nosso Grupo VIP gratuito ou comente EU QUERO que te envio! 👇
+
+*Ofertas esgotam rápido! Verifique o frete para sua região.
+
+#hardware #pcgamer #rtx5060ti #placadevideo #ofertas #promocao #setupgamer #atpromo`
+        };
+
+        // Paletas de Temas Visuais
+        const THEME_PALETTES = {
+            orange: {
+                bgGrad: 'linear-gradient(155deg, #090d16 0%, #111827 55%, #1e140c 100%)',
+                accentHex: '#f97316',
+                accentSecondary: '#f59e0b',
+                badgeBg: 'linear-gradient(90deg, #ea580c 0%, #f59e0b 100%)',
+                priceBoxBorder: '#10b981',
+                priceColor: '#34d399',
+                pillBg: 'rgba(249, 115, 22, 0.15)',
+                pillText: '#fb923c'
+            },
+            red: {
+                bgGrad: 'linear-gradient(155deg, #09090b 0%, #18181b 55%, #280a0a 100%)',
+                accentHex: '#ef4444',
+                accentSecondary: '#f43f5e',
+                badgeBg: 'linear-gradient(90deg, #dc2626 0%, #e11d48 100%)',
+                priceBoxBorder: '#10b981',
+                priceColor: '#4ade80',
+                pillBg: 'rgba(239, 68, 68, 0.16)',
+                pillText: '#f87171'
+            },
+            cyber: {
+                bgGrad: 'linear-gradient(155deg, #020617 0%, #0f172a 55%, #082f49 100%)',
+                accentHex: '#0ea5e9',
+                accentSecondary: '#f59e0b',
+                badgeBg: 'linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%)',
+                priceBoxBorder: '#f59e0b',
+                priceColor: '#fbbf24',
+                pillBg: 'rgba(14, 165, 233, 0.16)',
+                pillText: '#38bdf8'
+            }
+        };
+
+        // ============================================================================
+        // 3. INICIALIZAÇÃO E LISTENERS GLOBAIS (INCLUINDO CTRL+V DE IMAGEM)
+        // ============================================================================
+        window.onload = function () {
+            // Carregar chave API salva localmente (se houver)
+            const savedKey = localStorage.getItem('atpromo_gemini_api_key');
+            if (savedKey) {
+                document.getElementById('userApiKeyInput').value = savedKey;
+                const badge = document.getElementById('apiKeyStatusBadge');
+                badge.textContent = 'Salva no Navegador ✓';
+                badge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            }
+
+            // Preencher inputs com o estado inicial da RTX 5060 Ti
+            document.getElementById('rawOfferInput').value = DEFAULT_RAW_TEXT;
+            populateFormFromState();
+            renderSlidesStage();
+
+            // Listener global para Ctrl+V de imagem em qualquer lugar da página
+            window.addEventListener('paste', handleGlobalClipboardPaste);
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' 
+                ? 'bg-emerald-950/95 border-emerald-500/50 text-emerald-200' 
+                : type === 'warning'
+                ? 'bg-amber-950/95 border-amber-500/50 text-amber-200'
+                : 'bg-slate-900/95 border-orange-500/50 text-slate-100';
+
+            toast.className = `px-4 py-3 rounded-xl border shadow-2xl backdrop-blur-md text-xs font-semibold flex items-center gap-2.5 transition-all duration-300 ${bgClass}`;
+            toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '⚡'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // ============================================================================
+        // 4. SINCRONIZAÇÃO DOS CAMPOS COM O PREVIEW AO VIVO
+        // ============================================================================
+        function populateFormFromState() {
+            document.getElementById('fieldBadge').value = appState.badge;
+            document.getElementById('fieldStore').value = appState.store;
+            document.getElementById('fieldCondition').value = appState.condition;
+            document.getElementById('fieldTitle').value = appState.title;
+            document.getElementById('fieldSubtitle').value = appState.subtitle;
+            document.getElementById('fieldOldPrice').value = appState.oldPrice;
+            document.getElementById('fieldPrice').value = appState.price;
+            document.getElementById('fieldCoupon').value = appState.coupon;
+            document.getElementById('fieldInstallments').value = appState.installments;
+            document.getElementById('fieldBrandHandle').value = appState.brandHandle;
+            document.getElementById('fieldCommentTrigger').value = appState.commentTrigger;
+            document.getElementById('fieldDisclaimer').value = appState.disclaimer;
+
+            document.getElementById('fieldHighlight1').value = appState.highlights[0] || '';
+            document.getElementById('fieldHighlight2').value = appState.highlights[1] || '';
+            document.getElementById('fieldHighlight3').value = appState.highlights[2] || '';
+            document.getElementById('fieldHighlight4').value = appState.highlights[3] || '';
+
+            document.getElementById('generatedCaptionOutput').value = appState.caption;
+        }
+
+        function syncFormToState() {
+            appState.badge = document.getElementById('fieldBadge').value;
+            appState.store = document.getElementById('fieldStore').value;
+            appState.condition = document.getElementById('fieldCondition').value;
+            appState.title = document.getElementById('fieldTitle').value;
+            appState.subtitle = document.getElementById('fieldSubtitle').value;
+            appState.oldPrice = document.getElementById('fieldOldPrice').value;
+            appState.price = document.getElementById('fieldPrice').value;
+            appState.coupon = document.getElementById('fieldCoupon').value;
+            appState.installments = document.getElementById('fieldInstallments').value;
+            appState.brandHandle = document.getElementById('fieldBrandHandle').value;
+            appState.commentTrigger = document.getElementById('fieldCommentTrigger').value;
+            appState.disclaimer = document.getElementById('fieldDisclaimer').value;
+
+            appState.highlights = [
+                document.getElementById('fieldHighlight1').value,
+                document.getElementById('fieldHighlight2').value,
+                document.getElementById('fieldHighlight3').value,
+                document.getElementById('fieldHighlight4').value
+            ];
+
+            // Sincroniza também o primeiro produto do Giro de Ofertas com a oferta atual
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0] = {
+                    title: appState.title,
+                    subtitle: appState.subtitle,
+                    oldPrice: appState.oldPrice,
+                    price: appState.price,
+                    installments: appState.installments,
+                    store: appState.store,
+                    badge: appState.badge,
+                    image: appState.productImageSrc
+                };
+            }
+
+            renderSlidesStage();
+        }
+
+        // ============================================================================
+        // 5. UPLOAD E COLAGEM (CTRL+V) DE FOTOS DE PRODUTOS
+        // ============================================================================
+        function handleGlobalClipboardPaste(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData)?.items;
+            if (!items) return;
+
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        applyNewProductImage(event.target.result);
+                        showToast('Foto do produto colada via Ctrl+V! Dica: use "Card Branco" se a foto tiver fundo branco.');
+                    };
+                    reader.readAsDataURL(blob);
+                    return;
+                }
+            }
+        }
+
+        function handleImageFileSelect(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                applyNewProductImage(e.target.result);
+                showToast('Imagem do produto carregada com sucesso!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyNewProductImage(dataUrl) {
+            appState.productImageSrc = dataUrl;
+            // Quando o usuário sobe uma foto real de loja (geralmente fundo branco da Amazon/Kabum),
+            // ativamos automaticamente o Card Branco para ficar lindo sem precisar recortar fundo!
+            setPhotoBoxStyle('white-card');
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0].image = dataUrl;
+            }
+            renderSlidesStage();
+        }
+
+        function resetToDefaultGpuImage() {
+            appState.productImageSrc = DEFAULT_GPU_SVG_DATA_URI;
+            setPhotoBoxStyle('transparent');
+            if (appState.giroProducts.length > 0) {
+                appState.giroProducts[0].image = DEFAULT_GPU_SVG_DATA_URI;
+            }
+            renderSlidesStage();
+            showToast('Arte padrão da RTX 5060 Ti restaurada!');
+        }
+
+        function updateImageTransform() {
+            const val = document.getElementById('imgScaleSlider').value;
+            appState.imgScale = parseInt(val, 10);
+            document.getElementById('imgScaleValue').textContent = `${val}%`;
+            renderSlidesStage();
+        }
+
+        function setPhotoBoxStyle(style) {
+            appState.photoBoxStyle = style;
+            const btnWhite = document.getElementById('photoStyle-white-card');
+            const btnTrans = document.getElementById('photoStyle-transparent');
+            if (style === 'white-card') {
+                btnWhite.className = 'py-1 px-2 rounded text-[11px] font-semibold bg-orange-500 text-white transition';
+                btnTrans.className = 'py-1 px-2 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition';
+            } else {
+                btnTrans.className = 'py-1 px-2 rounded text-[11px] font-semibold bg-orange-500 text-white transition';
+                btnWhite.className = 'py-1 px-2 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition';
+            }
+            renderSlidesStage();
+        }
+
+        // ============================================================================
+        // 6. PARSER INTELIGENTE LOCAL (INSTANTÂNEO) & INTEGRAÇÃO GEMINI API
+        // ============================================================================
+        function extractOfferInstant() {
+            const raw = document.getElementById('rawOfferInput').value.trim();
+            if (!raw) {
+                showToast('Cole o texto da oferta primeiro!', 'warning');
+                return;
+            }
+
+            const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+            // 1. Detectar Loja pelo Link
+            let detectedStore = 'Oferta Verificada';
+            if (/amazon\.com\.br|amzn\.to/i.test(raw)) detectedStore = 'Amazon Brasil';
+            else if (/mercadolivre\.com|meli\.la/i.test(raw)) detectedStore = 'Mercado Livre';
+            else if (/shopee\.com/i.test(raw)) detectedStore = 'Shopee Oficial';
+            else if (/kabum\.com/i.test(raw)) detectedStore = 'KaBuM!';
+            else if (/terabyteshop/i.test(raw)) detectedStore = 'TerabyteShop';
+            else if (/pichau\.com/i.test(raw)) detectedStore = 'Pichau';
+            else if (/aliexpress/i.test(raw)) detectedStore = 'AliExpress';
+            else if (/magazineluiza|magalu/i.test(raw)) detectedStore = 'Magalu';
+
+            // 2. Detectar Preço (R$ 3283 ou R$ 3.283,00)
+            let numericPrice = 0;
+            let formattedPrice = appState.price;
+            const priceMatch = raw.match(/R\$\s*([\d.]+(?:,\d{2})?)/i);
+            if (priceMatch) {
+                const cleanNumStr = priceMatch[1].replace(/\./g, '').replace(',', '.');
+                numericPrice = parseFloat(cleanNumStr);
+                if (!isNaN(numericPrice)) {
+                    formattedPrice = 'R$ ' + Math.round(numericPrice).toLocaleString('pt-BR');
+                }
+            }
+
+            // Estimar Preço Antigo (~18% acima) para ancoragem visual se não houver no texto
+            let formattedOldPrice = '';
+            if (numericPrice > 0) {
+                const estimatedOld = Math.round((numericPrice * 1.18) / 10) * 10 - 1;
+                formattedOldPrice = 'R$ ' + estimatedOld.toLocaleString('pt-BR');
+            }
+
+            // 3. Detectar Parcelamento (Ex: 10x sem Juros)
+            let installmentsText = 'À vista no PIX ou parcelado';
+            const instMatch = raw.match(/(\d{1,2})\s*x\s*(?:de\s*R\$\s*([\d.,]+))?\s*(sem\s*juros)?/i);
+            if (instMatch) {
+                const count = parseInt(instMatch[1], 10);
+                const semJuros = instMatch[3] ? 'sem juros' : '';
+                if (numericPrice > 0 && count > 0) {
+                    const parcelVal = (numericPrice / count).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    installmentsText = `em até ${count}x de R$ ${parcelVal} ${semJuros}`.trim();
+                } else {
+                    installmentsText = `em até ${count}x ${semJuros}`.trim();
+                }
+            }
+
+            // 4. Detectar Condição (Seminovo, Reembalado, Open Box, Importado)
+            let conditionTag = 'ESTOQUE LIMITADO • MENOR PREÇO';
+            if (/seminovo/i.test(raw)) conditionTag = 'SEMINOVO • ESTOQUE LIMITADO';
+            else if (/reembalado|open\s*box/i.test(raw)) conditionTag = 'REEMBALADO • GARANTIA OFICIAL';
+            else if (/importado|estoque\s*no\s*brasil/i.test(raw)) conditionTag = 'ESTOQUE NO BRASIL • SEM TAXAS';
+
+            // 5. Detectar Cupom
+            let couponCode = '';
+            const cupomMatch = raw.match(/cupom\s*[:\-]?\s*([A-Z0-9]{4,15})/i);
+            if (cupomMatch) {
+                couponCode = cupomMatch[1].toUpperCase();
+            }
+
+            // 6. Extrair Gatilho/Badge e Título Limpo
+            let headlineLine = lines[0].replace(/^\*+|\*+$/g, '').trim();
+            let badgeText = '🔥 OFERTA RELÂMPAGO';
+            if (headlineLine.includes(':')) {
+                const parts = headlineLine.split(':');
+                badgeText = parts[0].trim().toUpperCase();
+            } else if (/vazou/i.test(headlineLine)) {
+                badgeText = '🔥 VAZOU O PREÇO';
+            }
+
+            // Linha técnica (geralmente entre _..._ ou segunda linha)
+            let techLine = lines.find(l => l.startsWith('_') || /GB|RTX|RX|RYZEN|SSD|DDR|HZ|BITS/i.test(l)) || lines[0];
+            techLine = techLine.replace(/^_+|_+$/g, '').replace(/^\*+|\*+$/g, '').replace(/\(seminovo\)/gi, '').trim();
+
+            // Limpar título principal
+            let cleanTitle = techLine;
+            let cleanSubtitle = 'Oferta selecionada pelo monitoramento ATpromo';
+            if (/RTX\s*5060\s*TI/i.test(raw)) {
+                cleanTitle = 'MSI GeForce RTX 5060 Ti 16GB';
+                cleanSubtitle = 'GDDR7 • Ventus 2X OC Black Plus • 128-Bit';
+            } else if (techLine.length > 34) {
+                const words = techLine.split(/\s+/);
+                cleanTitle = words.slice(0, 5).join(' ');
+                cleanSubtitle = words.slice(5, 12).join(' ');
+            }
+
+            // Atualizar Estado
+            appState.badge = badgeText;
+            appState.store = detectedStore;
+            appState.condition = conditionTag;
+            appState.title = cleanTitle;
+            appState.subtitle = cleanSubtitle;
+            appState.oldPrice = formattedOldPrice;
+            appState.price = formattedPrice;
+            appState.installments = installmentsText;
+            appState.coupon = couponCode;
+
+            // Gerar Destaques do Slide 2 adaptados
+            appState.highlights = [
+                `Desempenho de Ponta: ${cleanTitle} (${cleanSubtitle}) com excelente custo-benefício.`,
+                `Condição Especial: ${conditionTag} verificado na ${detectedStore}.`,
+                `Pagamento Facilitado: ${formattedPrice} (${installmentsText}).`,
+                `Atenção ao Estoque: Promoções desse nível costumam esgotar ou subir de preço rapidamente.`
+            ];
+
+            // Gerar Legenda Padronizada
+            appState.caption = `${badgeText}! ${cleanTitle} (${cleanSubtitle}) saindo por apenas ${formattedPrice} (${installmentsText}) na ${detectedStore}! 🚀\n\n` +
+                (conditionTag.includes('SEMINOVO') ? `⚠️ Atenção: Unidade na condição Seminovo — oportunidade única nesse valor e parcelado sem juros!\n\n` : '') +
+                `✅ ${cleanTitle}\n✅ ${cleanSubtitle}\n✅ ${formattedPrice} (${installmentsText})` +
+                (couponCode ? `\n🎟️ Cupom: ${couponCode}` : '') +
+                `\n\n🔗 Quer o link direto? Acesse o LINK NA BIO para entrar no nosso Grupo VIP ou comente ${appState.commentTrigger} que te mando! 👇\n\n*${appState.disclaimer}\n\n#ofertas #tecnologia #pcgamer #hardware #promocao #atpromo`;
+
+            populateFormFromState();
+            syncFormToState();
+            showToast('Oferta extraída instantaneamente e slides atualizados!');
+        }
+
+        // Extração Avançada com Gemini API (JSON Schema Estruturado)
+        async function extractOfferWithGemini() {
+            const raw = document.getElementById('rawOfferInput').value.trim();
+            if (!raw) {
+                showToast('Cole o texto da oferta antes de extrair!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnGeminiExtract');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin">⏳</span> Analisando com Gemini...`;
+
+            // Usa a chave salva pelo usuário no navegador (para Vercel) ou string vazia (para o ambiente Canvas injetar)
+            const savedUserKey = localStorage.getItem('atpromo_gemini_api_key') || '';
+            const apiKey = savedUserKey;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const systemInstruction = `Você é um especialista em marketing de afiliados e páginas de ofertas de tecnologia no Brasil (estilo ATpromo).
+Receba um texto bruto de oferta de grupo de WhatsApp/Telegram e extraia os dados padronizados para preencher um Carrossel de 3 slides no Instagram.
+Regras:
+- badge: Gatilho curto em maiúsculas com emoji (ex: "🔥 VAZOU O PREÇO", "⚡ MENOR PREÇO").
+- condition: Condição ou alerta em maiúsculas (ex: "SEMINOVO • ESTOQUE LIMITADO" se o texto citar seminovo/usado, ou "NOVO • NOTA FISCAL E GARANTIA").
+- title: Nome comercial limpo e atraente do produto (máximo 32 caracteres, ex: "MSI GeForce RTX 5060 Ti 16GB").
+- subtitle: Especificações técnicas resumidas separadas por • (ex: "GDDR7 • Ventus 2X OC Black Plus • 128-Bit").
+- oldPrice: Preço médio normal de mercado estimado no formato "R$ X.XXX" para mostrar o desconto.
+- price: Preço da oferta formatado "R$ X.XXX".
+- installments: Texto de parcelamento calculando o valor da parcela se houver número de vezes (ex: "em até 10x de R$ 328,30 sem juros").
+- store: Nome da loja identificada pela URL (ex: "Amazon Brasil", "Mercado Livre", "KaBuM!", "Shopee").
+- coupon: Código do cupom se existir, ou string vazia "".
+- highlights: Array com exatamente 4 frases curtas e persuasivas para o Slide 2 (Raio-X Técnico) explicando as especificações do produto e por que o preço vale a pena.
+- caption: Legenda completa para Instagram com emojis, bullets, aviso se for seminovo, chamada para comentar EU QUERO ou clicar no Link da Bio, e hashtags.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: raw }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            badge: { type: "STRING" },
+                            condition: { type: "STRING" },
+                            title: { type: "STRING" },
+                            subtitle: { type: "STRING" },
+                            oldPrice: { type: "STRING" },
+                            price: { type: "STRING" },
+                            installments: { type: "STRING" },
+                            store: { type: "STRING" },
+                            coupon: { type: "STRING" },
+                            highlights: {
+                                type: "ARRAY",
+                                items: { type: "STRING" }
+                            },
+                            caption: { type: "STRING" }
+                        },
+                        required: ["badge", "condition", "title", "subtitle", "oldPrice", "price", "installments", "store", "coupon", "highlights", "caption"]
+                    }
+                }
+            };
+
+            try {
+                let response;
+                const delays = [1000, 2000, 4000];
+                for (let attempt = 0; attempt <= delays.length; attempt++) {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) break;
+                    if (attempt < delays.length) {
+                        await new Promise(r => setTimeout(r, delays[attempt]));
+                    }
+                }
+
+                if (!response || !response.ok) {
+                    throw new Error('Fallback para extração local');
+                }
+
+                const result = await response.json();
+                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsed = JSON.parse(jsonText);
+
+                appState.badge = parsed.badge || appState.badge;
+                appState.condition = parsed.condition || appState.condition;
+                appState.title = parsed.title || appState.title;
+                appState.subtitle = parsed.subtitle || appState.subtitle;
+                appState.oldPrice = parsed.oldPrice || appState.oldPrice;
+                appState.price = parsed.price || appState.price;
+                appState.installments = parsed.installments || appState.installments;
+                appState.store = parsed.store || appState.store;
+                appState.coupon = parsed.coupon || '';
+                if (Array.isArray(parsed.highlights) && parsed.highlights.length >= 4) {
+                    appState.highlights = parsed.highlights.slice(0, 4);
+                }
+                appState.caption = parsed.caption || appState.caption;
+
+                populateFormFromState();
+                syncFormToState();
+                showToast('IA Gemini extraiu os dados e gerou o Raio-X Técnico!');
+            } catch (err) {
+                // Caso esteja rodando na Vercel sem chave configurada, faz o fallback instantâneo sem travar o usuário
+                extractOfferInstant();
+                showToast('Extraído com o motor inteligente local! (Configure sua chave Gemini se quiser Raio-X por IA na Vercel)', 'info');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        function loadRtxExample() {
+            document.getElementById('rawOfferInput').value = DEFAULT_RAW_TEXT;
+            appState.badge = '🔥 VAZOU O PREÇO';
+            appState.store = 'Amazon Brasil';
+            appState.condition = 'SEMINOVO • ESTOQUE LIMITADO';
+            appState.title = 'MSI GeForce RTX 5060 Ti 16GB';
+            appState.subtitle = 'GDDR7 • Ventus 2X OC Black Plus • 128-Bit';
+            appState.oldPrice = 'R$ 3.899';
+            appState.price = 'R$ 3.283';
+            appState.installments = 'em até 10x de R$ 328,30 sem juros';
+            appState.coupon = '';
+            appState.highlights = [
+                '16GB de VRAM GDDR7: Sobrando memória para rodar tudo em Quad HD (1440p) e projetos de IA.',
+                'Construção MSI Ventus 2X OC: Dual Fan com overclock de fábrica e excelente refrigeração.',
+                'Parcelamento Raro: 10x de R$ 328,30 sem juros direto na Amazon (Seminovo garantido).',
+                'Estoque Relâmpago: Unidades seminovas na Amazon costumam esgotar em poucos minutos.'
+            ];
+            resetToDefaultGpuImage();
+            populateFormFromState();
+            syncFormToState();
+        }
+
+        // ============================================================================
+        // 7. RENDERIZAÇÃO DOS SLIDES PADRONIZADOS (CAPA, RAIO-X, CTA, STORY, GIRO)
+        // ============================================================================
+        function renderSlidesStage() {
+            const container = document.getElementById('slidesStageContainer');
+            const palette = THEME_PALETTES[appState.theme] || THEME_PALETTES.orange;
+            const stageTitle = document.getElementById('previewStageTitle');
+            const downloadLabel = document.getElementById('downloadBtnLabel');
+
+            let slidesHtml = '';
+
+            if (appState.postMode === 'carousel-x') {
+                stageTitle.textContent = 'Pré-visualização ao Vivo — Carrossel Raio-X (3 Slides • 1080x1350)';
+                downloadLabel.textContent = 'Baixar Todos os 3 Slides (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildOfferCoverSlideHtml(palette, true, '1/3'), 'Slide 1 — Capa da Oferta', 'atpromo-slide-01-capa.png');
+                slidesHtml += wrapSlideWithActions(buildTechRaioXSlideHtml(palette, '2/3'), 'Slide 2 — Raio-X Técnico', 'atpromo-slide-02-raiox.png');
+                slidesHtml += wrapSlideWithActions(buildCtaFinalSlideHtml(palette, '3/3'), 'Slide 3 — Como Garantir (CTA)', 'atpromo-slide-03-cta.png');
+
+            } else if (appState.postMode === 'single-feed') {
+                stageTitle.textContent = 'Pré-visualização ao Vivo — Post Único Feed (1080x1350)';
+                downloadLabel.textContent = 'Baixar Post Feed (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildOfferCoverSlideHtml(palette, false, ''), 'Post Único (Feed 4:5)', 'atpromo-post-feed.png');
+
+            } else if (appState.postMode === 'story') {
+                stageTitle.textContent = 'Pré-visualização ao Vivo — Story Vertical (1080x1920)';
+                downloadLabel.textContent = 'Baixar Story 9:16 (PNG)';
+
+                slidesHtml += wrapSlideWithActions(buildStorySlideHtml(palette), 'Story Vertical (9:16)', 'atpromo-story-oferta.png');
+
+            } else if (appState.postMode === 'multi-giro') {
+                const totalSlides = appState.giroProducts.length + 2;
+                stageTitle.textContent = `Pré-visualização ao Vivo — Carrossel Giro de Ofertas (${totalSlides} Slides • 1080x1350)`;
+                downloadLabel.textContent = `Baixar Todos os ${totalSlides} Slides (PNG)`;
+
+                // Slide 1: Capa do Giro
+                slidesHtml += wrapSlideWithActions(buildGiroCoverSlideHtml(palette, `1/${totalSlides}`), 'Slide 1 — Capa do Giro', 'atpromo-giro-01-capa.png');
+
+                // Slides de Produtos
+                appState.giroProducts.forEach((prod, idx) => {
+                    const slideNum = idx + 2;
+                    slidesHtml += wrapSlideWithActions(
+                        buildCustomProductSlideHtml(prod, palette, `${slideNum}/${totalSlides}`, idx),
+                        `Slide ${slideNum} — Oferta #${idx + 1}`,
+                        `atpromo-giro-0${slideNum}-oferta.png`
+                    );
+                });
+
+                // Último Slide: CTA
+                slidesHtml += wrapSlideWithActions(
+                    buildCtaFinalSlideHtml(palette, `${totalSlides}/${totalSlides}`),
+                    `Slide ${totalSlides} — CTA Grupo VIP`,
+                    `atpromo-giro-0${totalSlides}-cta.png`
+                );
+            }
+
+            container.innerHTML = slidesHtml;
+        }
+
+        function wrapSlideWithActions(slideInnerHtml, label, filename) {
+            return `
+            <div class="flex flex-col items-center gap-2.5 shrink-0">
+                <div class="flex items-center justify-between w-full px-1">
+                    <span class="text-xs font-bold text-slate-300">${label}</span>
+                    <button onclick="downloadSingleSlide(this, '${filename}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-orange-500 text-slate-200 hover:text-white text-[11px] font-semibold transition flex items-center gap-1 border border-slate-700 cursor-pointer">
+                        <span>⬇️</span> Baixar PNG
+                    </button>
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-2xl border border-slate-800/90">
+                    ${slideInnerHtml}
+                </div>
+            </div>`;
+        }
+
+        // SLIDE 1: CAPA DA OFERTA (4:5)
+        function buildOfferCoverSlideHtml(palette, showSwipeBadge, pageIndicator) {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+
+            return `
+            <div class="exportable-slide slide-canvas-4-5 tech-grid-bg flex flex-col justify-between p-5 text-white" style="background: ${palette.bgGrad};">
+                <!-- Glow Decorativo Superior -->
+                <div style="position:absolute; top:-55px; right:-55px; width:170px; height:170px; background:${palette.accentHex}; opacity:0.18; filter:blur(42px); border-radius:9999px; pointer-events:none;"></div>
+
+                <!-- TOP BAR: Badge Gatilho + Loja -->
+                <div class="relative z-10 flex items-center justify-between gap-2">
+                    <div class="px-3 py-1 rounded-lg font-display font-black text-[11px] tracking-wide uppercase text-white shadow-md" style="background: ${palette.badgeBg};">
+                        ${escapeHtml(appState.badge)}
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold uppercase border border-white/15 bg-black/40 text-slate-200">
+                            🛒 ${escapeHtml(appState.store)}
+                        </span>
+                        ${pageIndicator ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-black/30">${pageIndicator}</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- ÁREA DA IMAGEM DO PRODUTO -->
+                <div class="relative z-10 my-1.5 flex-1 flex flex-col items-center justify-center min-h-[155px] max-h-[175px]">
+                    ${isWhiteBox ? `
+                        <div class="w-full h-full rounded-xl bg-white p-3 flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+                            <img src="${appState.productImageSrc}" alt="Produto" style="max-height:142px; max-width:92%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                        </div>
+                    ` : `
+                        <div class="w-full h-full flex items-center justify-center overflow-visible">
+                            <img src="${appState.productImageSrc}" alt="Produto" class="product-drop-shadow" style="max-height:158px; max-width:95%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                        </div>
+                    `}
+
+                    <!-- Pill de Condição (Ex: SEMINOVO) -->
+                    ${appState.condition ? `
+                        <div class="-mt-2.5 relative z-20 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-display font-black text-[9.5px] tracking-wider uppercase shadow">
+                            ⚠️ ${escapeHtml(appState.condition)}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- TÍTULO E SUBTÍTULO TÉCNICO -->
+                <div class="relative z-10 text-center my-1">
+                    <h2 class="font-display font-black text-[17px] leading-tight text-white tracking-tight line-clamp-1">
+                        ${escapeHtml(appState.title)}
+                    </h2>
+                    <p class="text-[11px] font-medium text-slate-300 mt-0.5 line-clamp-1">
+                        ${escapeHtml(appState.subtitle)}
+                    </p>
+                </div>
+
+                <!-- BOX DE PREÇO DE ALTA CONVERSÃO -->
+                <div class="relative z-10 rounded-xl p-3 bg-slate-950/85 border-2 shadow-xl mt-1" style="border-color: ${palette.priceBoxBorder};">
+                    <div class="flex items-end justify-between gap-2">
+                        <div>
+                            ${appState.oldPrice ? `
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[10px] text-slate-400 uppercase font-semibold">De</span>
+                                    <span class="text-xs font-mono text-slate-400 line-through">${escapeHtml(appState.oldPrice)}</span>
+                                    <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">MENOR PREÇO</span>
+                                </div>
+                            ` : `<span class="text-[10px] text-emerald-400 uppercase font-bold">Preço Especial Hoje</span>`}
+                            
+                            <div class="font-display font-black text-[28px] leading-none tracking-tight mt-0.5" style="color: ${palette.priceColor};">
+                                ${escapeHtml(appState.price)}
+                            </div>
+                        </div>
+
+                        ${appState.coupon ? `
+                            <div class="text-right bg-amber-500/15 border border-dashed border-amber-400 rounded-lg px-2 py-1">
+                                <span class="block text-[8px] uppercase text-amber-300 font-bold">Cupom</span>
+                                <span class="font-mono font-extrabold text-xs text-amber-400">${escapeHtml(appState.coupon)}</span>
+                            </div>
+                        ` : `
+                            <div class="text-right">
+                                <span class="inline-block px-2 py-1 rounded bg-white/10 text-[9.5px] font-bold text-white uppercase">
+                                    🔗 Link na Bio
+                                </span>
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="mt-1.5 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[10.5px] text-slate-200 font-medium">
+                        <span>💳 ${escapeHtml(appState.installments)}</span>
+                    </div>
+                </div>
+
+                <!-- RODAPÉ DO SLIDE -->
+                <div class="relative z-10 flex items-center justify-between pt-2 mt-1 text-[10px] text-slate-400">
+                    <div class="flex items-center gap-1.5 font-display font-bold text-slate-200">
+                        <span class="w-4 h-4 rounded bg-orange-500 text-white flex items-center justify-center text-[9px] font-black">AT</span>
+                        <span>${escapeHtml(appState.brandHandle)}</span>
+                    </div>
+                    ${showSwipeBadge ? `
+                        <div class="flex items-center gap-1 font-display font-bold text-[10px]" style="color: ${palette.accentSecondary};">
+                            <span>Raio-X da Oferta</span>
+                            <span>➔</span>
+                        </div>
+                    ` : `
+                        <span class="text-[9px] text-slate-400">Preços sujeitos a alteração</span>
+                    `}
+                </div>
+            </div>`;
+        }
+
+        // SLIDE 2: RAIO-X TÉCNICO ("POR QUE VALE A PENA?")
+        function buildTechRaioXSlideHtml(palette, pageIndicator) {
+            return `
+            <div class="exportable-slide slide-canvas-4-5 tech-grid-bg flex flex-col justify-between p-5 text-white" style="background: ${palette.bgGrad};">
+                <!-- Cabeçalho do Slide 2 -->
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase" style="background: ${palette.pillBg}; color: ${palette.pillText};">
+                            🔍 ANÁLISE RÁPIDA • RAIO-X
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-black/30">${pageIndicator}</span>
+                    </div>
+                    <h2 class="font-display font-black text-lg leading-tight text-white uppercase">
+                        POR QUE ESSA OFERTA <span style="color: ${palette.accentSecondary};">VALE A PENA?</span>
+                    </h2>
+                    <p class="text-[11px] text-slate-300 font-semibold mt-0.5 truncate">
+                        ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
+                    </p>
+                </div>
+
+                <!-- Lista dos 4 Destaques -->
+                <div class="relative z-10 my-2 space-y-2 flex-1 flex flex-col justify-center">
+                    ${appState.highlights.map((item, idx) => `
+                        <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/90 flex items-start gap-2.5 shadow">
+                            <div class="w-5 h-5 rounded-lg flex items-center justify-center font-mono font-bold text-[11px] shrink-0 mt-0.5 text-white" style="background: ${palette.badgeBg};">
+                                ${idx + 1}
+                            </div>
+                            <p class="text-[11px] text-slate-200 leading-snug font-medium">
+                                ${escapeHtml(item)}
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Barra Resumo + Swipe -->
+                <div class="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between">
+                    <div class="text-[10.5px]">
+                        <span class="text-slate-400">Na ${escapeHtml(appState.store)} por </span>
+                        <strong class="font-mono text-emerald-400">${escapeHtml(appState.price)}</strong>
+                    </div>
+                    <div class="flex items-center gap-1 font-display font-bold text-[10px]" style="color: ${palette.accentSecondary};">
+                        <span>Como pegar o link</span>
+                        <span>➔</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // SLIDE 3: COMO GARANTIR / CTA GRUPO VIP
+        function buildCtaFinalSlideHtml(palette, pageIndicator) {
+            return `
+            <div class="exportable-slide slide-canvas-4-5 tech-grid-bg flex flex-col justify-between p-5 text-white" style="background: ${palette.bgGrad};">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-emerald-500/20 text-emerald-300">
+                        ⚡ GARANTA ANTES QUE ESGOTE
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-black/30">${pageIndicator}</span>
+                </div>
+
+                <div class="my-auto space-y-3">
+                    <div class="text-center">
+                        <div class="w-12 h-12 rounded-2xl mx-auto mb-2 flex items-center justify-center font-display font-black text-xl text-white shadow-lg" style="background: ${palette.badgeBg};">
+                            🔗
+                        </div>
+                        <h2 class="font-display font-black text-xl leading-tight text-white uppercase">
+                            COMO PEGAR ESSA <span style="color: ${palette.accentSecondary};">OFERTA AGORA?</span>
+                        </h2>
+                        <p class="text-[11px] text-slate-300 mt-1">
+                            O Instagram não permite links clicáveis nos posts do Feed. Escolha uma opção abaixo:
+                        </p>
+                    </div>
+
+                    <!-- Opção 1: Link na Bio -->
+                    <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-400 font-display font-black text-sm flex items-center justify-center shrink-0">
+                            1
+                        </div>
+                        <div>
+                            <h3 class="font-display font-bold text-xs text-white uppercase">Acesse o Link na nossa Bio</h3>
+                            <p class="text-[10.5px] text-slate-300">Entre em 1 clique no nosso Grupo VIP gratuito com todas as ofertas em tempo real.</p>
+                        </div>
+                    </div>
+
+                    <!-- Opção 2: Comentar Palavra-Chave -->
+                    <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-display font-black text-sm flex items-center justify-center shrink-0">
+                            2
+                        </div>
+                        <div>
+                            <h3 class="font-display font-bold text-xs text-white uppercase">Ou comente <span class="text-emerald-400">"${escapeHtml(appState.commentTrigger)}"</span></h3>
+                            <p class="text-[10.5px] text-slate-300">Deixe um comentário neste post e confira seu Direct!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rodapé Assinatura -->
+                <div class="pt-2.5 border-t border-white/10 text-center">
+                    <p class="font-display font-bold text-xs text-white">${escapeHtml(appState.brandHandle)} • Monitoramento de Ofertas Tech</p>
+                    <p class="text-[9.5px] text-slate-400 mt-0.5">${escapeHtml(appState.disclaimer)}</p>
+                </div>
+            </div>`;
+        }
+
+        // MODO STORY VERTICAL (9:16 - 1080x1920)
+        function buildStorySlideHtml(palette) {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+
+            return `
+            <div class="exportable-slide slide-canvas-9-16 tech-grid-bg flex flex-col justify-between p-5 text-white" style="background: ${palette.bgGrad};">
+                <!-- Topo do Story -->
+                <div class="flex flex-col items-center gap-1.5 pt-2">
+                    <div class="px-3.5 py-1 rounded-full font-display font-black text-xs tracking-wide uppercase text-white shadow-lg" style="background: ${palette.badgeBg};">
+                        ${escapeHtml(appState.badge)}
+                    </div>
+                    <span class="text-[10px] font-mono uppercase text-slate-300 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
+                        🛒 Oferta verificada • ${escapeHtml(appState.store)}
+                    </span>
+                </div>
+
+                <!-- Foto Grande Central -->
+                <div class="my-2 flex-1 flex flex-col items-center justify-center max-h-[220px]">
+                    ${isWhiteBox ? `
+                        <div class="w-full h-full rounded-2xl bg-white p-4 flex items-center justify-center shadow-xl">
+                            <img src="${appState.productImageSrc}" alt="Produto" style="max-height:185px; max-width:92%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                        </div>
+                    ` : `
+                        <div class="w-full h-full flex items-center justify-center">
+                            <img src="${appState.productImageSrc}" alt="Produto" class="product-drop-shadow" style="max-height:195px; max-width:95%; object-fit:contain; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                        </div>
+                    `}
+                    ${appState.condition ? `
+                        <div class="-mt-3 relative z-20 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 font-display font-black text-[10px] uppercase shadow">
+                            ⚠️ ${escapeHtml(appState.condition)}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Título + Destaques Rápidos -->
+                <div class="text-center space-y-1">
+                    <h2 class="font-display font-black text-lg leading-tight text-white">
+                        ${escapeHtml(appState.title)}
+                    </h2>
+                    <p class="text-xs text-slate-300 font-medium">
+                        ${escapeHtml(appState.subtitle)}
+                    </p>
+                </div>
+
+                <!-- Card de Preço Gigante -->
+                <div class="rounded-2xl p-3.5 bg-slate-950/90 border-2 text-center shadow-2xl my-2" style="border-color: ${palette.priceBoxBorder};">
+                    ${appState.oldPrice ? `<p class="text-xs font-mono text-slate-400 line-through">De ${escapeHtml(appState.oldPrice)}</p>` : ''}
+                    <div class="font-display font-black text-3xl leading-none my-1" style="color: ${palette.priceColor};">
+                        ${escapeHtml(appState.price)}
+                    </div>
+                    <p class="text-xs text-slate-200 font-semibold">💳 ${escapeHtml(appState.installments)}</p>
+                </div>
+
+                <!-- Área Reservada para a Figurinha de Link do Instagram Stories -->
+                <div class="rounded-2xl border-2 border-dashed border-orange-400/70 bg-orange-500/10 p-3 text-center">
+                    <p class="font-display font-black text-xs uppercase text-orange-300">👇 CLIQUE NO LINK AQUI 👇</p>
+                    <p class="text-[10px] text-slate-300 mt-0.5">(Cole a figurinha de Link do Instagram aqui ao postar)</p>
+                </div>
+
+                <!-- Rodapé Story -->
+                <div class="text-center pt-1">
+                    <span class="text-[10px] font-mono text-slate-400">${escapeHtml(appState.brandHandle)} • ${escapeHtml(appState.disclaimer)}</span>
+                </div>
+            </div>`;
+        }
+
+        // SLIDE DE CAPA PARA O "GIRO DE OFERTAS" (Multi-produtos)
+        function buildGiroCoverSlideHtml(palette, pageIndicator) {
+            return `
+            <div class="exportable-slide slide-canvas-4-5 tech-grid-bg flex flex-col justify-between p-6 text-white" style="background: ${palette.bgGrad};">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        🔥 SELEÇÃO DO DIA
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-black/30">${pageIndicator}</span>
+                </div>
+
+                <div class="my-auto text-center space-y-3">
+                    <div class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        ⚡ ESTOQUE LIMITADO
+                    </div>
+                    <h1 class="font-display font-black text-3xl leading-none uppercase tracking-tight text-white">
+                        GIRO DE OFERTAS <span style="color: ${palette.accentSecondary};">TECH DO DIA!</span>
+                    </h1>
+                    <p class="text-xs text-slate-300 max-w-[260px] mx-auto leading-relaxed">
+                        Separamos as promoções e erros de preço mais absurdos que saíram hoje no nosso monitoramento.
+                    </p>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+                    <span class="font-display font-bold text-xs text-slate-200">${escapeHtml(appState.brandHandle)}</span>
+                    <span class="font-display font-black text-xs text-orange-400">ARRASTE PRO LADO ➔</span>
+                </div>
+            </div>`;
+        }
+
+        function buildCustomProductSlideHtml(prod, palette, pageIndicator, idx) {
+            return `
+            <div class="exportable-slide slide-canvas-4-5 tech-grid-bg flex flex-col justify-between p-5 text-white" style="background: ${palette.bgGrad};">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded font-display font-black text-[10px] uppercase text-white" style="background: ${palette.badgeBg};">
+                        ${escapeHtml(prod.badge || `OFERTA #${idx + 1}`)}
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-black/30">${pageIndicator}</span>
+                </div>
+
+                <div class="my-2 flex-1 flex items-center justify-center max-h-[165px]">
+                    <img src="${prod.image}" class="product-drop-shadow" style="max-height:150px; max-width:90%; object-fit:contain;" crossorigin="anonymous"/>
+                </div>
+
+                <div class="text-center">
+                    <h3 class="font-display font-black text-base text-white line-clamp-1">${escapeHtml(prod.title)}</h3>
+                    <p class="text-[11px] text-slate-300 line-clamp-1">${escapeHtml(prod.subtitle)}</p>
+                </div>
+
+                <div class="rounded-xl p-3 bg-slate-950/90 border-2 mt-2" style="border-color: ${palette.priceBoxBorder};">
+                    <div class="flex items-baseline justify-between">
+                        <span class="font-display font-black text-2xl" style="color: ${palette.priceColor};">${escapeHtml(prod.price)}</span>
+                        <span class="text-[10px] font-mono text-slate-400">${escapeHtml(prod.store)}</span>
+                    </div>
+                    <p class="text-[10.5px] text-slate-300 mt-1">💳 ${escapeHtml(prod.installments)}</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 text-[10px] text-slate-400">
+                    <span>${escapeHtml(appState.brandHandle)}</span>
+                    <span class="text-orange-400 font-bold">Próxima Oferta ➔</span>
+                </div>
+            </div>`;
+        }
+
+        function addCurrentOfferToGiro() {
+            appState.giroProducts.push({
+                title: appState.title,
+                subtitle: appState.subtitle,
+                oldPrice: appState.oldPrice,
+                price: appState.price,
+                installments: appState.installments,
+                store: appState.store,
+                badge: appState.badge,
+                image: appState.productImageSrc
+            });
+            setPostMode('multi-giro');
+            showToast(`Produto adicionado ao Giro de Ofertas! Total: ${appState.giroProducts.length} produtos.`);
+        }
+
+        // ============================================================================
+        // 8. EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p) VIA HTML2CANVAS
+        // ============================================================================
+        async function downloadSingleSlide(btnElement, filename) {
+            const wrapper = btnElement.closest('.flex-col');
+            const slideEl = wrapper.querySelector('.exportable-slide');
+            if (!slideEl) return;
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '⏳ Gerando...';
+            btnElement.disabled = true;
+
+            try {
+                const canvas = await html2canvas(slideEl, {
+                    scale: 3, // 360px * 3 = 1080px exatos!
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#090d16'
+                });
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast(`Imagem "${filename}" baixada em 1080p!`);
+            } catch (err) {
+                showToast('Erro ao gerar imagem. Tente usar foto local ou colada.', 'warning');
+            } finally {
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        }
+
+        async function downloadAllSlides() {
+            const slideElements = document.querySelectorAll('.exportable-slide');
+            if (!slideElements.length) return;
+
+            const btn = document.getElementById('btnDownloadAll');
+            const label = document.getElementById('downloadBtnLabel');
+            const originalLabel = label.textContent;
+            btn.disabled = true;
+
+            try {
+                for (let i = 0; i < slideElements.length; i++) {
+                    label.textContent = `Renderizando Slide ${i + 1} de ${slideElements.length}...`;
+                    const canvas = await html2canvas(slideElements[i], {
+                        scale: 3,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#090d16'
+                    });
+                    const link = document.createElement('a');
+                    link.download = `atpromo-slide-0${i + 1}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    await new Promise(r => setTimeout(r, 450));
+                }
+                showToast(`Pacote completo (${slideElements.length} slides) baixado em alta resolução!`);
+            } catch (e) {
+                showToast('Ocorreu um erro durante a exportação.', 'warning');
+            } finally {
+                label.textContent = originalLabel;
+                btn.disabled = false;
+            }
+        }
+
+        // ============================================================================
+        // 9. UTILITÁRIOS DE UI (ABAS, COPIAR LEGENDA, CHAVE API, TEMA)
+        // ============================================================================
+        function setPostMode(mode) {
+            appState.postMode = mode;
+            const modes = ['carousel-x', 'single-feed', 'story', 'multi-giro'];
+            modes.forEach(m => {
+                const btn = document.getElementById(`modeBtn-${m}`);
+                if (m === mode) {
+                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap bg-orange-500 text-white shadow';
+                } else {
+                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap text-slate-400 hover:text-white';
+                }
+            });
+            renderSlidesStage();
+        }
+
+        function setVisualTheme(themeName) {
+            appState.theme = themeName;
+            renderSlidesStage();
+        }
+
+        function switchEditorTab(tabId) {
+            ['tab-capa', 'tab-raiox', 'tab-cta'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            ['capa', 'raiox', 'cta'].forEach(shortId => {
+                const btn = document.getElementById(`tabBtn-${shortId}`);
+                if (`tab-${shortId}` === tabId) {
+                    btn.className = 'px-3 py-2 border-b-2 border-orange-500 text-orange-400';
+                } else {
+                    btn.className = 'px-3 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+                }
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+        }
+
+        function copyCaptionToClipboard() {
+            const textarea = document.getElementById('generatedCaptionOutput');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+
+            const btnText = document.getElementById('btnCopyCaptionText');
+            btnText.textContent = 'Copiado! ✓';
+            showToast('Legenda copiada para a área de transferência!');
+            setTimeout(() => {
+                btnText.textContent = 'Copiar Legenda';
+            }, 2200);
+        }
+
+        function toggleApiKeyBox() {
+            const box = document.getElementById('apiKeyBox');
+            box.classList.toggle('hidden');
+        }
+
+        function saveUserApiKey() {
+            const key = document.getElementById('userApiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('atpromo_gemini_api_key', key);
+                const badge = document.getElementById('apiKeyStatusBadge');
+                badge.textContent = 'Salva no Navegador ✓';
+                badge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                showToast('Chave Gemini salva na memória do seu navegador!');
+            } else {
+                localStorage.removeItem('atpromo_gemini_api_key');
+                showToast('Chave removida do navegador.', 'info');
+            }
+            document.getElementById('apiKeyBox').classList.add('hidden');
+        }
+
+        function openVercelModal() {
+            const m = document.getElementById('vercelModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeVercelModal() {
+            const m = document.getElementById('vercelModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
