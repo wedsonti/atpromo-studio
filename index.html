@@ -1839,11 +1839,11 @@ Ofertas esgotam, verifique o frete!`;
                         ` : ''}
 
                         <!-- Preço Principal em Camada Dupla Física (Indestrutível no html2canvas) -->
-                        <div class="relative inline-block my-0.5">
-                            <span class="absolute top-[2.5px] left-[2.5px] font-display font-black text-[30px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">
+                        <div class="relative w-full h-[38px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; text-align: center;" class="font-display font-black text-[30px] leading-none text-[#141414] select-none pointer-events-none" aria-hidden="true">
                                 ${escapeHtml(appState.price)}
                             </span>
-                            <span class="relative font-display font-black text-[30px] leading-tight text-white block">
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-display font-black text-[30px] leading-none text-white block">
                                 ${escapeHtml(appState.price)}
                             </span>
                         </div>
@@ -2119,9 +2119,9 @@ Ofertas esgotam, verifique o frete!`;
                         ${appState.oldPrice ? `<span class="font-display font-extrabold text-[11px] text-[#141414] line-through leading-normal mb-0.5 block">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
                         
                         <!-- Preço Story em Camada Dupla Física -->
-                        <div class="relative inline-block my-0.5">
-                            <span class="absolute top-[3px] left-[3px] font-display font-black text-[34px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(appState.price)}</span>
-                            <span class="relative font-display font-black text-[34px] leading-tight text-white block">${escapeHtml(appState.price)}</span>
+                        <div class="relative w-full h-[42px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; text-align: center;" class="font-display font-black text-[34px] leading-none text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(appState.price)}</span>
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-display font-black text-[34px] leading-none text-white block">${escapeHtml(appState.price)}</span>
                         </div>
 
                         <div class="relative mt-1 inline-block">
@@ -2204,9 +2204,9 @@ Ofertas esgotam, verifique o frete!`;
                     <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
                     <div class="neo-box-orange relative w-full py-2 px-3 flex flex-col items-center justify-center text-center">
                         <!-- Preço Giro em Camada Dupla Física -->
-                        <div class="relative inline-block my-0.5">
-                            <span class="absolute top-[2.5px] left-[2.5px] font-display font-black text-[29px] leading-tight text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(prod.price)}</span>
-                            <span class="relative font-display font-black text-[29px] leading-tight text-white block">${escapeHtml(prod.price)}</span>
+                        <div class="relative w-full h-[36px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; text-align: center;" class="font-display font-black text-[29px] leading-none text-[#141414] select-none pointer-events-none" aria-hidden="true">${escapeHtml(prod.price)}</span>
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-display font-black text-[29px] leading-none text-white block">${escapeHtml(prod.price)}</span>
                         </div>
 
                         <div class="relative mt-1 inline-block">
