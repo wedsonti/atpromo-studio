@@ -744,7 +744,7 @@
                         <ul class="list-disc list-inside ml-4 mt-1 space-y-1 font-mono text-[11px] text-orange-300">
                             <li>ADMIN_USER = admin</li>
                             <li>ADMIN_PASS = atpromo123</li>
-                            <li>GEMINI_API_KEY = sua_chave_gemini</li>
+                            <li>GROQ_API_KEY = sua_chave_groq_gsk_...</li>
                         </ul>
                     </li>
                     <li>Os Mascotes customizados enviados nos Slots 1 e 2 e o seu login ficam salvos automaticamente no <code class="px-1 py-0.5 rounded bg-slate-950 text-emerald-400 font-mono">localStorage</code> do seu navegador!</li>
@@ -1675,10 +1675,13 @@ Ofertas esgotam, verifique o frete!`;
                 populateFormFromState();
                 syncFormToState();
 
-                if (parsed.quotaExceeded || parsed.fromFallback) {
-                    showToast('Cota diária da IA atingida para hoje. Oferta gerada pelo motor local!', 'warning');
+                if (parsed.missingApiKey) {
+                    showToast('GROQ_API_KEY não configurada. Oferta gerada pelo motor local!', 'warning');
+                } else if (parsed.quotaExceeded || parsed.fromFallback) {
+                    showToast('Limite da IA atingido no momento. Oferta gerada pelo motor local!', 'warning');
                 } else {
-                    showToast('IA Gemini gerou os 3 slides no ângulo selecionado!');
+                    const modelShort = (parsed.modelUsed || 'gpt-oss-120b').replace('openai/', '');
+                    showToast(`IA Groq (${modelShort}) gerou os 3 slides no ângulo selecionado!`);
                 }
             } catch (err) {
                 extractOfferInstant();

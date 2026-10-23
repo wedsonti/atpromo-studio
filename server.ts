@@ -2,13 +2,16 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { GoogleGenAI, Type } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
+const GROQ_FALLBACK_MODEL = "openai/gpt-oss-20b";
 
 app.use(express.json({ limit: "15mb" }));
 
@@ -94,7 +97,7 @@ Receba um texto bruto de oferta de grupo de WhatsApp/Telegram e extraia os dados
 
 ${angleGuide}
 
-Regras obrigatórias de formatação dos campos JSON:
+Responda APENAS com um objeto JSON válido contendo exatamente estas chaves:
 - badge: Gatilho curto editorial (2 a 4 palavras, sem emojis exagerados, terminado em dois-pontos, ex: "Vazou o preço:", "Não compre 8GB:", "Economia real:", "Detalhe oculto:").
 - title: Título principal conciso para a Headline da Capa (máximo 34 caracteres, ex: "RTX 5060 Ti 16GB GDDR7").
 - subtitle: Submodelo técnico em maiúsculas para a barra inferior da foto (ex: "MSI VENTUS 2X OC • GDDR7").
@@ -144,8 +147,10 @@ interface ExtractedOffer {
   coupon: string;
   highlights: string[];
   caption: string;
+  modelUsed?: string;
   fromFallback?: boolean;
   quotaExceeded?: boolean;
+  missingApiKey?: boolean;
 }
 
 function parseOfferLocally(raw: string, angle: string): ExtractedOffer {
@@ -310,63 +315,132 @@ function parseOfferLocally(raw: string, angle: string): ExtractedOffer {
   };
 }
 
-async function generateWithGemini(model: string, raw: string, angle: string, customApiKey?: string): Promise<Record<string, any>> {
-  const activeKey = customApiKey || process.env.GEMINI_API_KEY;
-  const ai = new GoogleGenAI({
-    apiKey: activeKey,
-    httpOptions: {
-      headers: {
-        "User-Agent": "aistudio-build",
-      },
-    },
-  });
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: raw,
-    config: {
-      systemInstruction: buildSystemInstruction(String(angle)),
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          badge: { type: Type.STRING },
-          condition: { type: Type.STRING },
-          title: { type: Type.STRING },
-          subtitle: { type: Type.STRING },
-          oldPrice: { type: Type.STRING },
-          price: { type: Type.STRING },
-          installments: { type: Type.STRING },
-          store: { type: Type.STRING },
-          coupon: { type: Type.STRING },
-          highlights: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-          },
-          caption: { type: Type.STRING },
-        },
-        required: [
-          "badge",
-          "condition",
-          "title",
-          "subtitle",
-          "oldPrice",
-          "price",
-          "installments",
-          "store",
-          "coupon",
-          "highlights",
-          "caption",
-        ],
-      },
-    },
-  });
-
-  const jsonText = response.text;
-  if (!jsonText) {
-    throw new Error("Empty response from Gemini");
+function parseRetryDelayMs(retryAfterHeader: string | null, errorBodyText: string, attempt: number): number {
+  if (retryAfterHeader) {
+    const seconds = parseFloat(retryAfterHeader);
+    if (!isNaN(seconds) && seconds > 0) {
+      return Math.min(Math.max(Math.ceil(seconds * 1000), 1000), 10000);
+    }
   }
-  return JSON.parse(jsonText.trim());
+
+  // Groq costuma retornar ex: "Please try again in 2.45s" ou "Please try again in 1400ms"
+  const msMatch = errorBodyText.match(/try again in\s+(\d+(?:\.\d+)?)ms/i);
+  if (msMatch) {
+    const ms = parseFloat(msMatch[1]);
+    if (!isNaN(ms) && ms > 0) {
+      return Math.min(Math.max(Math.ceil(ms + 250), 1000), 10000);
+    }
+  }
+
+  const secMatch = errorBodyText.match(/try again in\s+(\d+(?:\.\d+)?)s/i);
+  if (secMatch) {
+    const sec = parseFloat(secMatch[1]);
+    if (!isNaN(sec) && sec > 0) {
+      return Math.min(Math.max(Math.ceil(sec * 1000 + 250), 1000), 10000);
+    }
+  }
+
+  // Backoff exponencial padrão (2s, 4s...)
+  return Math.min(2000 * Math.pow(2, attempt), 8000);
+}
+
+function cleanJsonString(rawContent: string): string {
+  let cleaned = rawContent.trim();
+  // Remove blocos <think>...</think> caso algum modelo retorne tags de raciocínio
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  // Remove cercas markdown ```json ... ``` se presentes
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  return cleaned;
+}
+
+async function generateWithGroq(
+  model: string,
+  raw: string,
+  angle: string,
+  customApiKey?: string,
+  maxRetries = 2
+): Promise<Record<string, any>> {
+  const activeKey =
+    customApiKey ||
+    process.env.GROQ_API_KEY ||
+    (process.env.GEMINI_API_KEY?.startsWith("gsk_") ? process.env.GEMINI_API_KEY : undefined);
+
+  if (!activeKey) {
+    const missingErr: any = new Error("GROQ_API_KEY não configurada no servidor.");
+    missingErr.missingApiKey = true;
+    throw missingErr;
+  }
+
+  let lastError: any = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${activeKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: buildSystemInstruction(String(angle)),
+          },
+          {
+            role: "user",
+            content: raw,
+          },
+        ],
+        reasoning_effort: "low",
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (response.status === 429) {
+      const errBody = await response.text().catch(() => "");
+      const rateErr: any = new Error(`Groq 429 Rate Limit on ${model}: ${errBody}`);
+      rateErr.status = 429;
+      lastError = rateErr;
+
+      if (attempt < maxRetries) {
+        const waitMs = parseRetryDelayMs(response.headers.get("retry-after"), errBody, attempt);
+        console.warn(
+          `[Groq] Limite 429 atingido em ${model}. Aguardando ${waitMs}ms antes da tentativa ${attempt + 2}/${maxRetries + 1}...`
+        );
+        await sleep(waitMs);
+        continue;
+      }
+
+      throw rateErr;
+    }
+
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => "");
+      const apiErr: any = new Error(`Groq API error (${response.status}) on ${model}: ${errBody}`);
+      apiErr.status = response.status;
+      throw apiErr;
+    }
+
+    const data: any = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content || typeof content !== "string") {
+      throw new Error(`Resposta vazia do modelo Groq ${model}`);
+    }
+
+    const parsed = JSON.parse(cleanJsonString(content));
+    return {
+      ...parsed,
+      modelUsed: model,
+    };
+  }
+
+  throw lastError || new Error(`Falha ao gerar com Groq (${model})`);
 }
 
 app.post("/api/extract-offer", async (req, res) => {
@@ -376,44 +450,61 @@ app.post("/api/extract-offer", async (req, res) => {
   }
 
   const { raw, angle = "price-alert", customApiKey } = req.body;
-  const activeApiKey = (req.headers["x-gemini-api-key"] as string) || customApiKey || undefined;
+  const activeApiKey =
+    (req.headers["x-groq-api-key"] as string) ||
+    (req.headers["x-api-key"] as string) ||
+    (req.headers["x-gemini-api-key"] as string) ||
+    customApiKey ||
+    undefined;
 
   if (!raw || typeof raw !== "string") {
     res.status(400).json({ error: "Texto da oferta inválido." });
     return;
   }
 
-  // 1. Tentar primeiro o modelo padrão (gemini-3.8-flash)
+  // 1. Tentar primeiro o modelo principal recomendado na Groq: openai/gpt-oss-120b (raciocínio no mínimo + retry no 429)
   try {
-    const result = await generateWithGemini("gemini-3.8-flash", raw, String(angle), activeApiKey);
+    const result = await generateWithGroq(GROQ_PRIMARY_MODEL, raw, String(angle), activeApiKey, 2);
     res.json(result);
     return;
   } catch (err: any) {
     const errString = String(err?.message || err || "");
+    const isMissingKey = Boolean(err?.missingApiKey);
     const isQuotaError =
       err?.status === 429 ||
       err?.code === 429 ||
-      /quota|RESOURCE_EXHAUSTED|429|exceeded your current quota/i.test(errString);
+      /rate_limit|quota|429|too many requests|tokens per minute/i.test(errString);
 
-    if (isQuotaError) {
-      console.warn("Quota exceeded on gemini-3.8-flash. Attempting secondary model gemini-3.1-flash-lite...");
+    if (!isMissingKey) {
+      console.warn(
+        `[Groq] ${GROQ_PRIMARY_MODEL} indisponível (${isQuotaError ? "429 Rate Limit" : errString}). Tentando fallback rápido ${GROQ_FALLBACK_MODEL}...`
+      );
       try {
-        const fallbackModelResult = await generateWithGemini("gemini-3.1-flash-lite", raw, String(angle), activeApiKey);
+        const fallbackModelResult = await generateWithGroq(
+          GROQ_FALLBACK_MODEL,
+          raw,
+          String(angle),
+          activeApiKey,
+          1
+        );
         res.json(fallbackModelResult);
         return;
       } catch (secondaryErr: any) {
-        console.warn("Secondary model quota also unavailable. Falling back to built-in smart local parser.");
+        console.warn(
+          `[Groq] Modelo secundário ${GROQ_FALLBACK_MODEL} também falhou. Acionando leitor local por regex.`
+        );
       }
     } else {
-      console.warn("Gemini generation encountered an issue, falling back to local extractor:", errString);
+      console.warn("[Groq] GROQ_API_KEY ausente. Acionando leitor local por regex.");
     }
 
-    // Fallback gracioso: motor local editorial de alta precisão
+    // Fallback gracioso: motor local editorial de alta precisão por regex
     const localResult = parseOfferLocally(raw, String(angle));
     res.json({
       ...localResult,
       fromFallback: true,
       quotaExceeded: isQuotaError,
+      missingApiKey: isMissingKey,
     });
   }
 });
