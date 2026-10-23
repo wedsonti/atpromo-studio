@@ -1,6 +1,6 @@
 {
-  "summary":  "Análise da falha no campo de preço do Slide 1 no PNG exportado e plano de correção definitiva.\n- Diagnóstico: desincronização vertical do texto duplo no html2canvas devido a classe Tailwind top-[2.5px] em container inline-block.\n- Solução: Recriação da camada de preço usando container com altura fixa e posicionamento absoluto 100% explícito (inline style: top/left com width: 100% e text-align: center).\n- Aplicação uniforme no Slide 1, Story e Giro para garantir PNGs impecáveis em todos os formatos.",
-  "updatedAt":  "2026-10-22T20:51:39.679328463Z",
+  "summary":  "Plano de implementação para inclusão de Slide 1 Capa Gancho dedicada no carrossel do Giro de Ofertas.",
+  "updatedAt":  "2026-10-22T22:30:36.983866222Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

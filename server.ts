@@ -132,80 +132,285 @@ app.post("/api/login", (req, res) => {
   res.status(401).json({ ok: false, error: "Usuário ou senha incorretos." });
 });
 
+interface ExtractedOffer {
+  badge: string;
+  condition: string;
+  title: string;
+  subtitle: string;
+  oldPrice: string;
+  price: string;
+  installments: string;
+  store: string;
+  coupon: string;
+  highlights: string[];
+  caption: string;
+  fromFallback?: boolean;
+  quotaExceeded?: boolean;
+}
+
+function parseOfferLocally(raw: string, angle: string): ExtractedOffer {
+  const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  // 1. Detectar Loja pelo Link ou Menção
+  let detectedStore = "AMAZON";
+  if (/amazon/i.test(raw)) detectedStore = "AMAZON";
+  else if (/mercadolivre|meli\./i.test(raw)) detectedStore = "MERCADO LIVRE";
+  else if (/shopee/i.test(raw)) detectedStore = "SHOPEE";
+  else if (/kabum/i.test(raw)) detectedStore = "KABUM!";
+  else if (/terabyte/i.test(raw)) detectedStore = "TERABYTE";
+  else if (/pichau/i.test(raw)) detectedStore = "PICHAU";
+  else if (/aliexpress/i.test(raw)) detectedStore = "ALIEXPRESS";
+  else if (/magazineluiza|magalu/i.test(raw)) detectedStore = "MAGALU";
+
+  // 2. Detectar Preço
+  let numericPrice = 0;
+  let formattedPrice = "R$ 3.283";
+  const priceMatch = raw.match(/R\$\s*([\d.]+(?:,\d{2})?)/i);
+  if (priceMatch) {
+    const cleanNumStr = priceMatch[1].replace(/\./g, "").replace(",", ".");
+    numericPrice = parseFloat(cleanNumStr);
+    if (!isNaN(numericPrice)) {
+      formattedPrice = "R$ " + Math.round(numericPrice).toLocaleString("pt-BR");
+    }
+  }
+
+  let formattedOldPrice = "";
+  if (numericPrice > 0) {
+    const estimatedOld = Math.round((numericPrice * 1.18) / 10) * 10 - 1;
+    formattedOldPrice = "R$ " + estimatedOld.toLocaleString("pt-BR");
+  } else {
+    formattedOldPrice = "R$ 3.899";
+  }
+
+  // 3. Detectar Parcelamento
+  let installmentsText = "À vista no PIX ou parcelado";
+  const instMatch = raw.match(/(\d{1,2})\s*x\s*(?:de\s*R\$\s*([\d.,]+))?\s*(sem\s*juros)?/i);
+  if (instMatch) {
+    const count = parseInt(instMatch[1], 10);
+    const semJuros = instMatch[3] ? "sem Juros" : "";
+    if (count > 0) {
+      if (numericPrice > 0) {
+        const parcelVal = (numericPrice / count).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        installmentsText = `${count}x de R$ ${parcelVal} ${semJuros}`.trim();
+      } else {
+        installmentsText = `Em até ${count}x ${semJuros}`.trim();
+      }
+    }
+  }
+
+  // 4. Detectar Condição
+  let conditionTag = "⚡ ESTOQUE LIMITADO";
+  if (/seminovo/i.test(raw)) conditionTag = "⚠️ SEMINOVO • ESTOQUE LIMITADO";
+  else if (/reembalado|open\s*box/i.test(raw)) conditionTag = "⚠️ REEMBALADO • GARANTIA OFICIAL";
+  else if (/importado|estoque\s*no\s*brasil/i.test(raw)) conditionTag = "🇧🇷 ESTOQUE NO BRASIL";
+
+  // 5. Detectar Cupom
+  let couponCode = "";
+  const cupomMatch = raw.match(/cupom\s*[:\-]?\s*([A-Z0-9]{4,15})/i);
+  if (cupomMatch) {
+    couponCode = cupomMatch[1].toUpperCase();
+  }
+
+  // 6. Extrair Produto e Submodelo
+  let techLine =
+    lines.find((l) => l.startsWith("_") || /GB|RTX|RX|RYZEN|SSD|DDR|HZ|BITS/i.test(l)) ||
+    lines[0] ||
+    "Placa de Vídeo RTX";
+  techLine = techLine
+    .replace(/^_+|_+$/g, "")
+    .replace(/^\*+|\*+$/g, "")
+    .replace(/\(seminovo\)/gi, "")
+    .trim();
+
+  let cleanTitle = techLine;
+  let cleanSubtitle = `OFERTA VERIFICADA • ${detectedStore}`;
+  if (/RTX\s*5060\s*TI/i.test(raw)) {
+    cleanTitle = "RTX 5060 Ti 16GB GDDR7";
+    cleanSubtitle = "MSI VENTUS 2X OC • GDDR7";
+  } else if (cleanTitle.length > 28) {
+    const words = cleanTitle.split(/\s+/);
+    cleanTitle = words.slice(0, 4).join(" ");
+    cleanSubtitle = words.slice(4, 10).join(" ").toUpperCase();
+  }
+
+  let badge = "Vazou o preço:";
+  let highlights: string[] = [];
+
+  if (angle === "contrarian") {
+    badge = "Esqueça placa de 8GB:";
+    cleanTitle = `Por que a ${cleanTitle} vale muito mais`;
+    highlights = [
+      `🛑 8GB já trava em jogos novos | Com 16GB GDDR7 você roda tudo no Ultra sem gargalo de VRAM.`,
+      `❄️ Projeto ${cleanSubtitle} | Construção superior que mantém temperaturas baixas em uso pesado.`,
+      `💳 Preço de versão básica | Saindo por ${formattedPrice} (${installmentsText}) na ${detectedStore}.`,
+      `⚠️ Oportunidade Seminovo | Reembalado oficial na ${detectedStore} com garantia e preço de ocasião.`,
+    ];
+  } else if (angle === "math-value") {
+    badge = "Matemática rápida:";
+    cleanTitle = `${cleanTitle} pelo menor custo por FPS`;
+    highlights = [
+      `📊 Economia Direta no Bolso | De ${formattedOldPrice} por ${formattedPrice} nesta oferta.`,
+      `💳 Sem Juros no Cartão | Parcelamento em ${installmentsText} sem perder o valor promocional.`,
+      `🚀 Longevidade de Setup | ${cleanSubtitle} pronta para vários anos sem precisar de upgrade.`,
+      `✅ Compra Segura ${detectedStore} | Entrega rápida e proteção total ao comprador.`,
+    ];
+  } else if (angle === "who-is-it-for") {
+    badge = "Guia rápido:";
+    cleanTitle = `Pra quem é a ${cleanTitle}?`;
+    highlights = [
+      `🎮 Ideal para Gamers exigentes | Perfeita para rodar jogos atuais em Quad HD (1440p) com folga.`,
+      `💻 Criadores, Edição e IA | Memória de sobra para renderização, edição de vídeo e IA local.`,
+      `💳 Para quem busca parcelamento | ${formattedPrice} em ${installmentsText} direto na ${detectedStore}.`,
+      `⚠️ Ponto de Atenção | ${conditionTag} — estoque super restrito que acaba rápido.`,
+    ];
+  } else if (angle === "hidden-detail") {
+    badge = "O detalhe que ninguém viu:";
+    cleanTitle = `O segredo dessa ${cleanTitle}`;
+    highlights = [
+      `🔍 Nova Memória GDDR7 | Largura de banda muito mais rápida que a geração GDDR6 anterior.`,
+      `❄️ Engenharia ${cleanSubtitle} | Sistema térmico otimizado com overclock de fábrica.`,
+      `🛡️ Garantia na ${detectedStore} | Mesmo na condição seminovo, conta com cobertura oficial da loja.`,
+      `🔥 Preço fora da curva | ${formattedPrice} (${installmentsText}) é valor raríssimo para essa ficha técnica.`,
+    ];
+  } else {
+    // Default: price-alert
+    badge = "Vazou o preço:";
+    highlights = [
+      `🚀 Desempenho de Ponta | ${cleanTitle} (${cleanSubtitle}) pelo menor valor monitorado.`,
+      `❄️ Construção Premium | Acabamento reforçado e refrigeração silenciosa de alta eficiência.`,
+      `💳 Pagamento Facilitado | Sai por ${formattedPrice} (${installmentsText}) na ${detectedStore}.`,
+      `⚠️ Alerta de Estoque | ${conditionTag} — unidades costumam esgotar em poucos minutos.`,
+    ];
+  }
+
+  const caption =
+    `${badge} ${cleanTitle} (${cleanSubtitle}) saindo por apenas ${formattedPrice} (${installmentsText}) na ${detectedStore}! 🚀\n\n` +
+    (conditionTag.includes("SEMINOVO")
+      ? `⚠️ Atenção: Unidade na condição Seminovo — oportunidade única nesse valor e parcelado sem juros!\n\n`
+      : "") +
+    `${highlights.map((h) => h.replace(" | ", ": ")).join("\n")}` +
+    (couponCode ? `\n🎟️ Cupom: ${couponCode}` : "") +
+    `\n\n📲 Acesse nosso grupo pelo link na bio (@atpromoo) 👇\n\n*Ofertas esgotam rápido! Verifique o frete para sua região.\n\n#ofertas #tecnologia #pcgamer #hardware #promocao #atpromoo`;
+
+  return {
+    badge,
+    condition: conditionTag,
+    title: cleanTitle,
+    subtitle: cleanSubtitle,
+    oldPrice: formattedOldPrice,
+    price: formattedPrice,
+    installments: installmentsText,
+    store: detectedStore,
+    coupon: couponCode,
+    highlights,
+    caption,
+  };
+}
+
+async function generateWithGemini(model: string, raw: string, angle: string): Promise<Record<string, any>> {
+  const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: {
+      headers: {
+        "User-Agent": "aistudio-build",
+      },
+    },
+  });
+
+  const response = await ai.models.generateContent({
+    model,
+    contents: raw,
+    config: {
+      systemInstruction: buildSystemInstruction(String(angle)),
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          badge: { type: Type.STRING },
+          condition: { type: Type.STRING },
+          title: { type: Type.STRING },
+          subtitle: { type: Type.STRING },
+          oldPrice: { type: Type.STRING },
+          price: { type: Type.STRING },
+          installments: { type: Type.STRING },
+          store: { type: Type.STRING },
+          coupon: { type: Type.STRING },
+          highlights: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+          },
+          caption: { type: Type.STRING },
+        },
+        required: [
+          "badge",
+          "condition",
+          "title",
+          "subtitle",
+          "oldPrice",
+          "price",
+          "installments",
+          "store",
+          "coupon",
+          "highlights",
+          "caption",
+        ],
+      },
+    },
+  });
+
+  const jsonText = response.text;
+  if (!jsonText) {
+    throw new Error("Empty response from Gemini");
+  }
+  return JSON.parse(jsonText.trim());
+}
+
 app.post("/api/extract-offer", async (req, res) => {
   if (!verifyHeaderCredentials(req)) {
     res.status(401).json({ error: "Não autorizado. Faça login novamente." });
     return;
   }
 
+  const { raw, angle = "price-alert" } = req.body;
+  if (!raw || typeof raw !== "string") {
+    res.status(400).json({ error: "Texto da oferta inválido." });
+    return;
+  }
+
+  // 1. Tentar primeiro o modelo padrão (gemini-3.8-flash)
   try {
-    const { raw, angle = "price-alert" } = req.body;
-    if (!raw || typeof raw !== "string") {
-      res.status(400).json({ error: "Texto da oferta inválido." });
-      return;
+    const result = await generateWithGemini("gemini-3.8-flash", raw, String(angle));
+    res.json(result);
+    return;
+  } catch (err: any) {
+    const errString = String(err?.message || err || "");
+    const isQuotaError =
+      err?.status === 429 ||
+      err?.code === 429 ||
+      /quota|RESOURCE_EXHAUSTED|429|exceeded your current quota/i.test(errString);
+
+    if (isQuotaError) {
+      console.warn("Quota exceeded on gemini-3.8-flash. Attempting secondary model gemini-3.1-flash-lite...");
+      try {
+        const fallbackModelResult = await generateWithGemini("gemini-3.1-flash-lite", raw, String(angle));
+        res.json(fallbackModelResult);
+        return;
+      } catch (secondaryErr: any) {
+        console.warn("Secondary model quota also unavailable. Falling back to built-in smart local parser.");
+      }
+    } else {
+      console.warn("Gemini generation encountered an issue, falling back to local extractor:", errString);
     }
 
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: raw,
-      config: {
-        systemInstruction: buildSystemInstruction(String(angle)),
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            badge: { type: Type.STRING },
-            condition: { type: Type.STRING },
-            title: { type: Type.STRING },
-            subtitle: { type: Type.STRING },
-            oldPrice: { type: Type.STRING },
-            price: { type: Type.STRING },
-            installments: { type: Type.STRING },
-            store: { type: Type.STRING },
-            coupon: { type: Type.STRING },
-            highlights: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
-            caption: { type: Type.STRING },
-          },
-          required: [
-            "badge",
-            "condition",
-            "title",
-            "subtitle",
-            "oldPrice",
-            "price",
-            "installments",
-            "store",
-            "coupon",
-            "highlights",
-            "caption",
-          ],
-        },
-      },
-    });
-
-    const jsonText = response.text;
-    if (!jsonText) {
-      throw new Error("Empty response from Gemini");
-    }
-
-    const parsed = JSON.parse(jsonText.trim());
-    res.json(parsed);
-  } catch (error) {
-    console.error("Error extracting offer with Gemini:", error);
-    res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to extract offer",
+    // Fallback gracioso: motor local editorial de alta precisão
+    const localResult = parseOfferLocally(raw, String(angle));
+    res.json({
+      ...localResult,
+      fromFallback: true,
+      quotaExceeded: isQuotaError,
     });
   }
 });

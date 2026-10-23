@@ -1,34 +1,40 @@
-# Plano de Correção: Campo de Preço no Slide 1 e Exportação PNG
+# Plano de Implementação: Capa Gancho Dedicada no Giro de Ofertas
 
-## 1. Análise da Falha (Diagnóstico)
+## 1. Contexto & Objetivo
+O usuário confirmou a preferência para o modo **Giro de Ofertas**: o carrossel deve possuir um **Slide 1 Capa Gancho dedicada** antes dos slides de produtos individuais.
 
-Ao analisar a imagem baixada (`image_612efd92.png`), identifica-se exatamente o que provocou a deformação no campo do preço:
-
-1. **Deslocamento do Texto de Sombra**: O preço branco ("R$ 466") permaneceu no lugar correto, mas a camada duplicada em preto (que deveria atuar como sombra sólida de 2.5px) foi deslocada verticalmente cerca de 25px a 30px para baixo.
-2. **Causa Raiz no `html2canvas`**: O HTML utilizava a combinação de `<div class="relative inline-block">` com `<span class="absolute top-[2.5px] left-[2.5px]">` e um irmão `<span class="relative ... block">`.
-   - Durante a clonagem para a sandbox de renderização do `html2canvas`, a classe dinamicamente processada pelo Tailwind `top-[2.5px]` é avaliada como `top: auto` em estilos computados do nó clonado.
-   - Pela regra de posicionamento estático do CSS para elementos `absolute` dentro de `inline-block` com irmãos `block`, o `top: auto` posiciona o elemento após a linha do bloco irmão, empurrando o texto preto exatamente um `line-height` inteiro para baixo (invadindo e vazando por baixo da pílula "À vista no PIX ou parcelado").
+Atualmente, no modo `multi-giro`, o carrossel iniciava direto no primeiro produto. Com esta alteração, o carrossel terá a seguinte estrutura organizada:
+1. **Slide 1 — Capa Gancho do Giro**: Slide editorial de alto impacto para prender a atenção no feed (ex: *"🔥 GIRO DE OFERTAS TECH • X Promoções Imperdíveis de Hoje"* com mascote e design neo-brutalista).
+2. **Slides 2 a N+1 — Produtos em Destaque**: Os slides individuais com foto, preço com sombra sólida, badge de condição e loja.
+3. **Slide Final (N+2) — CTA (@atpromoo)**: Slide de encerramento com o sticker do mascote e instrução de automação (ex: *"Comente EU QUERO ou acesse o link da bio"*).
 
 ---
 
-## 2. Solução Proposta
+## 2. Alterações Propostas em `/index.html`
 
-Para garantir 100% de precisão visual tanto na tela quanto no arquivo PNG baixado:
+### 1. Novo Construtor de Layout: `buildGiroHookSlideHtml()`
+- Criar a função `buildGiroHookSlideHtml()` no mesmo padrão estético neo-brutalista `@atpromoo` (3px border, `#FAF6EE` background, `#141414` shadows, fonte Plus Jakarta Sans).
+- **Elementos Visuais**:
+  - Topo com @atpromoo e logo do mascote.
+  - Título / Gancho principal expansível (ex: *"GIRO DE OFERTAS TECH"* / *"As Melhores Promoções Selecionadas de Hoje"*).
+  - Pílula Laranja chamativa indicando a quantidade total de ofertas inclusas no Giro (ex: *"⚡ 3 OFERTAS VERIFICADAS"*).
+  - Ilustração / Mascote com Notebook em destaque no centro.
+  - Seta/Indicativo "Arrasta ➔" para engajamento.
 
-### Alterações Principais:
-1. **Container de Coordenadas Absolutas Explícitas**:
-   - Reestruturar o bloco do preço para utilizar um container com altura e alinhamento central fixos (`relative w-full h-[36px] my-0.5`).
-   - Definir posicionamento inline explícito no estilo das duas camadas:
-     - **Camada Sombra (Preto)**: `style="position: absolute; top: 2px; left: 2px; width: 100%; text-align: center;"`
-     - **Camada Principal (Branco)**: `style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;"`
-   - Dessa forma, o `html2canvas` lê o `top: 2px` diretamente do atributo `style`, zerando qualquer possibilidade de recálculo ou deslocamento vertical.
+### 2. Atualização da Lógica de Renderização (`renderSlidesStage`)
+- No bloco `appState.postMode === 'multi-giro'`:
+  - Calcular `totalSlides = appState.giroProducts.length + 2` (1 Capa Gancho + N Produtos + 1 CTA Final).
+  - Adicionar o **Slide 1 Capa Gancho** no início com nome de arquivo `atpromoo-giro-01-capa-gancho.png`.
+  - Renderizar os produtos do Giro a partir do **Slide 2** (`atpromoo-giro-02-produto-1.png`, etc.).
+  - Encerrar com o **Slide CTA Final** no último número (`atpromoo-giro-0N-cta.png`).
 
-2. **Revisão e Padronização Geral**:
-   - Aplicar essa mesma estrutura nos templates do **Slide 1**, **Story** e **Slide Giro**, mantendo o design neo-brutalista idêntico e à prova de falhas em todos os modos.
+### 3. Integração com Exportação PNG
+- Garantir que todas as camadas do Slide Capa Gancho do Giro utilizem a mesma proteção física contra deslocamentos no `html2canvas` (posicionamento explícito e estilos inline seguros).
 
 ---
 
 ## 3. Plano de Verificação
 
-1. **Compilação e Teste**: Executar `compile_applet` para garantir sintaxe válida.
-2. **Validação de Exportação**: Testar a geração do PNG do Slide 1 e verificar se o preço branco e sua sombra sólida de 2px ficam perfeitamente encaixados, sem sobrepor a pílula de parcelamento.
+1. **Compilação**: Executar `compile_applet` para confirmar a ausência de erros de sintaxe ou referências inválidas.
+2. **Visualização no Preview**: Alternar para a aba "Giro de Ofertas" no app e verificar a presença do Slide 1 (Capa Gancho), seguido das ofertas e da CTA final.
+3. **Exportação de Imagens**: Testar a geração e o download em PNG dos slides do Giro para validar se a Capa Gancho é exportada perfeitamente em 1080p.

@@ -462,7 +462,56 @@
                 </div>
             </div>
 
-            <!-- PASSO 3: EDIÇÃO FINA DOS TEXTOS DOS 3 SLIDES -->
+            <!-- PAINEL DE CONTROLE EXCLUSIVO PARA O MODO "GIRO DE OFERTAS" -->
+            <div id="giroSelectorCard" class="hidden bg-slate-900 border-2 border-[#FF6B1A] rounded-2xl p-4 shadow-2xl space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded bg-[#FF6B1A] text-[#141414] font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#141414]">
+                            🔥 GIRO DE OFERTAS
+                        </span>
+                        <h2 class="font-display font-extrabold text-xs sm:text-sm text-white uppercase tracking-wide">
+                            Editando <span id="giroActiveOfferLabel" class="text-orange-400">Oferta #1</span>
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="addNewGiroOffer()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer shadow">
+                            <span>➕</span> Nova
+                        </button>
+                        <button type="button" onclick="removeActiveGiroOffer()" class="px-2.5 py-1 rounded-lg bg-red-600/80 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1 transition cursor-pointer shadow">
+                            <span>🗑️</span> Excluir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Título do Gancho (Slide 1 do Giro) -->
+                <div>
+                    <label class="block text-[11px] text-orange-400 font-bold mb-1">
+                        Título/Gancho do Slide 1 (Capa Dedicada do Giro)
+                    </label>
+                    <input
+                        type="text"
+                        id="fieldGiroTitle"
+                        oninput="syncGiroTitleFromInput(this.value)"
+                        placeholder="As 4 Melhores Ofertas de Hoje"
+                        class="w-full bg-slate-950 border border-slate-700 focus:border-[#FF6B1A] focus:outline-none rounded-xl px-3 py-1.5 text-xs font-bold text-white"
+                    >
+                </div>
+
+                <!-- Lista de Tabs / Seletor de Ofertas -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-[11px] font-bold text-slate-300">
+                            Selecione a Oferta para editar dados e foto:
+                        </label>
+                        <span id="giroTotalCountBadge" class="text-[10px] font-mono text-orange-400 font-bold">4 Ofertas • 6 Slides</span>
+                    </div>
+                    <div id="giroOfferTabsList" class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5">
+                        <!-- Injetado dinamicamente via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASSO 3: EDIÇÃO FINA DOS TEXTOS DOS SLIDES -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-2">
@@ -778,7 +827,9 @@ Ofertas esgotam, verifique o frete!`;
                 '⚠️ Estoque Relâmpago Seminovo | Unidades reembaladas na Amazon esgotam em minutos.'
             ],
 
-            // Lista de Produtos para o modo "Giro de Ofertas"
+            // Lista de Produtos para o modo "Giro de Ofertas" (Padrão 4 Ofertas = 6 Slides no Carrossel)
+            activeGiroIndex: 0,
+            giroTitle: 'As 4 Melhores Ofertas de Hoje',
             giroProducts: [
                 {
                     badge: 'Vazou o preço:',
@@ -800,6 +851,28 @@ Ofertas esgotam, verifique o frete!`;
                     installments: '10x de R$ 129,90 sem Juros',
                     store: 'AMAZON',
                     condition: '✅ NOVO • GARANTIA OFICIAL',
+                    image: ''
+                },
+                {
+                    badge: 'Desconto bug:',
+                    title: 'SSD NVMe 1TB Kingston NV2',
+                    subtitle: 'M.2 2280 • 3500MB/S LEITURA',
+                    oldPrice: 'R$ 549',
+                    price: 'R$ 389',
+                    installments: '6x de R$ 64,83 sem Juros',
+                    store: 'MERCADO LIVRE',
+                    condition: '🔥 PROMOÇÃO RELÂMPAGO',
+                    image: ''
+                },
+                {
+                    badge: 'Super oferta:',
+                    title: 'Monitor Gamer 27" 180Hz IPS',
+                    subtitle: '1MS • FREESYNC • FULL HD',
+                    oldPrice: 'R$ 1.299',
+                    price: 'R$ 899',
+                    installments: '10x de R$ 89,90 sem Juros',
+                    store: 'KABUM!',
+                    condition: '⚡ ESTOQUE LIMITADO',
                     image: ''
                 }
             ],
@@ -1072,6 +1145,8 @@ Ofertas esgotam, verifique o frete!`;
         window.onload = async function () {
             document.getElementById('rawOfferInput').value = DEFAULT_RAW_TEXT;
             populateFormFromState();
+            renderGiroOfferTabs();
+            setPostMode(appState.postMode);
             await loadMascotsFromLocalStorage();
 
             window.addEventListener('paste', handleGlobalClipboardPaste);
@@ -1125,27 +1200,30 @@ Ofertas esgotam, verifique o frete!`;
         // 5. SINCRONIZAÇÃO DOS CAMPOS COM O PREVIEW AO VIVO
         // ============================================================================
         function populateFormFromState() {
-            document.getElementById('fieldBadge').value = appState.badge;
-            document.getElementById('fieldStore').value = appState.store;
-            document.getElementById('fieldCondition').value = appState.condition;
-            document.getElementById('fieldTitle').value = appState.title;
-            document.getElementById('fieldSubtitle').value = appState.subtitle;
-            document.getElementById('fieldOldPrice').value = appState.oldPrice;
-            document.getElementById('fieldPrice').value = appState.price;
-            document.getElementById('fieldCoupon').value = appState.coupon;
-            document.getElementById('fieldInstallments').value = appState.installments;
-            document.getElementById('fieldBrandHandle').value = appState.brandHandle;
-            document.getElementById('fieldSiteUrl').value = appState.siteUrl;
-            document.getElementById('fieldCtaHeadline').value = appState.ctaHeadline;
-            document.getElementById('fieldCommentTrigger').value = appState.commentTrigger;
-            document.getElementById('fieldDisclaimer').value = appState.disclaimer;
+            document.getElementById('fieldBadge').value = appState.badge || '';
+            document.getElementById('fieldStore').value = appState.store || 'AMAZON';
+            document.getElementById('fieldCondition').value = appState.condition || '';
+            document.getElementById('fieldTitle').value = appState.title || '';
+            document.getElementById('fieldSubtitle').value = appState.subtitle || '';
+            document.getElementById('fieldOldPrice').value = appState.oldPrice || '';
+            document.getElementById('fieldPrice').value = appState.price || '';
+            document.getElementById('fieldCoupon').value = appState.coupon || '';
+            document.getElementById('fieldInstallments').value = appState.installments || '';
+            document.getElementById('fieldBrandHandle').value = appState.brandHandle || '@atpromoo';
+            document.getElementById('fieldSiteUrl').value = appState.siteUrl || 'atpromo.vercel.app';
+            document.getElementById('fieldCtaHeadline').value = appState.ctaHeadline || '';
+            document.getElementById('fieldCommentTrigger').value = appState.commentTrigger || '';
+            document.getElementById('fieldDisclaimer').value = appState.disclaimer || '';
+
+            const fieldGiroTitle = document.getElementById('fieldGiroTitle');
+            if (fieldGiroTitle) fieldGiroTitle.value = appState.giroTitle || 'As 4 Melhores Ofertas de Hoje';
 
             document.getElementById('fieldHighlight1').value = appState.highlights[0] || '';
             document.getElementById('fieldHighlight2').value = appState.highlights[1] || '';
             document.getElementById('fieldHighlight3').value = appState.highlights[2] || '';
             document.getElementById('fieldHighlight4').value = appState.highlights[3] || '';
 
-            document.getElementById('generatedCaptionOutput').value = appState.caption;
+            updateCaptionOutput();
         }
 
         function syncFormToState() {
@@ -1171,8 +1249,9 @@ Ofertas esgotam, verifique o frete!`;
                 document.getElementById('fieldHighlight4').value
             ];
 
-            if (appState.giroProducts.length > 0) {
-                appState.giroProducts[0] = {
+            const activeIdx = appState.activeGiroIndex || 0;
+            if (appState.giroProducts && appState.giroProducts[activeIdx]) {
+                appState.giroProducts[activeIdx] = {
                     badge: appState.badge,
                     title: appState.title,
                     subtitle: appState.subtitle,
@@ -1185,7 +1264,9 @@ Ofertas esgotam, verifique o frete!`;
                 };
             }
 
+            renderGiroOfferTabs();
             renderSlidesStage();
+            updateCaptionOutput();
         }
 
         // ============================================================================
@@ -1218,7 +1299,7 @@ Ofertas esgotam, verifique o frete!`;
             const reader = new FileReader();
             reader.onload = function (e) {
                 applyNewProductImage(e.target.result);
-                showToast('Foto do produto adicionada ao Slide 1!');
+                showToast('Foto do produto adicionada!');
             };
             reader.readAsDataURL(file);
         }
@@ -1227,9 +1308,10 @@ Ofertas esgotam, verifique o frete!`;
             appState.productImageSrc = dataUrl;
             appState.productImageTransparentSrc = dataUrl;
             setPhotoBoxStyle('white-card');
-            if (appState.giroProducts.length > 0) {
-                appState.giroProducts[0].image = dataUrl;
-                appState.giroProducts[0].imageTransparent = dataUrl;
+            
+            const activeIdx = appState.activeGiroIndex || 0;
+            if (appState.giroProducts && appState.giroProducts[activeIdx]) {
+                appState.giroProducts[activeIdx].image = dataUrl;
             }
 
             // Detecta a proporção natural da imagem para auto-adaptar o quadro
@@ -1438,12 +1520,12 @@ Ofertas esgotam, verifique o frete!`;
 
             // 1. Detectar Loja pelo Link
             let detectedStore = 'AMAZON';
-            if (/amazon\.com\.br|amzn\.to/i.test(raw)) detectedStore = 'AMAZON';
-            else if (/mercadolivre\.com|meli\.la/i.test(raw)) detectedStore = 'MERCADO LIVRE';
-            else if (/shopee\.com/i.test(raw)) detectedStore = 'SHOPEE';
-            else if (/kabum\.com/i.test(raw)) detectedStore = 'KABUM!';
-            else if (/terabyteshop/i.test(raw)) detectedStore = 'TERABYTE';
-            else if (/pichau\.com/i.test(raw)) detectedStore = 'PICHAU';
+            if (/amazon/i.test(raw)) detectedStore = 'AMAZON';
+            else if (/mercadolivre|meli\./i.test(raw)) detectedStore = 'MERCADO LIVRE';
+            else if (/shopee/i.test(raw)) detectedStore = 'SHOPEE';
+            else if (/kabum/i.test(raw)) detectedStore = 'KABUM!';
+            else if (/terabyte/i.test(raw)) detectedStore = 'TERABYTE';
+            else if (/pichau/i.test(raw)) detectedStore = 'PICHAU';
             else if (/aliexpress/i.test(raw)) detectedStore = 'ALIEXPRESS';
             else if (/magazineluiza|magalu/i.test(raw)) detectedStore = 'MAGALU';
 
@@ -1471,11 +1553,13 @@ Ofertas esgotam, verifique o frete!`;
             if (instMatch) {
                 const count = parseInt(instMatch[1], 10);
                 const semJuros = instMatch[3] ? 'sem Juros' : '';
-                if (numericPrice > 0 && count > 0) {
-                    const parcelVal = (numericPrice / count).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    installmentsText = `${count}x de R$ ${parcelVal} ${semJuros}`.trim();
-                } else {
-                    installmentsText = `Em até ${count}x ${semJuros}`.trim();
+                if (count > 0) {
+                    if (numericPrice > 0) {
+                        const parcelVal = (numericPrice / count).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        installmentsText = `${count}x de R$ ${parcelVal} ${semJuros}`.trim();
+                    } else {
+                        installmentsText = `Em até ${count}x ${semJuros}`.trim();
+                    }
                 }
             }
 
@@ -1590,7 +1674,12 @@ Ofertas esgotam, verifique o frete!`;
 
                 populateFormFromState();
                 syncFormToState();
-                showToast('IA Gemini gerou os 3 slides no ângulo selecionado!');
+
+                if (parsed.quotaExceeded || parsed.fromFallback) {
+                    showToast('Cota diária da IA atingida para hoje. Oferta gerada pelo motor local!', 'warning');
+                } else {
+                    showToast('IA Gemini gerou os 3 slides no ângulo selecionado!');
+                }
             } catch (err) {
                 extractOfferInstant();
                 showToast('Extraído com o motor inteligente local!', 'info');
@@ -1706,36 +1795,71 @@ Ofertas esgotam, verifique o frete!`;
                 slidesHtml += wrapSlideWithActions(buildStoryNeoBrutalistHtml(), 'Story Vertical (9:16)', 'atpromoo-story-oferta.png');
 
             } else if (appState.postMode === 'multi-giro') {
-                const totalSlides = appState.giroProducts.length + 1;
+                const totalSlides = appState.giroProducts.length + 2;
                 stageTitle.textContent = `Carrossel Giro de Ofertas @atpromoo (${totalSlides} Slides • 1080x1350px)`;
                 downloadLabel.textContent = `Baixar Todos os ${totalSlides} Slides (PNG)`;
 
+                // Slide 1: Capa Gancho
+                slidesHtml += wrapSlideWithActions(
+                    buildGiroHookSlideHtml(),
+                    'Slide 1 — Capa Gancho (Giro de Ofertas)',
+                    'atpromoo-giro-01-capa-gancho.png'
+                );
+
+                // Slides 2..N+1: Ofertas do Giro
                 appState.giroProducts.forEach((prod, idx) => {
+                    const slideNum = idx + 2;
+                    const paddedSlide = String(slideNum).padStart(2, '0');
+                    const paddedProd = String(idx + 1).padStart(2, '0');
                     slidesHtml += wrapSlideWithActions(
                         buildGiroProductSlideHtml(prod, idx + 1),
-                        `Slide ${idx + 1} — ${prod.title}`,
-                        `atpromoo-giro-0${idx + 1}.png`
+                        `Slide ${slideNum} — Oferta #${idx + 1}: ${prod.title || 'Sem título'}`,
+                        `atpromoo-giro-${paddedSlide}-oferta-${paddedProd}.png`,
+                        idx
                     );
                 });
 
+                // Slide N+2: CTA Final
+                const ctaSlideNum = totalSlides;
+                const ctaPaddedNum = String(ctaSlideNum).padStart(2, '0');
                 slidesHtml += wrapSlideWithActions(
                     buildSlide3CtaHtml(),
-                    `Slide ${totalSlides} — CTA Final`,
-                    `atpromoo-giro-0${totalSlides}-cta.png`
+                    `Slide ${ctaSlideNum} — CTA Final`,
+                    `atpromoo-giro-${ctaPaddedNum}-cta.png`
                 );
             }
 
             container.innerHTML = slidesHtml;
         }
 
-        function wrapSlideWithActions(slideInnerHtml, label, filename) {
+        function wrapSlideWithActions(slideInnerHtml, label, filename, giroIndex = null) {
+            let editGiroBtn = '';
+            if (giroIndex !== null && appState.postMode === 'multi-giro') {
+                const isActive = giroIndex === appState.activeGiroIndex;
+                editGiroBtn = `
+                <button
+                    type="button"
+                    onclick="selectGiroOffer(${giroIndex})"
+                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 border cursor-pointer ${
+                        isActive
+                            ? 'bg-[#FF6B1A] text-white border-[#141414] shadow-[2px_2px_0px_#141414]'
+                            : 'bg-slate-800 hover:bg-slate-700 text-orange-400 border-slate-700'
+                    }"
+                >
+                    <span>${isActive ? '✏️ Editando' : '✏️ Editar'}</span>
+                </button>`;
+            }
+
             return `
             <div class="flex flex-col items-center gap-2.5 shrink-0">
-                <div class="flex items-center justify-between w-full px-1">
-                    <span class="text-xs font-extrabold text-slate-200">${label}</span>
-                    <button onclick="downloadSingleSlide(this, '${filename}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-[#FF6B1A] text-slate-200 hover:text-white text-[11px] font-bold transition flex items-center gap-1 border border-slate-700 cursor-pointer">
-                        <span>⬇️</span> Baixar PNG
-                    </button>
+                <div class="flex items-center justify-between w-full px-1 gap-2">
+                    <span class="text-xs font-extrabold text-slate-200 truncate max-w-[200px]">${label}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${editGiroBtn}
+                        <button type="button" onclick="downloadSingleSlide(this, '${filename}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-[#FF6B1A] text-slate-200 hover:text-white text-[11px] font-bold transition flex items-center gap-1 border border-slate-700 cursor-pointer">
+                            <span>⬇️</span> PNG
+                        </button>
+                    </div>
                 </div>
                 <div class="rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-800">
                     ${slideInnerHtml}
@@ -2148,6 +2272,100 @@ Ofertas esgotam, verifique o frete!`;
             </div>`;
         }
 
+        function buildGiroHookSlideHtml() {
+            const totalCount = appState.giroProducts.length || 1;
+            const hookTitle = appState.giroTitle || 'As Melhores Seleções de Hoje';
+
+            return `
+            <div class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-5 py-3.5 bg-[#FAF6EE]">
+                
+                <!-- 1. TOPO: Brand Handle + Mascot + Badge de Contagem -->
+                <div class="w-full flex items-center justify-between pt-0.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-[64px] h-[60px] shrink-0 flex items-center justify-center overflow-hidden">
+                            <img
+                                src="${appState.mascotSlot1Raw}"
+                                alt="Mascote ATpromo"
+                                class="w-full h-full object-contain"
+                                crossorigin="anonymous"
+                            />
+                        </div>
+                        <div class="flex flex-col items-start min-w-0">
+                            <span class="font-display font-black text-[13px] text-[#141414]/75 tracking-tight">
+                                ${escapeHtml(appState.brandHandle)}
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-[#FF6B1A] text-[#141414] border-2 border-[#141414] font-display font-black text-[9px] uppercase tracking-wide">
+                                SELEÇÃO ESPECIAL
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Badge de Ofertas Verificadas com Sombra Dura Física -->
+                    <div class="relative inline-block shrink-0">
+                        <div style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; height: 100%; background-color: #141414; border-radius: 9999px;"></div>
+                        <div class="relative px-3 py-1 rounded-full bg-[#141414] border-2 border-[#141414]">
+                            <span class="font-display font-black text-[10px] text-[#FF6B1A] uppercase tracking-wider block leading-none">
+                                ⚡ ${totalCount} ${totalCount === 1 ? 'OFERTA' : 'OFERTAS'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CENTRO: HEADLINE GANCHO + CARD CENTRAL DO GIRO -->
+                <div class="my-auto w-full flex flex-col items-center text-center">
+                    
+                    <h2 class="font-display font-black text-[25px] leading-[1.12] tracking-tight text-[#141414] uppercase mb-1">
+                        🔥 GIRO DE <span class="text-[#FF6B1A]">OFERTAS</span>
+                    </h2>
+
+                    <!-- Card Central do Mascote / Sticker do Giro com Sombra Dura Física -->
+                    <div class="relative w-[88%] mx-auto my-1">
+                        <div style="position: absolute; top: 6px; left: 6px; width: 100%; height: 100%; background-color: #141414; border-radius: 20px;"></div>
+                        <div class="neo-box-white relative w-full overflow-hidden flex flex-col items-center p-3 text-center">
+                            
+                            <div class="relative w-[124px] h-[124px] my-1">
+                                <div style="position: absolute; top: 3px; left: 3px; width: 124px; height: 124px; background-color: #141414; border-radius: 9999px;"></div>
+                                <div class="relative w-[124px] h-[124px] rounded-full border-[3px] border-[#141414] overflow-hidden bg-[#FFE6D5] flex items-center justify-center">
+                                    <img
+                                        src="${appState.mascotSlot2Raw}"
+                                        alt="Mascote Oficial ATpromo"
+                                        class="w-full h-full object-cover"
+                                        style="object-position: center 10%;"
+                                        crossorigin="anonymous"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="mt-2 w-full">
+                                <div class="relative inline-block w-full">
+                                    <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #141414; border-radius: 10px;"></div>
+                                    <div class="relative w-full py-1.5 px-2 bg-[#FF6B1A] border-2 border-[#141414] rounded-lg">
+                                        <span class="font-display font-black text-[11px] text-[#141414] uppercase tracking-wide block leading-tight">
+                                            ${formatEditorialTextWithOrangeItalics(hookTitle)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="font-sans font-extrabold text-[10px] text-neutral-700 mt-2 leading-tight">
+                                Promos verificadas e selecionadas a dedo pelo monitoramento ATpromo 👇
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. RODAPÉ: "atpromo.vercel.app" + "Arrasta ➔" -->
+                <div class="w-full relative flex items-center justify-between pt-0.5 px-1">
+                    <span class="font-display font-bold text-[11px] text-[#141414]/80">
+                        ${escapeHtml(appState.siteUrl)}
+                    </span>
+                    <span class="font-display font-black text-[12px] text-[#141414]">
+                        Arrasta ➔
+                    </span>
+                </div>
+            </div>`;
+        }
+
         function buildGiroProductSlideHtml(prod, slideNumber) {
             const hasPhoto = Boolean(prod.image && prod.image.trim() !== '');
 
@@ -2438,7 +2656,8 @@ Ofertas esgotam, verifique o frete!`;
                     label.textContent = `Exportando Slide ${i + 1}/${slideElements.length}...`;
                     const canvas = await renderSlideToCanvas(slideElements[i]);
                     const link = document.createElement('a');
-                    link.download = `atpromoo-slide-0${i + 1}.png`;
+                    const paddedIndex = String(i + 1).padStart(2, '0');
+                    link.download = `atpromoo-slide-${paddedIndex}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     await new Promise(r => setTimeout(r, 450));
@@ -2453,6 +2672,134 @@ Ofertas esgotam, verifique o frete!`;
             }
         }
 
+        function renderGiroOfferTabs() {
+            const container = document.getElementById('giroOfferTabsList');
+            const activeLabel = document.getElementById('giroActiveOfferLabel');
+            const totalBadge = document.getElementById('giroTotalCountBadge');
+            const fieldGiroTitle = document.getElementById('fieldGiroTitle');
+
+            if (fieldGiroTitle) {
+                fieldGiroTitle.value = appState.giroTitle || 'As 4 Melhores Ofertas de Hoje';
+            }
+
+            const totalOffers = appState.giroProducts.length;
+            const totalSlides = totalOffers + 2; // Slide 1 (Capa Gancho) + N Ofertas + Slide N+2 (CTA)
+
+            if (activeLabel) {
+                activeLabel.textContent = `Oferta #${appState.activeGiroIndex + 1}`;
+            }
+            if (totalBadge) {
+                totalBadge.textContent = `${totalOffers} ${totalOffers === 1 ? 'Oferta' : 'Ofertas'} • ${totalSlides} Slides`;
+            }
+
+            if (!container) return;
+
+            let html = '';
+            appState.giroProducts.forEach((prod, idx) => {
+                const isActive = idx === appState.activeGiroIndex;
+                const activeClass = isActive
+                    ? 'bg-[#FF6B1A] text-white border-2 border-[#141414] shadow-[2px_2px_0px_#141414] font-black'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-700 font-bold';
+
+                const shortTitle = prod.title ? (prod.title.length > 14 ? prod.title.substring(0, 14) + '…' : prod.title) : `Oferta #${idx + 1}`;
+
+                html += `
+                <button
+                    type="button"
+                    onclick="selectGiroOffer(${idx})"
+                    class="px-2.5 py-1.5 rounded-xl text-xs transition whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5 ${activeClass}"
+                >
+                    <span>${isActive ? '🔥' : '🏷️'}</span>
+                    <span>#${idx + 1}: ${escapeHtml(shortTitle)}</span>
+                </button>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectGiroOffer(index) {
+            if (index < 0 || index >= appState.giroProducts.length) return;
+            appState.activeGiroIndex = index;
+
+            const prod = appState.giroProducts[index];
+            appState.badge = prod.badge || 'Vazou o preço:';
+            appState.title = prod.title || '';
+            appState.subtitle = prod.subtitle || '';
+            appState.oldPrice = prod.oldPrice || '';
+            appState.price = prod.price || '';
+            appState.installments = prod.installments || '';
+            appState.store = prod.store || 'AMAZON';
+            appState.condition = prod.condition || '⚡ ESTOQUE LIMITADO';
+            appState.productImageSrc = prod.image || '';
+            appState.productImageTransparentSrc = prod.image || '';
+
+            populateFormFromState();
+            renderGiroOfferTabs();
+            renderSlidesStage();
+            updateCaptionOutput();
+
+            showToast(`Editando Oferta #${index + 1}: ${prod.title || 'Sem título'}`);
+        }
+
+        function syncGiroTitleFromInput(val) {
+            appState.giroTitle = val;
+            renderSlidesStage();
+            updateCaptionOutput();
+        }
+
+        function addNewGiroOffer() {
+            const nextNum = appState.giroProducts.length + 1;
+            appState.giroProducts.push({
+                badge: 'Super oferta:',
+                title: `Nova Oferta #${nextNum}`,
+                subtitle: 'DESCRIÇÃO TÉCNICA E RECURSOS',
+                oldPrice: 'R$ 999',
+                price: 'R$ 699',
+                installments: '10x de R$ 69,90 sem Juros',
+                store: 'AMAZON',
+                condition: '⚡ PROMOÇÃO IMPERDÍVEL',
+                image: ''
+            });
+
+            selectGiroOffer(appState.giroProducts.length - 1);
+            showToast(`Nova oferta adicionada! Total: ${appState.giroProducts.length} ofertas (${appState.giroProducts.length + 2} slides).`);
+        }
+
+        function removeActiveGiroOffer() {
+            if (appState.giroProducts.length <= 1) {
+                showToast('O Giro de Ofertas deve ter no mínimo 1 oferta!', 'warning');
+                return;
+            }
+
+            const removedTitle = appState.giroProducts[appState.activeGiroIndex]?.title || `Oferta #${appState.activeGiroIndex + 1}`;
+            appState.giroProducts.splice(appState.activeGiroIndex, 1);
+            const newIndex = Math.max(0, Math.min(appState.activeGiroIndex, appState.giroProducts.length - 1));
+            selectGiroOffer(newIndex);
+
+            showToast(`"${removedTitle}" removida. Restam ${appState.giroProducts.length} ofertas.`, 'info');
+        }
+
+        function updateCaptionOutput() {
+            if (appState.postMode === 'multi-giro') {
+                const totalProds = appState.giroProducts.length;
+                let text = `🔥 GIRO DE OFERTAS DO DIA — @atpromoo 🚀\n\n`;
+                text += `Confira as ${totalProds} melhores promoções selecionadas a dedo no carrossel de hoje:\n\n`;
+                appState.giroProducts.forEach((p, idx) => {
+                    const numEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'][idx] || `${idx + 1}️⃣`;
+                    text += `${numEmoji} ${p.title} (${p.subtitle || p.store}) — por apenas ${p.price}`;
+                    if (p.installments) text += ` em ${p.installments}`;
+                    if (p.store) text += ` na ${p.store}`;
+                    text += `\n`;
+                });
+                text += `\n💬 Comente EU QUERO pra receber os links diretos no seu Direct, ou acesse pelo link da bio (@atpromoo)! 👇\n\n`;
+                text += `*Ofertas esgotam rápido! Verifique o frete para sua região.\n\n`;
+                text += `#girodeofertas #pcgamer #hardware #promocao #ofertas #atpromoo`;
+                appState.caption = text;
+            }
+            const output = document.getElementById('generatedCaptionOutput');
+            if (output) output.value = appState.caption;
+        }
+
         // ============================================================================
         // 11. UTILITÁRIOS DE UI
         // ============================================================================
@@ -2461,13 +2808,27 @@ Ofertas esgotam, verifique o frete!`;
             const modes = ['carousel-x', 'single-feed', 'story', 'multi-giro'];
             modes.forEach(m => {
                 const btn = document.getElementById(`modeBtn-${m}`);
-                if (m === mode) {
-                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
-                } else {
-                    btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer';
+                if (btn) {
+                    if (m === mode) {
+                        btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
+                    } else {
+                        btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer';
+                    }
                 }
             });
+
+            const giroCard = document.getElementById('giroSelectorCard');
+            if (giroCard) {
+                if (mode === 'multi-giro') {
+                    giroCard.classList.remove('hidden');
+                } else {
+                    giroCard.classList.add('hidden');
+                }
+            }
+
+            renderGiroOfferTabs();
             renderSlidesStage();
+            updateCaptionOutput();
         }
 
         function switchEditorTab(tabId) {
