@@ -9,7 +9,9 @@
     <meta property="og:description" content="Fábrica padronizada de posts, stories e carrosséis de ofertas tech com extração inteligente via IA e exportação em alta definição.">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas para exportação fiel em PNG de alta resolução -->
+    <!-- html-to-image: exporta o PNG usando o próprio motor de layout do navegador (texto idêntico ao preview) -->
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <!-- html2canvas: mantido apenas como plano B, caso o html-to-image falhe -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Google Fonts: Plus Jakarta Sans, Montserrat & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2462,9 +2464,130 @@ Ofertas esgotam, verifique o frete!`;
         }
 
         // ============================================================================
-        // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p) FIEL VIA HTML2CANVAS
+        // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p)
         // ============================================================================
+        // Motor principal: html-to-image. Ele serializa o DOM real e deixa o PRÓPRIO NAVEGADOR
+        // desenhar o slide, então o PNG sai igual ao preview.
+        //
+        // Por que o html2canvas (plano B abaixo) gerava diferença: ele NÃO usa o layout do
+        // navegador, reimplementa o CSS e desenha cada texto por conta própria. Com line-height
+        // curto (leading-none / leading-tight), letter-spacing (tracking-*), truncate/line-clamp
+        // e emojis, o texto cai mais baixo dentro das caixas, o "line-through" descola do preço
+        // e chips como o da loja cortam o texto. Remendar caso a caso (como em
+        // renderSlideToCanvasLegacy) só trata sintomas.
+        const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        let fontEmbedCssPromise = null;
+
+        // As fontes precisam ir DENTRO do PNG: o slide é desenhado como imagem SVG isolada, que não
+        // enxerga as fontes da página. O html-to-image tenta montar esse CSS lendo as regras do <link>
+        // do Google Fonts, mas esse <link> é de outro domínio e o navegador bloqueia a leitura
+        // (SecurityError). A biblioteca só registra o erro no console e devolve "" SEM falhar, então o
+        // PNG saía com Arial/Helvetica (mais larga: quebrava linhas e cortava textos).
+        // Por isso montamos o CSS aqui: baixamos o CSS via fetch (o Google Fonts libera CORS) e
+        // convertemos cada arquivo de fonte em data URL.
+        const fontDataUrlCache = new Map();
+
+        function fetchAsDataUrl(url) {
+            if (!fontDataUrlCache.has(url)) {
+                fontDataUrlCache.set(url, (async () => {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`Falha ao baixar fonte (${res.status}): ${url}`);
+                    const blob = await res.blob();
+                    return await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = () => reject(reader.error);
+                        reader.readAsDataURL(blob);
+                    });
+                })().catch(err => { fontDataUrlCache.delete(url); throw err; }));
+            }
+            return fontDataUrlCache.get(url);
+        }
+
+        async function buildFontEmbedCss(hrefFilter = /fonts\.googleapis\.com/) {
+            const hrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+                .map(link => link.href)
+                .filter(href => hrefFilter.test(href));
+            if (!hrefs.length) throw new Error('Link do Google Fonts não encontrado na página.');
+
+            // Fontes variáveis vêm como vários @font-face (um por peso) apontando para o MESMO arquivo.
+            // Agrupamos por arquivo e emitimos um só @font-face com faixa de pesos, para o CSS não inflar.
+            const groups = new Map();
+            for (const href of hrefs) {
+                const res = await fetch(href);
+                if (!res.ok) throw new Error(`Falha ao baixar CSS de fontes (${res.status}).`);
+                const css = await res.text();
+                // Navegadores recebem "/* subconjunto */ @font-face {...}"; clientes sem suporte a woff2
+                // recebem @font-face sem comentário (arquivo único). Aceitamos os dois formatos.
+                for (const m of css.matchAll(/(?:\/\*\s*([\w-]+)\s*\*\/\s*)?@font-face\s*\{([^}]*)\}/g)) {
+                    const subset = m[1];
+                    // cobre português; ignora cirílico/grego/etc. (só quando o subconjunto vem identificado)
+                    if (subset && subset !== 'latin' && subset !== 'latin-ext') continue;
+                    const body = m[2];
+                    const prop = name => (body.match(new RegExp(name + '\\s*:\\s*([^;]+);')) || [])[1]?.trim();
+                    const src = body.match(/url\((['"]?)([^)'"]+)\1\)\s*(?:format\((['"]?)([^)'"]+)\3\))?/);
+                    if (!src) continue;
+                    const family = prop('font-family');
+                    const style = prop('font-style') || 'normal';
+                    const range = prop('unicode-range');
+                    const weight = parseInt(prop('font-weight'), 10) || 400;
+                    const key = [family, style, range, src[2]].join('|');
+                    const g = groups.get(key) || { family, style, range, url: src[2], format: src[4] || 'woff2', min: weight, max: weight };
+                    g.min = Math.min(g.min, weight);
+                    g.max = Math.max(g.max, weight);
+                    groups.set(key, g);
+                }
+            }
+
+            const faces = await Promise.all(Array.from(groups.values()).map(async g => {
+                const data = await fetchAsDataUrl(g.url);
+                const weight = g.min === g.max ? `${g.min}` : `${g.min} ${g.max}`;
+                return `@font-face{font-family:${g.family};font-style:${g.style};font-weight:${weight};` +
+                    `src:url(${data}) format('${g.format}');${g.range ? `unicode-range:${g.range};` : ''}}`;
+            }));
+
+            // Falha ALTA de propósito: sem fontes o PNG sairia errado, então cai no plano B.
+            if (!faces.length) throw new Error('Nenhuma fonte encontrada para embutir no PNG.');
+            return faces.join('\n');
+        }
+
+        function getFontEmbedCss() {
+            if (!fontEmbedCssPromise) {
+                fontEmbedCssPromise = (async () => {
+                    // Garante que as fontes do Google Fonts já carregaram na página antes de embuti-las
+                    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+                    return buildFontEmbedCss();
+                })().catch(err => {
+                    fontEmbedCssPromise = null; // permite tentar de novo na próxima exportação
+                    throw err;
+                });
+            }
+            return fontEmbedCssPromise;
+        }
+
         async function renderSlideToCanvas(slideEl) {
+            if (window.htmlToImage) {
+                try {
+                    const isStory = slideEl.classList.contains('slide-canvas-9-16') || appState.postMode === 'story';
+                    const options = {
+                        width: 360,
+                        height: isStory ? 640 : 450,
+                        pixelRatio: 3, // 360px * 3 = 1080px (1080x1350 ou 1080x1920)
+                        backgroundColor: '#FAF6EE',
+                        fontEmbedCSS: await getFontEmbedCss()
+                    };
+                    // Safari costuma desenhar imagens/fontes em branco na 1ª passada
+                    if (IS_SAFARI) await window.htmlToImage.toCanvas(slideEl, options);
+                    return await window.htmlToImage.toCanvas(slideEl, options);
+                } catch (err) {
+                    console.warn('html-to-image falhou, usando html2canvas como plano B:', err);
+                }
+            }
+            return renderSlideToCanvasLegacy(slideEl);
+        }
+
+        // Plano B (motor anterior, via html2canvas com clone + ajustes manuais)
+        async function renderSlideToCanvasLegacy(slideEl) {
             // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat) estarem 100% carregadas
             if (document.fonts) {
                 await document.fonts.ready;
