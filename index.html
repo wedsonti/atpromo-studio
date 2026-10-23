@@ -9,7 +9,9 @@
     <meta property="og:description" content="Fábrica padronizada de posts, stories e carrosséis de ofertas tech com extração inteligente via IA e exportação em alta definição.">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2canvas para exportação fiel em PNG de alta resolução -->
+    <!-- html-to-image: exporta o PNG usando o próprio motor de layout do navegador (texto idêntico ao preview) -->
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+    <!-- html2canvas: mantido apenas como plano B, caso o html-to-image falhe -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Google Fonts: Plus Jakarta Sans, Montserrat & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2459,9 +2461,57 @@ Ofertas esgotam, verifique o frete!`;
         }
 
         // ============================================================================
-        // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p) FIEL VIA HTML2CANVAS
+        // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p)
         // ============================================================================
+        // Motor principal: html-to-image. Ele serializa o DOM real e deixa o PRÓPRIO NAVEGADOR
+        // desenhar o slide, então o PNG sai igual ao preview.
+        //
+        // Por que o html2canvas (plano B abaixo) gerava diferença: ele NÃO usa o layout do
+        // navegador, reimplementa o CSS e desenha cada texto por conta própria. Com line-height
+        // curto (leading-none / leading-tight), letter-spacing (tracking-*), truncate/line-clamp
+        // e emojis, o texto cai mais baixo dentro das caixas, o "line-through" descola do preço
+        // e chips como o da loja cortam o texto. Remendar caso a caso (como em
+        // renderSlideToCanvasLegacy) só trata sintomas.
+        const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        let fontEmbedCssPromise = null;
+
+        function getFontEmbedCss(node) {
+            if (!fontEmbedCssPromise) {
+                fontEmbedCssPromise = (async () => {
+                    // Garante que as fontes do Google Fonts já carregaram antes de embuti-las no PNG
+                    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+                    return window.htmlToImage.getFontEmbedCSS(node);
+                })().catch(err => {
+                    fontEmbedCssPromise = null; // permite tentar de novo na próxima exportação
+                    throw err;
+                });
+            }
+            return fontEmbedCssPromise;
+        }
+
         async function renderSlideToCanvas(slideEl) {
+            if (window.htmlToImage) {
+                try {
+                    const isStory = slideEl.classList.contains('slide-canvas-9-16') || appState.postMode === 'story';
+                    const options = {
+                        width: 360,
+                        height: isStory ? 640 : 450,
+                        pixelRatio: 3, // 360px * 3 = 1080px (1080x1350 ou 1080x1920)
+                        backgroundColor: '#FAF6EE',
+                        fontEmbedCSS: await getFontEmbedCss(slideEl)
+                    };
+                    // Safari costuma desenhar imagens/fontes em branco na 1ª passada
+                    if (IS_SAFARI) await window.htmlToImage.toCanvas(slideEl, options);
+                    return await window.htmlToImage.toCanvas(slideEl, options);
+                } catch (err) {
+                    console.warn('html-to-image falhou, usando html2canvas como plano B:', err);
+                }
+            }
+            return renderSlideToCanvasLegacy(slideEl);
+        }
+
+        // Plano B (motor anterior, via html2canvas com clone + ajustes manuais)
+        async function renderSlideToCanvasLegacy(slideEl) {
             // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat) estarem 100% carregadas
             if (document.fonts) {
                 await document.fonts.ready;
