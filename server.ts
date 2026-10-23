@@ -310,9 +310,10 @@ function parseOfferLocally(raw: string, angle: string): ExtractedOffer {
   };
 }
 
-async function generateWithGemini(model: string, raw: string, angle: string): Promise<Record<string, any>> {
+async function generateWithGemini(model: string, raw: string, angle: string, customApiKey?: string): Promise<Record<string, any>> {
+  const activeKey = customApiKey || process.env.GEMINI_API_KEY;
   const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
+    apiKey: activeKey,
     httpOptions: {
       headers: {
         "User-Agent": "aistudio-build",
@@ -374,7 +375,9 @@ app.post("/api/extract-offer", async (req, res) => {
     return;
   }
 
-  const { raw, angle = "price-alert" } = req.body;
+  const { raw, angle = "price-alert", customApiKey } = req.body;
+  const activeApiKey = (req.headers["x-gemini-api-key"] as string) || customApiKey || undefined;
+
   if (!raw || typeof raw !== "string") {
     res.status(400).json({ error: "Texto da oferta inválido." });
     return;
@@ -382,7 +385,7 @@ app.post("/api/extract-offer", async (req, res) => {
 
   // 1. Tentar primeiro o modelo padrão (gemini-3.8-flash)
   try {
-    const result = await generateWithGemini("gemini-3.8-flash", raw, String(angle));
+    const result = await generateWithGemini("gemini-3.8-flash", raw, String(angle), activeApiKey);
     res.json(result);
     return;
   } catch (err: any) {
@@ -395,7 +398,7 @@ app.post("/api/extract-offer", async (req, res) => {
     if (isQuotaError) {
       console.warn("Quota exceeded on gemini-3.8-flash. Attempting secondary model gemini-3.1-flash-lite...");
       try {
-        const fallbackModelResult = await generateWithGemini("gemini-3.1-flash-lite", raw, String(angle));
+        const fallbackModelResult = await generateWithGemini("gemini-3.1-flash-lite", raw, String(angle), activeApiKey);
         res.json(fallbackModelResult);
         return;
       } catch (secondaryErr: any) {
