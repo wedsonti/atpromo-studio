@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATpromo — Campanha Oficial Black Friday (Neo-Brutalismo Comercial)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Tipografia Comercial Pesada: Anton (Impacto Monumental), Space Grotesk (Tech/Números), Plus Jakarta Sans (DNA ATpromo), JetBrains Mono (Specs/Tech) -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Space+Grotesk:wght@700&family=Syne:wght@800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-impact: 'Anton', sans-serif;
+            --font-tech: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --bf-gold: #FFD000;
+            --bf-yellow: #FFE600;
+            --bf-cyber: #FCEE0A;
+            --at-orange: #FF5A1F;
+            --bf-red: #FF2E00;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #09090B;
+            color: #F4F4F5;
+        }
+
+        .font-impact {
+            font-family: var(--font-impact);
+            letter-spacing: 0.02em;
+        }
+        .font-tech {
+            font-family: var(--font-tech);
+        }
+        .font-mono-tech {
+            font-family: var(--font-mono);
+        }
+
+        /* Neo-Brutalist Core Borders & Hard Shadows */
+        .nb-border {
+            border: 3.5px solid #000000;
+        }
+        .nb-border-thick {
+            border: 4px solid #000000;
+        }
+        .nb-border-thin {
+            border: 2.5px solid #000000;
+        }
+        .nb-border-gold {
+            border: 3.5px solid #FFD000;
+        }
+
+        /* High-Contrast Commercial Price Strokes */
+        .price-stroke-black {
+            text-shadow: 4px 4px 0px #000000;
+            -webkit-text-stroke: 2px #000000;
+        }
+        .price-stroke-gold {
+            text-shadow: 4px 4px 0px #FFD000;
+            -webkit-text-stroke: 2px #000000;
+        }
+        .price-stroke-red {
+            text-shadow: 4px 4px 0px #FF2E00;
+            -webkit-text-stroke: 2px #000000;
+        }
+
+        /* Proporção exata Instagram 4:5 (400x500px = escala exata de 1080x1350px) */
+        .insta-canvas {
+            width: 400px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            user-select: none;
+            flex-shrink: 0;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Padrões de Fundo Black Friday */
+        .bg-grid-premium {
+            background-color: #0A0A0C;
+            background-image: 
+                linear-gradient(to right, rgba(255, 208, 0, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 208, 0, 0.07) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .bg-hazard-stripes {
+            background: repeating-linear-gradient(
+                -45deg,
+                #FFE600,
+                #FFE600 12px,
+                #000000 12px,
+                #000000 24px
+            );
+        }
+
+        .bg-tech-matrix {
+            background-color: #0B0D11;
+            background-image: radial-gradient(rgba(252, 238, 10, 0.16) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        /* Recortes Geométricos Neo-Brutalistas */
+        .clip-chamfer {
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+        }
+
+        .ticket-coupon {
+            clip-path: polygon(
+                0% 0%, 100% 0%, 
+                100% 36%, 96% 44%, 96% 56%, 100% 64%, 
+                100% 100%, 0% 100%, 
+                0% 64%, 4% 56%, 4% 44%, 0% 36%
+            );
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121215;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD000;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-[#FFD000] selection:text-black">
+
+    <!-- Top Studio Header -->
+    <header class="bg-zinc-950/95 backdrop-blur border-b-2 border-zinc-800 sticky top-0 z-40 px-4 py-3 shadow-2xl">
+        <div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Identity -->
+            <div class="flex items-center gap-3">
+                <div class="bg-[#FFD000] text-black font-black px-3 py-1.5 rounded-lg border-2 border-black shadow-[3px_3px_0px_#FF5A1F] text-sm tracking-tight flex items-center gap-1.5">
+                    <span class="text-[#FF5A1F] underline decoration-2">AT</span><span>promo</span>
+                    <span class="bg-black text-[#FFD000] px-1.5 py-0.5 rounded text-[10px] font-mono-tech uppercase">BLACK FRIDAY</span>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-extrabold text-white leading-tight flex items-center gap-2">
+                        <span>Gerador de Campanhas Black Friday (4:5 • 1080×1350)</span>
+                    </h1>
+                    <p class="text-xs text-zinc-400">1. Black Friday Premium • 2. Black Friday Explosiva • 3. Black Friday Tech</p>
+                </div>
+            </div>
+
+            <!-- View Mode & Export Actions -->
+            <div class="flex flex-wrap items-center gap-2 bg-zinc-900 p-1.5 rounded-xl border border-zinc-800">
+                <button onclick="setViewMode('grid')" id="btnViewGrid" class="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#FFD000] text-black shadow transition">
+                    👁️ Lado a Lado (3 Propostas)
+                </button>
+                <button onclick="setViewMode('single')" id="btnViewSingle" class="px-3 py-1.5 rounded-lg text-xs font-extrabold text-zinc-300 hover:text-white transition">
+                    🔍 Visualização Individual
+                </button>
+                <button onclick="openCodeModal()" class="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-zinc-800 text-[#FFD000] hover:bg-zinc-700 border border-zinc-700 transition">
+                    💻 Exportar HTML/CSS
+                </button>
+                <button onclick="downloadHighResPNG()" id="btnDownloadPNG" class="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#FF5A1F] text-white hover:bg-[#e04812] border border-black shadow-[2px_2px_0px_#000] transition">
+                    ⬇️ Baixar PNG (1080×1350)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Live Editable Control Bar -->
+    <section class="bg-zinc-900/90 border-b border-zinc-800 px-4 py-3">
+        <div class="max-w-[1440px] mx-auto grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2.5 items-end">
+            
+            <!-- 1. Campanha -->
+            <div>
+                <label class="block text-[10px] font-extrabold uppercase tracking-wider text-[#FFD000] mb-1">Campanha</label>
+                <input type="text" id="inputCampaign" value="BLACK FRIDAY" oninput="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-amber-400/50 rounded-lg px-2.5 py-1.5 text-xs font-black text-[#FFD000] focus:border-[#FFD000] focus:outline-none">
+            </div>
+
+            <!-- 2. Gatilho -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Gatilho Comercial</label>
+                <input type="text" id="inputTrigger" value="Vazou o preço:" oninput="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:border-[#FFD000] focus:outline-none">
+            </div>
+
+            <!-- 3. Produto -->
+            <div class="col-span-2 sm:col-span-1">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Produto</label>
+                <input type="text" id="inputProduct" value="ELG Power Bank 20000mAh" oninput="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:border-[#FFD000] focus:outline-none">
+            </div>
+
+            <!-- 4. Especificações -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Especificações</label>
+                <input type="text" id="inputSpec" value="ELG PB200BK • 22,5W" oninput="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:border-[#FFD000] focus:outline-none">
+            </div>
+
+            <!-- 5. Loja -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Loja Oficial</label>
+                <select id="inputStore" onchange="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white focus:border-[#FFD000] focus:outline-none">
+                    <option value="🛒 AMAZON">🛒 AMAZON</option>
+                    <option value="🤝 MERCADO LIVRE">🤝 MERCADO LIVRE</option>
+                    <option value="🧡 SHOPEE">🧡 SHOPEE</option>
+                    <option value="⚡ KABUM!">⚡ KABUM!</option>
+                    <option value="🔥 ALIEXPRESS">🔥 ALIEXPRESS</option>
+                    <option value="💙 MAGALU">💙 MAGALU</option>
+                </select>
+            </div>
+
+            <!-- 6. Preço Anterior & Atual -->
+            <div class="flex gap-1.5 col-span-2 sm:col-span-1">
+                <div class="w-1/2">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">De (R$)</label>
+                    <input type="text" id="inputOldPrice" value="149,90" oninput="updateStudio()" 
+                        class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs font-bold text-zinc-400 focus:border-[#FFD000] focus:outline-none">
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-[#FFD000] mb-1">Por (R$)</label>
+                    <input type="text" id="inputNewPrice" value="116,75" oninput="updateStudio()" 
+                        class="w-full bg-zinc-950 border border-amber-400/60 rounded-lg px-2 py-1.5 text-xs font-black text-[#FFD000] focus:border-[#FFD000] focus:outline-none">
+                </div>
+            </div>
+
+            <!-- 7. Desconto -->
+            <div>
+                <label class="block text-[10px] font-extrabold uppercase tracking-wider text-[#FF5A1F] mb-1">Selo Desconto</label>
+                <input type="text" id="inputDiscount" value="22% OFF" oninput="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-orange-500/50 rounded-lg px-2.5 py-1.5 text-xs font-black text-[#FF5A1F] focus:border-[#FFD000] focus:outline-none">
+            </div>
+
+            <!-- 8. Condição / Garantia -->
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">Condição PIX / Topo</label>
+                <select id="inputCondition" onchange="updateStudio()" 
+                    class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs font-bold text-white focus:border-[#FFD000] focus:outline-none">
+                    <option value="À vista no PIX">À vista no PIX</option>
+                    <option value="No PIX com Cupom">No PIX com Cupom</option>
+                    <option value="Em até 10x sem juros">Em até 10x s/ juros</option>
+                    <option value="Menor Preço Histórico">Menor Preço Histórico</option>
+                </select>
+            </div>
+
+            <!-- 9. Uploads de Imagem do Produto e Logo -->
+            <div class="flex gap-1.5">
+                <label class="flex-1 cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-600 rounded-lg px-2 py-1.5 text-[11px] font-extrabold text-center transition truncate" title="Carregar foto PNG/JPG do produto">
+                    📷 Produto
+                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'product')">
+                </label>
+                <label class="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-600 rounded-lg px-2.5 py-1.5 text-[11px] font-extrabold text-center transition" title="Carregar logo ATpromo">
+                    🧑 Logo
+                    <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'logo')">
+                </label>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Single View Selector Tabs -->
+    <div id="singleModeSelector" class="hidden justify-center gap-3 pt-5 px-4 flex-wrap">
+        <button onclick="selectVariation(0)" id="tabVar0" class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 border-black shadow-[4px_4px_0px_#FFD000] bg-zinc-900 text-[#FFD000] transition">
+            1. BLACK FRIDAY PREMIUM (Ouro & Contraste)
+        </button>
+        <button onclick="selectVariation(1)" id="tabVar1" class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 border-black shadow-[4px_4px_0px_#FF2E00] bg-[#FFE600] text-black transition">
+            2. BLACK FRIDAY EXPLOSIVA (Liquidação & Impacto)
+        </button>
+        <button onclick="selectVariation(2)" id="tabVar2" class="px-4 py-2 rounded-xl font-extrabold text-xs border-2 border-black shadow-[4px_4px_0px_#FF5A1F] bg-zinc-900 text-[#FCEE0A] transition">
+            3. BLACK FRIDAY TECH (Hardware & Eletrônicos)
+        </button>
+    </div>
+
+    <!-- Main Studio Showcase -->
+    <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 py-6 flex items-start justify-center">
+        <div id="studioContainer" class="grid grid-cols-1 lg:grid-cols-3 gap-10 justify-items-center items-start w-full">
+            <!-- Renderizado dinamicamente via JS -->
+        </div>
+    </main>
+
+    <!-- Modal de Exportação de Código HTML/CSS -->
+    <div id="codeModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-zinc-900 border-2 border-[#FFD000] rounded-2xl max-w-4xl w-full p-6 shadow-2xl max-h-[88vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+                <div>
+                    <h2 class="text-lg font-extrabold text-white">💻 Exportar Código HTML + CSS da Arte</h2>
+                    <p class="text-xs text-zinc-400">Selecione a proposta abaixo para copiar o código completo e auto-contido</p>
+                </div>
+                <button onclick="closeCodeModal()" class="text-zinc-400 hover:text-white font-bold text-2xl px-2">&times;</button>
+            </div>
+
+            <div class="flex flex-wrap gap-2 my-3">
+                <button onclick="showCodeFor(0)" id="codeBtn0" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-[#FFD000] text-black">1. Black Friday Premium</button>
+                <button onclick="showCodeFor(1)" id="codeBtn1" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-zinc-800 text-zinc-300">2. Black Friday Explosiva</button>
+                <button onclick="showCodeFor(2)" id="codeBtn2" class="px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-zinc-800 text-zinc-300">3. Black Friday Tech</button>
+            </div>
+
+            <div class="my-2 overflow-y-auto flex-1">
+                <pre id="codeExportArea" class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 text-[11px] text-[#FFD000] font-mono overflow-x-auto leading-relaxed whitespace-pre-wrap"></pre>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                <button onclick="copyExportedCode()" id="btnCopyConfirm" class="bg-[#FFD000] hover:bg-[#e6bc00] text-black font-black text-xs px-5 py-2.5 rounded-xl border-2 border-black shadow-[3px_3px_0px_#FF5A1F] transition">
+                    📋 Copiar Código HTML/CSS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customProductImg = null;
+        let customLogoImg = null;
+        let viewMode = 'grid';
+        let focusedIndex = 0;
+        let selectedCodeIndex = 0;
+
+        // Ilustração Vetorial Fiel do Produto (ELG Power Bank 20000mAh) sem interferências visuais
+        function getProductVisualHTML() {
+            if (customProductImg) {
+                return `<img src="${customProductImg}" alt="Produto em Oferta" class="max-h-[145px] max-w-[240px] object-contain mx-auto drop-shadow-sm" />`;
+            }
+            return `
+            <svg viewBox="0 0 200 205" class="w-[138px] h-[138px] mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g transform="rotate(12 100 102)">
+                    <!-- Profundidade Lateral -->
+                    <rect x="64" y="14" width="80" height="170" rx="12" fill="#1E2028" stroke="#000000" stroke-width="3.5"/>
+                    <!-- Corpo Principal Grafite -->
+                    <rect x="52" y="18" width="80" height="170" rx="10" fill="#363946" stroke="#000000" stroke-width="3.5"/>
+                    <!-- Visor Digital Superior -->
+                    <rect x="56" y="22" width="72" height="42" rx="6" fill="#0D0F14" stroke="#000000" stroke-width="2.5"/>
+                    <!-- Display 100% Verde -->
+                    <text x="92" y="47" fill="#00E676" font-family="monospace" font-weight="bold" font-size="11.5" text-anchor="middle">100%</text>
+                    <!-- Portas USB Laranja Fast Charge -->
+                    <rect x="69" y="14" width="11" height="3.5" fill="#FF5A1F"/>
+                    <rect x="89" y="14" width="11" height="3.5" fill="#FF5A1F"/>
+                    <rect x="109" y="14" width="11" height="3.5" fill="#FF5A1F"/>
+                    <!-- Especificações Gravadas no Corpo -->
+                    <text x="62" y="162" fill="#E2E8F0" font-family="sans-serif" font-weight="bold" font-size="13">22.5W</text>
+                    <text x="62" y="172" fill="#94A3B8" font-family="sans-serif" font-weight="bold" font-size="6.5">FAST CHARGE</text>
+                    <text x="122" y="168" fill="#CBD5E1" font-family="sans-serif" font-weight="bold" font-size="9" transform="rotate(-90 122 168)">20000mAh</text>
+                </g>
+            </svg>`;
+        }
+
+        // Identidade Oficial ATpromo (Mascote + Logo AT em Laranja e promo em Preto/Branco)
+        function getBrandLogoHTML(shadowColor = '#FFD000', sizeClass = 'w-[54px] h-[54px]') {
+            if (customLogoImg) {
+                return `<img src="${customLogoImg}" alt="ATpromo Logo" class="${sizeClass} object-contain rounded-xl nb-border-thin bg-[#FAF6F0] shrink-0" style="box-shadow: 3px 3px 0px ${shadowColor};" />`;
+            }
+            return `
+            <div class="${sizeClass} rounded-xl bg-[#FAF6F0] nb-border-thin flex flex-col items-center justify-center p-1 relative shrink-0" style="box-shadow: 3px 3px 0px ${shadowColor};">
+                <svg viewBox="0 0 80 54" class="w-10 h-7 -mt-0.5">
+                    <path d="M25 18 C22 10, 35 6, 40 10 C45 6, 56 10, 52 18 C56 22, 54 28, 50 28 L26 28 C22 26, 22 20, 25 18 Z" fill="#111111"/>
+                    <rect x="29" y="14" width="18" height="18" rx="7" fill="#F3C6A5" stroke="#000" stroke-width="2"/>
+                    <path d="M33 25 Q38 23 43 25" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="34" cy="20" r="1.5" fill="#000"/>
+                    <circle cx="42" cy="20" r="1.5" fill="#000"/>
+                    <path d="M22 46 C22 36, 54 36, 54 46" fill="#FFFFFF" stroke="#000" stroke-width="2"/>
+                    <polygon points="42,32 66,30 63,46 39,46" fill="#18181B" stroke="#000" stroke-width="2"/>
+                    <circle cx="52" cy="38" r="3" fill="#FF5A1F"/>
+                </svg>
+                <div class="text-[9.5px] font-black tracking-tighter leading-none italic">
+                    <span class="text-[#FF5A1F] underline decoration-2">AT</span><span class="text-[#000000]">promo</span>
+                </div>
+            </div>`;
+        }
+
+        function getFormData() {
+            const rawCampaign = (document.getElementById('inputCampaign').value || 'BLACK FRIDAY').trim();
+            const parts = rawCampaign.split(' ');
+            const word1 = parts[0] || 'BLACK';
+            const word2 = parts.slice(1).join(' ') || 'FRIDAY';
+
+            return {
+                campaignFull: rawCampaign,
+                word1: word1,
+                word2: word2,
+                trigger: document.getElementById('inputTrigger').value || 'Vazou o preço:',
+                product: document.getElementById('inputProduct').value || 'ELG Power Bank 20000mAh',
+                spec: document.getElementById('inputSpec').value || 'ELG PB200BK • 22,5W',
+                store: document.getElementById('inputStore').value || '🛒 AMAZON',
+                oldPrice: document.getElementById('inputOldPrice').value || '149,90',
+                newPrice: document.getElementById('inputNewPrice').value || '116,75',
+                discount: document.getElementById('inputDiscount').value || '22% OFF',
+                condition: document.getElementById('inputCondition').value || 'À vista no PIX'
+            };
+        }
+
+        /* ==========================================================================
+           PROPOSTA 1: BLACK FRIDAY PREMIUM
+           - Preto profundo (#0A0A0C) com malha arquitetônica dourada sutil
+           - Cabeçalho monumental BLACK FRIDAY em Ouro Vibrante (#FFD000) + Preto
+           - Vitrine do produto 100% limpa com selo geométrico chanfrado de desconto
+           - Bloco comercial de preço em Ouro Vibrante (#FFD000) com sombra dura Branca/Laranja
+           ========================================================================== */
+        function renderProposal1(d, isSingle) {
+            return `
+            <div class="flex flex-col items-center">
+                <!-- Rótulo do Estúdio -->
+                <div class="w-[400px] flex items-center justify-between mb-2 px-1">
+                    <div>
+                        <span class="text-xs font-black text-[#FFD000] uppercase tracking-wide block">1. BLACK FRIDAY PREMIUM</span>
+                        <span class="text-[11px] text-zinc-400">Preto Profundo + Ouro Vibrante (#FFD000) + Contraste Comercial</span>
+                    </div>
+                    <button onclick="downloadSingleCanvas(0)" class="text-[10px] font-extrabold bg-zinc-800 hover:bg-[#FFD000] hover:text-black text-[#FFD000] px-2.5 py-1 rounded border border-zinc-700 transition">
+                        ⬇️ PNG
+                    </button>
+                </div>
+
+                <!-- 4:5 Instagram Canvas -->
+                <div id="canvas-var-0" class="insta-canvas rounded-2xl border-[3.5px] border-zinc-800 bg-grid-premium p-[16px] shadow-2xl ${isSingle ? 'scale-110 my-6' : ''}">
+                    
+                    <!-- 1. IDENTIFICAÇÃO IMEDIATA: HEADER MONUMENTAL BLACK FRIDAY PREMIUM -->
+                    <div class="relative z-10">
+                        <div class="flex items-stretch justify-between gap-2 bg-[#FFD000] nb-border rounded-xl p-2 shadow-[4px_4px_0px_#FFFFFF]">
+                            <!-- Logo ATpromo -->
+                            ${getBrandLogoHTML('#000000', 'w-[50px] h-[50px]')}
+
+                            <!-- Bloco Tipográfico BLACK FRIDAY -->
+                            <div class="flex-1 flex flex-col justify-center bg-[#0A0A0C] rounded-lg px-3 py-1 nb-border-thin">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-[#FFD000]">@atpromoo • OFERTA OFICIAL</span>
+                                    <span class="w-2 h-2 rounded-full bg-[#FF5A1F]"></span>
+                                </div>
+                                <div class="font-impact text-[25px] leading-[0.95] tracking-wider uppercase text-white flex items-center gap-1.5">
+                                    <span>${d.word1}</span>
+                                    <span class="text-[#FFD000] underline decoration-[#FF5A1F] decoration-2">${d.word2}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Título do Produto com Gatilho -->
+                        <div class="mt-2 px-1">
+                            <h2 class="text-[16px] font-extrabold leading-[1.15] text-white tracking-tight">
+                                <span class="bg-[#FF5A1F] text-white px-1.5 py-0.5 rounded nb-border-thin text-[13px] italic mr-1 inline-block">${d.trigger}</span>
+                                <span class="text-white">${d.product}</span>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- 2. VITRINE DO PRODUTO + SELO DE DESCONTO GEOMÉTRICO -->
+                    <div class="relative z-10 my-0.5">
+                        <!-- Selo de Desconto Grande e Chamativo -->
+                        <div class="absolute -top-3 -right-2 z-20 bg-[#FF5A1F] text-white nb-border px-3 py-1 rounded-lg transform rotate-3 shadow-[3px_3px_0px_#FFD000] flex flex-col items-center">
+                            <span class="text-[7.5px] font-black uppercase tracking-widest leading-none text-[#FFD000]">DESCONTO</span>
+                            <span class="font-impact text-[18px] leading-none tracking-wide">${d.discount}</span>
+                        </div>
+
+                        <!-- Card Principal do Produto -->
+                        <div class="rounded-xl nb-border bg-white overflow-hidden flex flex-col shadow-[5px_5px_0px_#FFD000]">
+                            <!-- Topo Garantias -->
+                            <div class="bg-[#111111] text-[#FFD000] py-1 px-3 border-b-[3px] border-black flex items-center justify-between">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="inline-flex items-center justify-center w-3.5 h-3.5 bg-[#FFD000] text-black rounded-[3px] text-[9px] font-black">✓</span>
+                                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider">NOVO • GARANTIA OFICIAL</span>
+                                </div>
+                            </div>
+
+                            <!-- Palco Branco 100% Limpo para o Produto -->
+                            <div class="bg-white h-[142px] flex items-center justify-center p-2 relative">
+                                ${getProductVisualHTML()}
+                            </div>
+
+                            <!-- Barra de Especificações e Loja -->
+                            <div class="bg-[#F4F4F5] py-1.5 px-3 border-t-[3px] border-black flex items-center justify-between">
+                                <span class="text-[10px] font-extrabold text-black uppercase tracking-tight truncate pr-2">${d.spec}</span>
+                                <span class="bg-black text-[#FFD000] px-2.5 py-0.5 rounded text-[9.5px] font-black uppercase tracking-wider shrink-0">
+                                    ${d.store}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. PREÇO PROMOCIONAL DE MÁXIMO IMPACTO COMERCIAL -->
+                    <div class="relative z-10 rounded-xl nb-border bg-[#FFD000] px-4 py-2 flex flex-col items-center justify-center shadow-[5px_5px_0px_#FFFFFF]">
+                        <!-- Preço Anterior Riscado -->
+                        <div class="bg-black text-zinc-300 px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider line-through decoration-[#FF2E00] decoration-2 -mt-0.5">
+                            DE R$ ${d.oldPrice}
+                        </div>
+
+                        <!-- Preço Atual Gigante -->
+                        <div class="font-tech text-[38px] font-black leading-none tracking-tight text-black my-0.5" style="text-shadow: 2.5px 2.5px 0px #FFFFFF;">
+                            R$ ${d.newPrice}
+                        </div>
+
+                        <!-- Condição PIX + CTA -->
+                        <div class="w-full flex items-center justify-between gap-2 mt-0.5 pt-1 border-t-2 border-black/20">
+                            <span class="bg-white text-black nb-border-thin px-3 py-0.5 rounded-full text-[10px] font-black uppercase shadow-[2px_2px_0px_#000]">
+                                ⚡ ${d.condition}
+                            </span>
+                            <span class="text-[10px] font-black uppercase text-black flex items-center gap-1">
+                                Aproveite Agora <span class="bg-black text-[#FFD000] w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px]">➔</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 4. RODAPÉ INSTITUCIONAL ATPROMO -->
+                    <div class="flex items-center justify-between text-[10.5px] font-extrabold text-zinc-300 pt-0.5 z-10">
+                        <span class="font-mono-tech text-[10px] text-[#FFD000]">atpromo.vercel.app</span>
+                        <span class="bg-[#FFD000] text-black px-2 py-0.5 rounded font-black text-[10px] uppercase">Arrasta ➔</span>
+                    </div>
+
+                </div>
+            </div>`;
+        }
+
+        /* ==========================================================================
+           PROPOSTA 2: BLACK FRIDAY EXPLOSIVA
+           - Visual ousado de liquidação agressiva com faixas diagonais de alerta (Preto & Amarelo #FFE600)
+           - Tipografia monumental gigante "BLACK FRIDAY" em bloco inclinado de alto impacto
+           - Explosão gráfica starburst vermelha/laranja (#FF2E00) para o desconto
+           - Bloco de preço em formato de Cupom de Liquidação recortado
+           ========================================================================== */
+        function renderProposal2(d, isSingle) {
+            return `
+            <div class="flex flex-col items-center">
+                <!-- Rótulo do Estúdio -->
+                <div class="w-[400px] flex items-center justify-between mb-2 px-1">
+                    <div>
+                        <span class="text-xs font-black text-[#FFE600] uppercase tracking-wide block">2. BLACK FRIDAY EXPLOSIVA</span>
+                        <span class="text-[11px] text-zinc-400">Fitas de Liquidação + Tipografia Gigante + Explosão de Preço</span>
+                    </div>
+                    <button onclick="downloadSingleCanvas(1)" class="text-[10px] font-extrabold bg-zinc-800 hover:bg-[#FFE600] hover:text-black text-[#FFE600] px-2.5 py-1 rounded border border-zinc-700 transition">
+                        ⬇️ PNG
+                    </button>
+                </div>
+
+                <!-- 4:5 Instagram Canvas -->
+                <div id="canvas-var-1" class="insta-canvas rounded-2xl border-[3.5px] border-zinc-800 bg-[#0E0E10] p-[16px] shadow-2xl ${isSingle ? 'scale-110 my-6' : ''}">
+                    
+                    <!-- Fita Diagonal de Liquidação no Topo e Base -->
+                    <div class="absolute top-0 left-0 right-0 h-2.5 bg-hazard-stripes border-b-2 border-black z-20"></div>
+                    <div class="absolute bottom-0 left-0 right-0 h-2 bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                    <!-- 1. HEADER EXPLOSIVO DE LIQUIDAÇÃO BLACK FRIDAY -->
+                    <div class="relative z-10 mt-1.5">
+                        <div class="flex items-center gap-2.5">
+                            ${getBrandLogoHTML('#FFE600', 'w-[52px] h-[52px]')}
+
+                            <!-- Banner Tipográfico Gigante Inclinado -->
+                            <div class="flex-1 bg-[#FFE600] nb-border rounded-xl px-3 py-1 transform -rotate-1 shadow-[4px_4px_0px_#FF2E00]">
+                                <div class="flex items-center justify-between text-[9px] font-black uppercase text-black leading-none mb-0.5">
+                                    <span>🚨 LIQUIDAÇÃO @atpromoo</span>
+                                    <span class="bg-[#FF2E00] text-white px-1.5 py-0.5 rounded text-[8px]">URGENTE</span>
+                                </div>
+                                <div class="font-impact text-[27px] leading-[0.92] tracking-wider uppercase text-black">
+                                    ${d.campaignFull}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gatilho + Nome do Produto -->
+                        <div class="mt-2 bg-zinc-900/95 border-2 border-[#FFE600] rounded-lg px-2.5 py-1 flex items-center gap-1.5">
+                            <span class="text-[#FFE600] font-black text-[12px] uppercase italic shrink-0">${d.trigger}</span>
+                            <h2 class="text-[14.5px] font-extrabold text-white truncate leading-tight">${d.product}</h2>
+                        </div>
+                    </div>
+
+                    <!-- 2. PRODUTO EM DESTAQUE + EXPLOSÃO STARBURST DE DESCONTO -->
+                    <div class="relative z-10 my-0.5">
+                        
+                        <!-- Explosão Starburst 16 Pontas -->
+                        <div class="absolute -top-4 -right-3 z-20 w-[68px] h-[68px] flex items-center justify-center transform rotate-12 drop-shadow-[3px_3px_0px_#000000]">
+                            <svg viewBox="0 0 100 100" class="w-full h-full absolute inset-0">
+                                <polygon points="50,2 63,17 82,10 83,30 98,42 86,58 93,77 73,81 66,98 50,87 34,98 27,81 7,77 14,58 2,42 17,30 18,10 37,17" 
+                                         fill="#FF2E00" stroke="#000000" stroke-width="5"/>
+                            </svg>
+                            <div class="relative z-10 text-center leading-none">
+                                <span class="block text-[7px] font-black text-[#FFE600] uppercase">BAIXOU</span>
+                                <span class="font-impact text-[14px] text-white tracking-wide">${d.discount}</span>
+                            </div>
+                        </div>
+
+                        <!-- Etiqueta Lateral "QUEIMA DE ESTOQUE" -->
+                        <div class="absolute bottom-9 -left-2 z-20 bg-[#FFE600] text-black nb-border-thin px-2 py-0.5 rounded transform -rotate-3 shadow-[2px_2px_0px_#000] text-[8.5px] font-black uppercase">
+                            🔥 OFERTA RELÂMPAGO
+                        </div>
+
+                        <!-- Container do Produto -->
+                        <div class="rounded-xl nb-border bg-white overflow-hidden flex flex-col shadow-[5px_5px_0px_#FFE600]">
+                            <div class="bg-[#FF2E00] text-white py-1 px-3 border-b-[3px] border-black flex items-center justify-center gap-1.5">
+                                <span class="text-[9.5px] font-black uppercase tracking-wider">✅ NOVO • GARANTIA OFICIAL</span>
+                            </div>
+
+                            <!-- Palco Branco Limpo -->
+                            <div class="bg-white h-[138px] flex items-center justify-center p-2">
+                                ${getProductVisualHTML()}
+                            </div>
+
+                            <div class="bg-[#FFE600] py-1.5 px-3 border-t-[3px] border-black flex items-center justify-between text-black">
+                                <span class="text-[10px] font-black uppercase tracking-tight truncate pr-2">${d.spec}</span>
+                                <span class="bg-black text-white px-2.5 py-0.5 rounded text-[9.5px] font-black uppercase shrink-0">
+                                    ${d.store}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. CUPOM DE PREÇO AGRESSIVO -->
+                    <div class="relative z-10">
+                        <div class="ticket-coupon bg-[#FF2E00] nb-border rounded-xl px-5 py-2 flex flex-col items-center justify-center shadow-[5px_5px_0px_#FFE600]">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-black text-[#FFE600] px-2 py-0.5 rounded text-[9.5px] font-extrabold uppercase line-through">
+                                    DE R$ ${d.oldPrice}
+                                </span>
+                                <span class="text-[9.5px] font-black text-white uppercase tracking-wider">POR APENAS:</span>
+                            </div>
+
+                            <div class="font-impact text-[40px] leading-none tracking-wide text-[#FFE600] my-0.5 price-stroke-black">
+                                R$ ${d.newPrice}
+                            </div>
+
+                            <div class="bg-white text-black nb-border-thin px-4 py-0.5 rounded-full text-[10px] font-black uppercase shadow-[2px_2px_0px_#000]">
+                                ${d.condition}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. RODAPÉ -->
+                    <div class="flex items-center justify-between text-[10.5px] font-extrabold text-white pb-1.5 z-10">
+                        <span class="font-mono-tech text-[10px] bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">atpromo.vercel.app</span>
+                        <span class="text-[#FFE600] font-black uppercase flex items-center gap-1">Arrasta pro lado ➔</span>
+                    </div>
+
+                </div>
+            </div>`;
+        }
+
+        /* ==========================================================================
+           PROPOSTA 3: BLACK FRIDAY TECH
+           - Estética tecnológica Neo-Brutalista para hardware, smartphones, games e eletrônicos
+           - Fundo Carbono (#0B0D11) com matriz técnica + Amarelo Cyber (#FCEE0A) + Laranja ATpromo (#FF5A1F)
+           - Molduras chanfradas estilo HUD de hardware, código de barras e tipografia técnica
+           - Palco branco 100% puro para destacar produtos escuros/eletrônicos sem poluição
+           ========================================================================== */
+        function renderProposal3(d, isSingle) {
+            return `
+            <div class="flex flex-col items-center">
+                <!-- Rótulo do Estúdio -->
+                <div class="w-[400px] flex items-center justify-between mb-2 px-1">
+                    <div>
+                        <span class="text-xs font-black text-[#FCEE0A] uppercase tracking-wide block">3. BLACK FRIDAY TECH</span>
+                        <span class="text-[11px] text-zinc-400">Estética Hardware/Gamer + Cyber Yellow (#FCEE0A) + HUD</span>
+                    </div>
+                    <button onclick="downloadSingleCanvas(2)" class="text-[10px] font-extrabold bg-zinc-800 hover:bg-[#FCEE0A] hover:text-black text-[#FCEE0A] px-2.5 py-1 rounded border border-zinc-700 transition">
+                        ⬇️ PNG
+                    </button>
+                </div>
+
+                <!-- 4:5 Instagram Canvas -->
+                <div id="canvas-var-2" class="insta-canvas rounded-2xl border-[3.5px] border-zinc-800 bg-tech-matrix p-[16px] shadow-2xl ${isSingle ? 'scale-110 my-6' : ''}">
+                    
+                    <!-- Cantoneiras HUD Tech -->
+                    <div class="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-[#FCEE0A] pointer-events-none"></div>
+                    <div class="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-[#FCEE0A] pointer-events-none"></div>
+                    <div class="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-[#FCEE0A] pointer-events-none"></div>
+                    <div class="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-[#FCEE0A] pointer-events-none"></div>
+
+                    <!-- 1. HEADER CYBER TECH BLACK FRIDAY -->
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between gap-2.5">
+                            ${getBrandLogoHTML('#FF5A1F', 'w-[52px] h-[52px]')}
+
+                            <div class="flex-1 bg-[#14171F] border-2 border-[#FCEE0A] rounded-lg p-2 shadow-[4px_4px_0px_#FF5A1F]">
+                                <div class="flex items-center justify-between border-b border-zinc-700 pb-0.5 mb-1">
+                                    <span class="font-mono-tech text-[8.5px] text-[#FCEE0A] uppercase">// SYS.DEAL: @atpromoo</span>
+                                    <span class="font-mono-tech text-[8.5px] bg-[#FF5A1F] text-black font-black px-1.5 rounded">TECH_BF</span>
+                                </div>
+                                <div class="font-impact text-[24px] leading-none tracking-wider uppercase text-[#FCEE0A]">
+                                    ${d.campaignFull}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Produto Tech -->
+                        <div class="mt-2 flex items-center justify-between bg-zinc-900 border-l-4 border-[#FF5A1F] px-2.5 py-1 rounded-r-lg">
+                            <div class="truncate">
+                                <span class="font-mono-tech text-[11px] font-extrabold text-[#FCEE0A] uppercase mr-1">${d.trigger}</span>
+                                <span class="text-[14.5px] font-extrabold text-white">${d.product}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. VITRINE DE HARDWARE + MÓDULO DE DESCONTO CHANFRADO -->
+                    <div class="relative z-10 my-0.5">
+                        <!-- Badge de Desconto Tech -->
+                        <div class="absolute -top-3 right-2 z-20 bg-[#FCEE0A] text-black nb-border px-3 py-0.5 shadow-[3px_3px_0px_#FF5A1F] flex items-center gap-1">
+                            <span class="font-mono-tech text-[13px] font-black uppercase">▼ ${d.discount}</span>
+                        </div>
+
+                        <!-- Card do Produto -->
+                        <div class="rounded-xl nb-border bg-white overflow-hidden flex flex-col shadow-[5px_5px_0px_#FCEE0A]">
+                            <!-- Barra Superior -->
+                            <div class="bg-[#14171F] text-white py-1 px-3 border-b-[3px] border-black flex items-center justify-between">
+                                <span class="font-mono-tech text-[9px] font-bold text-[#00E676] flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-[#00E676] inline-block"></span>
+                                    NOVO • GARANTIA OFICIAL
+                                </span>
+                                <span class="font-mono-tech text-[8px] text-zinc-400">VERIFIED_DEAL</span>
+                            </div>
+
+                            <!-- Palco Branco Limpo -->
+                            <div class="bg-white h-[140px] flex items-center justify-center p-2 relative">
+                                ${getProductVisualHTML()}
+                            </div>
+
+                            <!-- Especificações + Loja -->
+                            <div class="bg-[#F4F4F5] py-1.5 px-3 border-t-[3px] border-black flex items-center justify-between">
+                                <span class="font-mono-tech text-[9.5px] font-extrabold text-black uppercase truncate pr-2">${d.spec}</span>
+                                <span class="bg-[#FF5A1F] text-white border border-black px-2 py-0.5 rounded text-[9.5px] font-black uppercase shadow-[2px_2px_0px_#000] shrink-0">
+                                    ${d.store}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. MÓDULO DE PREÇO HIGH-VOLTAGE TECH -->
+                    <div class="relative z-10 clip-chamfer bg-[#FCEE0A] nb-border px-4 py-2 flex flex-col items-center justify-center shadow-[5px_5px_0px_#FF5A1F]">
+                        <div class="w-full flex items-center justify-between border-b-2 border-black/20 pb-0.5 mb-0.5">
+                            <span class="font-mono-tech text-[9.5px] font-extrabold text-black/80 line-through">
+                                OLD_PRICE: R$ ${d.oldPrice}
+                            </span>
+                            <span class="font-mono-tech text-[9px] font-black bg-black text-[#FCEE0A] px-1.5 py-0.2 rounded">
+                                BLACK_PRICE
+                            </span>
+                        </div>
+
+                        <div class="font-tech text-[38px] font-black leading-none tracking-tight text-black my-0.5" style="text-shadow: 2.5px 2.5px 0px #FFFFFF;">
+                            R$ ${d.newPrice}
+                        </div>
+
+                        <div class="mt-0.5 bg-black text-[#FCEE0A] px-4 py-0.5 rounded text-[10px] font-mono-tech font-extrabold uppercase tracking-wider">
+                            ⚡ ${d.condition}
+                        </div>
+                    </div>
+
+                    <!-- 4. RODAPÉ TECH -->
+                    <div class="flex items-center justify-between text-[10px] font-mono-tech font-bold text-zinc-300 pt-0.5 z-10">
+                        <span class="text-[#FCEE0A]">atpromo.vercel.app</span>
+                        <span class="bg-zinc-800 border border-[#FCEE0A] text-[#FCEE0A] px-2 py-0.5 rounded">ARRASTA ➔</span>
+                    </div>
+
+                </div>
+            </div>`;
+        }
+
+        function updateStudio() {
+            const data = getFormData();
+            const container = document.getElementById('studioContainer');
+
+            if (viewMode === 'grid') {
+                container.className = "grid grid-cols-1 lg:grid-cols-3 gap-10 justify-items-center items-start w-full";
+                container.innerHTML = [
+                    renderProposal1(data, false),
+                    renderProposal2(data, false),
+                    renderProposal3(data, false)
+                ].join('');
+            } else {
+                container.className = "flex justify-center items-center w-full py-2";
+                const renderFns = [renderProposal1, renderProposal2, renderProposal3];
+                container.innerHTML = renderFns[focusedIndex](data, true);
+            }
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            const btnGrid = document.getElementById('btnViewGrid');
+            const btnSingle = document.getElementById('btnViewSingle');
+            const selector = document.getElementById('singleModeSelector');
+
+            if (mode === 'grid') {
+                btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#FFD000] text-black shadow transition";
+                btnSingle.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold text-zinc-300 hover:text-white transition";
+                selector.classList.add('hidden');
+                selector.classList.remove('flex');
+            } else {
+                btnSingle.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#FFD000] text-black shadow transition";
+                btnGrid.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold text-zinc-300 hover:text-white transition";
+                selector.classList.remove('hidden');
+                selector.classList.add('flex');
+            }
+            updateStudio();
+        }
+
+        function selectVariation(index) {
+            focusedIndex = index;
+            updateStudio();
+        }
+
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (type === 'product') customProductImg = e.target.result;
+                if (type === 'logo') customLogoImg = e.target.result;
+                updateStudio();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openCodeModal() {
+            const modal = document.getElementById('codeModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            showCodeFor(selectedCodeIndex);
+        }
+
+        function closeCodeModal() {
+            const modal = document.getElementById('codeModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function showCodeFor(idx) {
+            selectedCodeIndex = idx;
+            for (let i = 0; i < 3; i++) {
+                const btn = document.getElementById('codeBtn' + i);
+                if (i === idx) {
+                    btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-[#FFD000] text-black";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-extrabold bg-zinc-800 text-zinc-300 hover:bg-zinc-700";
+                }
+            }
+
+            const d = getFormData();
+            const renderFns = [renderProposal1, renderProposal2, renderProposal3];
+            const rawHTML = renderFns[idx](d, false);
+            document.getElementById('codeExportArea').textContent = rawHTML.trim();
+        }
+
+        function copyExportedCode() {
+            const code = document.getElementById('codeExportArea').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const btn = document.getElementById('btnCopyConfirm');
+            const prev = btn.innerText;
+            btn.innerText = '✅ Código Copiado com Sucesso!';
+            setTimeout(() => { btn.innerText = prev; }, 2000);
+        }
+
+        // Exportação em Alta Resolução 1080x1350px (Proporção 4:5 Instagram)
+        async function downloadSingleCanvas(idx) {
+            const targetId = `canvas-var-${idx}`;
+            const el = document.getElementById(targetId);
+            if (!el || typeof html2canvas === 'undefined') return;
+
+            const btn = document.getElementById('btnDownloadPNG');
+            const originalText = btn.innerText;
+            btn.innerText = '⏳ Gerando 1080×1350...';
+
+            try {
+                const canvas = await html2canvas(el, {
+                    scale: 2.7, // 400px * 2.7 = 1080px | 500px * 2.7 = 1350px
+                    useCORS: true,
+                    backgroundColor: null
+                });
+                const link = document.createElement('a');
+                const names = ['premium', 'explosiva', 'tech'];
+                link.download = `ATpromo-BlackFriday-${names[idx]}-1080x1350.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error('Erro ao exportar PNG:', err);
+            } finally {
+                btn.innerText = originalText;
+            }
+        }
+
+        function downloadHighResPNG() {
+            const indexToDownload = viewMode === 'single' ? focusedIndex : 0;
+            downloadSingleCanvas(indexToDownload);
+        }
+
+        window.onload = function() {
+            updateStudio();
+        };
+    </script>
+</body>
+</html>

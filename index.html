@@ -13,10 +13,10 @@
     <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
     <!-- html2canvas: mantido apenas como plano B, caso o html-to-image falhe -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts: Plus Jakarta Sans, Montserrat & JetBrains Mono -->
+    <!-- Google Fonts: Anton, Plus Jakarta Sans, Montserrat & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500;700;800&family=Montserrat:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -32,6 +32,7 @@
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
                         display: ['Plus Jakarta Sans', 'Montserrat', 'sans-serif'],
+                        impact: ['Anton', 'Montserrat', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     }
                 }
@@ -118,6 +119,22 @@
         /* Integração dos mascotes: SEM mix-blend-mode (o fundo #FAF6EE dos slides é idêntico ao das imagens) */
         .mascot-clean {
             background: transparent;
+        }
+
+        /* Tipografia Monumental & Fitas de Liquidação para o Tema Novembro Black (Black Friday Explosiva) */
+        .font-impact {
+            font-family: 'Anton', 'Montserrat', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .bg-hazard-stripes {
+            background: repeating-linear-gradient(
+                -45deg,
+                #FFE600,
+                #FFE600 10px,
+                #000000 10px,
+                #000000 20px
+            );
         }
     </style>
 </head>
@@ -218,20 +235,33 @@
                 </div>
             </div>
 
-            <!-- Seletor de Formato -->
-            <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
-                <button onclick="setPostMode('carousel-x')" id="modeBtn-carousel-x" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer">
-                    📑 Carrossel 3 Slides (4:5)
-                </button>
-                <button onclick="setPostMode('single-feed')" id="modeBtn-single-feed" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
-                    🖼️ Post Único (4:5)
-                </button>
-                <button onclick="setPostMode('story')" id="modeBtn-story" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
-                    📱 Story (9:16)
-                </button>
-                <button onclick="setPostMode('multi-giro')" id="modeBtn-multi-giro" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
-                    🔥 Giro de Ofertas
-                </button>
+            <!-- Seletor de Tema + Seletor de Formato -->
+            <div class="flex flex-wrap items-center gap-2 max-w-full">
+                <!-- Toggle de Tema Visual: Editorial Padrão vs Novembro Black -->
+                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button onclick="setVisualTheme('editorial')" id="themeBtn-editorial" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer">
+                        🎨 Editorial Padrão
+                    </button>
+                    <button onclick="setVisualTheme('novembro-black')" id="themeBtn-novembro-black" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap text-[#FFE600] hover:bg-zinc-900 cursor-pointer">
+                        💣 Novembro Black
+                    </button>
+                </div>
+
+                <!-- Seletor dos 4 Formatos (Funciona nos 2 Temas!) -->
+                <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
+                    <button onclick="setPostMode('carousel-x')" id="modeBtn-carousel-x" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer">
+                        📑 Carrossel 3 Slides (4:5)
+                    </button>
+                    <button onclick="setPostMode('single-feed')" id="modeBtn-single-feed" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                        🖼️ Post Único (4:5)
+                    </button>
+                    <button onclick="setPostMode('story')" id="modeBtn-story" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                        📱 Story (9:16)
+                    </button>
+                    <button onclick="setPostMode('multi-giro')" id="modeBtn-multi-giro" class="mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer">
+                        🔥 Giro de Ofertas
+                    </button>
+                </div>
             </div>
 
             <!-- Export Actions -->
@@ -513,6 +543,133 @@
                 </div>
             </div>
 
+            <!-- SEÇÃO EXCLUSIVA: TEMA NOVEMBRO BLACK / BLACK FRIDAY EXPLOSIVA -->
+            <div id="bfSelectorCard" class="hidden bg-zinc-950 border-2 border-[#FFE600] rounded-2xl p-4 shadow-[0_0_25px_rgba(255,230,0,0.12)] space-y-3">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded bg-[#FFE600] text-black font-mono font-black text-xs uppercase border border-black shadow-[2px_2px_0px_#FF2E00]">
+                            💣 NOVEMBRO BLACK
+                        </span>
+                        <h2 class="font-display font-extrabold text-xs sm:text-sm text-white uppercase tracking-wide">
+                            Black Friday Explosiva
+                        </h2>
+                    </div>
+                    <span class="text-[10px] font-mono font-bold text-[#FFE600] bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                        Modelo #2 • 1080p
+                    </span>
+                </div>
+
+                <!-- Sub-formato dentro do Tema Novembro Black (Sincronizado com os 4 formatos do topo) -->
+                <div>
+                    <label class="block text-[11px] font-bold text-zinc-300 mb-1.5">
+                        Formato da Publicação Black Friday:
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                        <button type="button" onclick="setPostMode('carousel-x')" id="bfSubBtn-carousel-x" class="py-1.5 px-2 rounded-lg text-[11px] font-extrabold bg-[#FFE600] text-black shadow transition cursor-pointer">
+                            📑 3 Slides
+                        </button>
+                        <button type="button" onclick="setPostMode('single-feed')" id="bfSubBtn-single-feed" class="py-1.5 px-2 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition cursor-pointer">
+                            🖼️ Post Único
+                        </button>
+                        <button type="button" onclick="setPostMode('story')" id="bfSubBtn-story" class="py-1.5 px-2 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition cursor-pointer">
+                            📱 Story (9:16)
+                        </button>
+                        <button type="button" onclick="setPostMode('multi-giro')" id="bfSubBtn-multi-giro" class="py-1.5 px-2 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition cursor-pointer">
+                            🔥 Giro Black
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Título Monumental da Campanha + Atalhos Rápidos -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[11px] font-bold text-[#FFE600]">
+                            Título Monumental no Topo (Fonte Anton)
+                        </label>
+                        <span class="text-[10px] text-zinc-400">Atalhos rápidos:</span>
+                    </div>
+                    <input
+                        type="text"
+                        id="fieldBfCampaign"
+                        oninput="syncBfFieldsFromInput()"
+                        placeholder="BLACK FRIDAY"
+                        class="w-full bg-zinc-900 border border-[#FFE600]/60 focus:border-[#FFE600] focus:outline-none rounded-xl px-3 py-1.5 text-xs font-black text-[#FFE600] uppercase tracking-wider"
+                    >
+                    <div class="flex flex-wrap gap-1.5 mt-1.5">
+                        <button type="button" onclick="setBfCampaignPreset('BLACK FRIDAY')" class="px-2 py-0.5 rounded bg-[#FFE600]/15 hover:bg-[#FFE600]/25 text-[#FFE600] border border-[#FFE600]/40 text-[10px] font-extrabold transition cursor-pointer">
+                            💣 BLACK FRIDAY
+                        </button>
+                        <button type="button" onclick="setBfCampaignPreset('NOVEMBRO BLACK')" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-bold transition cursor-pointer">
+                            🖤 NOVEMBRO BLACK
+                        </button>
+                        <button type="button" onclick="setBfCampaignPreset('ESQUENTA BLACK')" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-bold transition cursor-pointer">
+                            🔥 ESQUENTA BLACK
+                        </button>
+                        <button type="button" onclick="setBfCampaignPreset('CYBER MONDAY')" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-bold transition cursor-pointer">
+                            ⚡ CYBER MONDAY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Subtítulo do Banner + Tag Urgente -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-2">
+                        <label class="block text-[10.5px] font-bold text-zinc-400 mb-1">Subtítulo do Banner</label>
+                        <input
+                            type="text"
+                            id="fieldBfHeaderSubtitle"
+                            oninput="syncBfFieldsFromInput()"
+                            placeholder="🚨 LIQUIDAÇÃO @ATPROMOO"
+                            class="w-full bg-zinc-900 border border-zinc-700 focus:border-[#FFE600] focus:outline-none rounded-lg px-2.5 py-1.5 text-xs font-bold text-white"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10.5px] font-bold text-zinc-400 mb-1">Selo Topo</label>
+                        <input
+                            type="text"
+                            id="fieldBfUrgentTag"
+                            oninput="syncBfFieldsFromInput()"
+                            placeholder="URGENTE"
+                            class="w-full bg-zinc-900 border border-zinc-700 focus:border-[#FFE600] focus:outline-none rounded-lg px-2.5 py-1.5 text-xs font-black text-[#FF2E00] uppercase"
+                        >
+                    </div>
+                </div>
+
+                <!-- Explosão Starburst de Desconto + Etiqueta Relâmpago -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10.5px] font-bold text-zinc-400 mb-1">Topo do Selo</label>
+                        <input
+                            type="text"
+                            id="fieldBfStarburstTop"
+                            oninput="syncBfFieldsFromInput()"
+                            placeholder="BAIXOU"
+                            class="w-full bg-zinc-900 border border-zinc-700 focus:border-[#FFE600] focus:outline-none rounded-lg px-2 py-1.5 text-xs font-bold text-[#FFE600] uppercase"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10.5px] font-extrabold text-[#FF2E00] mb-1">Desconto (Auto)</label>
+                        <input
+                            type="text"
+                            id="fieldBfDiscount"
+                            oninput="syncBfFieldsFromInput()"
+                            placeholder="Auto (ex: 22% OFF)"
+                            class="w-full bg-zinc-900 border border-[#FF2E00]/60 focus:border-[#FFE600] focus:outline-none rounded-lg px-2 py-1.5 text-xs font-black text-white uppercase"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-[10.5px] font-bold text-zinc-400 mb-1">Tag na Foto</label>
+                        <input
+                            type="text"
+                            id="fieldBfFlashTag"
+                            oninput="syncBfFieldsFromInput()"
+                            placeholder="🔥 OFERTA RELÂMPAGO"
+                            class="w-full bg-zinc-900 border border-zinc-700 focus:border-[#FFE600] focus:outline-none rounded-lg px-2 py-1.5 text-xs font-bold text-[#FFE600]"
+                        >
+                    </div>
+                </div>
+            </div>
+
             <!-- PASSO 3: EDIÇÃO FINA DOS TEXTOS DOS SLIDES -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
                 <div class="flex items-center justify-between mb-3">
@@ -784,7 +941,14 @@ https://www.amazon.com.br/dp/B0HD2G4RNM?tag=atpromo-20
 Ofertas esgotam, verifique o frete!`;
 
         let appState = {
+            visualTheme: 'editorial',    // 'editorial' | 'novembro-black'
             postMode: 'carousel-x',      // 'carousel-x' | 'single-feed' | 'story' | 'multi-giro'
+            bfCampaignTitle: 'BLACK FRIDAY',
+            bfHeaderSubtitle: '🚨 LIQUIDAÇÃO @ATPROMOO',
+            bfUrgentTag: 'URGENTE',
+            bfStarburstTop: 'BAIXOU',
+            bfDiscountCustom: '',        // Se vazio, calcula automaticamente % OFF entre oldPrice e price
+            bfFlashTag: '🔥 OFERTA RELÂMPAGO',
             copyAngle: 'price-alert',    // 'price-alert' | 'contrarian' | 'math-value' | 'who-is-it-for' | 'hidden-detail'
             photoBoxStyle: 'white-card', // 'white-card' | 'transparent'
             photoFit: 'contain',         // 'contain' | 'cover'
@@ -1220,6 +1384,22 @@ Ofertas esgotam, verifique o frete!`;
             const fieldGiroTitle = document.getElementById('fieldGiroTitle');
             if (fieldGiroTitle) fieldGiroTitle.value = appState.giroTitle || 'As 4 Melhores Ofertas de Hoje';
 
+            const fieldBfCampaign = document.getElementById('fieldBfCampaign');
+            if (fieldBfCampaign) fieldBfCampaign.value = appState.bfCampaignTitle || 'BLACK FRIDAY';
+            const fieldBfHeaderSubtitle = document.getElementById('fieldBfHeaderSubtitle');
+            if (fieldBfHeaderSubtitle) fieldBfHeaderSubtitle.value = appState.bfHeaderSubtitle || '🚨 LIQUIDAÇÃO @ATPROMOO';
+            const fieldBfUrgentTag = document.getElementById('fieldBfUrgentTag');
+            if (fieldBfUrgentTag) fieldBfUrgentTag.value = appState.bfUrgentTag || 'URGENTE';
+            const fieldBfStarburstTop = document.getElementById('fieldBfStarburstTop');
+            if (fieldBfStarburstTop) fieldBfStarburstTop.value = appState.bfStarburstTop || 'BAIXOU';
+            const fieldBfDiscount = document.getElementById('fieldBfDiscount');
+            if (fieldBfDiscount) {
+                fieldBfDiscount.placeholder = `Auto (${getComputedBfDiscountLabel()})`;
+                fieldBfDiscount.value = appState.bfDiscountCustom || '';
+            }
+            const fieldBfFlashTag = document.getElementById('fieldBfFlashTag');
+            if (fieldBfFlashTag) fieldBfFlashTag.value = appState.bfFlashTag ?? '🔥 OFERTA RELÂMPAGO';
+
             document.getElementById('fieldHighlight1').value = appState.highlights[0] || '';
             document.getElementById('fieldHighlight2').value = appState.highlights[1] || '';
             document.getElementById('fieldHighlight3').value = appState.highlights[2] || '';
@@ -1264,6 +1444,11 @@ Ofertas esgotam, verifique o frete!`;
                     condition: appState.condition,
                     image: appState.productImageSrc
                 };
+            }
+
+            const fieldBfDiscount = document.getElementById('fieldBfDiscount');
+            if (fieldBfDiscount) {
+                fieldBfDiscount.placeholder = `Auto (${getComputedBfDiscountLabel()})`;
             }
 
             renderGiroOfferTabs();
@@ -1776,10 +1961,80 @@ Ofertas esgotam, verifique o frete!`;
 
             const stageTitle = document.getElementById('previewStageTitle');
             const downloadLabel = document.getElementById('downloadBtnLabel');
+            const isBlackTheme = appState.visualTheme === 'novembro-black';
 
             let slidesHtml = '';
 
-            if (appState.postMode === 'carousel-x') {
+            if (isBlackTheme) {
+                if (appState.postMode === 'single-feed') {
+                    stageTitle.textContent = 'Novembro Black Explosiva @atpromoo — Post Único (4:5 • 1080x1350px)';
+                    downloadLabel.textContent = 'Baixar Post Black Friday (PNG)';
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaSlide1Html(false),
+                        'Post Único — Black Friday Explosiva',
+                        'atpromoo-blackfriday-post-unico.png'
+                    );
+                } else if (appState.postMode === 'story') {
+                    stageTitle.textContent = 'Novembro Black Explosiva @atpromoo — Story Vertical (9:16 • 1080x1920px)';
+                    downloadLabel.textContent = 'Baixar Story Black Friday 9:16 (PNG)';
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaStoryHtml(),
+                        'Story 9:16 — Black Friday Explosiva',
+                        'atpromoo-blackfriday-story.png'
+                    );
+                } else if (appState.postMode === 'multi-giro') {
+                    const totalSlides = appState.giroProducts.length + 2;
+                    stageTitle.textContent = `Giro de Ofertas Novembro Black @atpromoo (${totalSlides} Slides • 1080x1350px)`;
+                    downloadLabel.textContent = `Baixar Todos os ${totalSlides} Slides Black (PNG)`;
+
+                    // Slide 1: Capa Gancho Giro Black Friday
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaGiroHookSlideHtml(),
+                        'Slide 1 — Capa Gancho (Giro Black Friday)',
+                        'atpromoo-blackfriday-giro-01-capa.png'
+                    );
+
+                    // Slides 2..N+1: Produtos do Giro no formato Black Friday Explosiva
+                    appState.giroProducts.forEach((prod, idx) => {
+                        const slideNum = idx + 2;
+                        const paddedSlide = String(slideNum).padStart(2, '0');
+                        const paddedProd = String(idx + 1).padStart(2, '0');
+                        slidesHtml += wrapSlideWithActions(
+                            buildBfExplosivaGiroProductSlideHtml(prod, idx + 1),
+                            `Slide ${slideNum} — Oferta #${idx + 1}: ${prod.title || 'Sem título'}`,
+                            `atpromoo-blackfriday-giro-${paddedSlide}-oferta-${paddedProd}.png`,
+                            idx
+                        );
+                    });
+
+                    // Slide N+2: CTA Final Black Friday
+                    const ctaSlideNum = totalSlides;
+                    const ctaPaddedNum = String(ctaSlideNum).padStart(2, '0');
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaSlide3CtaHtml(),
+                        `Slide ${ctaSlideNum} — CTA Final Black Friday`,
+                        `atpromoo-blackfriday-giro-${ctaPaddedNum}-cta.png`
+                    );
+                } else {
+                    stageTitle.textContent = 'Carrossel Novembro Black Explosiva @atpromoo (3 Slides • 1080x1350px)';
+                    downloadLabel.textContent = 'Baixar Todos os 3 Slides Black (PNG)';
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaSlide1Html(true),
+                        'Slide 1 — Capa Black Friday Explosiva',
+                        'atpromoo-blackfriday-slide-01-capa.png'
+                    );
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaSlide2Html(),
+                        'Slide 2 — Vale a Pena? (Black Friday)',
+                        'atpromoo-blackfriday-slide-02-vale-a-pena.png'
+                    );
+                    slidesHtml += wrapSlideWithActions(
+                        buildBfExplosivaSlide3CtaHtml(),
+                        'Slide 3 — CTA Black Friday (@atpromoo)',
+                        'atpromoo-blackfriday-slide-03-cta.png'
+                    );
+                }
+            } else if (appState.postMode === 'carousel-x') {
                 stageTitle.textContent = 'Carrossel Editorial @atpromoo (3 Slides • 1080x1350px)';
                 downloadLabel.textContent = 'Baixar Todos os 3 Slides (PNG)';
 
@@ -2464,6 +2719,870 @@ Ofertas esgotam, verifique o frete!`;
         }
 
         // ============================================================================
+        // 9B. TEMA NOVEMBRO BLACK — MODELO #2: BLACK FRIDAY EXPLOSIVA (@atpromoo)
+        // ============================================================================
+        function parseCurrencyValue(str) {
+            if (!str) return 0;
+            const cleaned = String(str).replace(/[^\d.,]/g, '').trim();
+            if (!cleaned) return 0;
+            // Se tiver vírgula como separador decimal (ex: 3.283,50 ou 149,90)
+            if (cleaned.includes(',')) {
+                const normalized = cleaned.replace(/\./g, '').replace(',', '.');
+                const val = parseFloat(normalized);
+                return isNaN(val) ? 0 : val;
+            }
+            // Se tiver apenas pontos de milhar (ex: 3.283)
+            const withoutDots = cleaned.replace(/\./g, '');
+            const val = parseFloat(withoutDots);
+            return isNaN(val) ? 0 : val;
+        }
+
+        function getComputedBfDiscountLabel() {
+            const custom = (appState.bfDiscountCustom || '').trim();
+            if (custom) return custom;
+
+            const oldVal = parseCurrencyValue(appState.oldPrice);
+            const newVal = parseCurrencyValue(appState.price);
+            if (oldVal > newVal && newVal > 0) {
+                const pct = Math.round(((oldVal - newVal) / oldVal) * 100);
+                if (pct >= 1 && pct <= 95) {
+                    return `${pct}% OFF`;
+                }
+            }
+            return '22% OFF';
+        }
+
+        function syncBfFieldsFromInput() {
+            const cEl = document.getElementById('fieldBfCampaign');
+            const sEl = document.getElementById('fieldBfHeaderSubtitle');
+            const uEl = document.getElementById('fieldBfUrgentTag');
+            const tEl = document.getElementById('fieldBfStarburstTop');
+            const dEl = document.getElementById('fieldBfDiscount');
+            const fEl = document.getElementById('fieldBfFlashTag');
+
+            if (cEl) appState.bfCampaignTitle = cEl.value;
+            if (sEl) appState.bfHeaderSubtitle = sEl.value;
+            if (uEl) appState.bfUrgentTag = uEl.value;
+            if (tEl) appState.bfStarburstTop = tEl.value;
+            if (dEl) appState.bfDiscountCustom = dEl.value;
+            if (fEl) appState.bfFlashTag = fEl.value;
+
+            renderSlidesStage();
+        }
+
+        function setBfCampaignPreset(presetText) {
+            appState.bfCampaignTitle = presetText;
+            const cEl = document.getElementById('fieldBfCampaign');
+            if (cEl) cEl.value = presetText;
+            renderSlidesStage();
+            showToast(`Campanha alterada para "${presetText}"!`);
+        }
+
+        function setBfSubFormat(subFormat) {
+            appState.bfSubFormat = subFormat;
+            ['carousel-3', 'single-feed', 'story'].forEach(fmt => {
+                const btn = document.getElementById(`bfSubBtn-${fmt}`);
+                if (btn) {
+                    if (fmt === subFormat) {
+                        btn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-extrabold bg-[#FFE600] text-black shadow transition cursor-pointer';
+                    } else {
+                        btn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition cursor-pointer';
+                    }
+                }
+            });
+            renderSlidesStage();
+        }
+
+        function buildBfExplosivaSlide1Html(showArrasta) {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+            const hasProductPhoto = Boolean(appState.productImageSrc && appState.productImageSrc.trim() !== '');
+            const activeProductImg = isWhiteBox
+                ? appState.productImageSrc
+                : (appState.productImageTransparentSrc || appState.productImageSrc);
+
+            const campaignTitle = (appState.bfCampaignTitle || 'BLACK FRIDAY').trim();
+            const headerSubtitle = (appState.bfHeaderSubtitle || '🚨 LIQUIDAÇÃO @ATPROMOO').trim();
+            const urgentTag = (appState.bfUrgentTag || 'URGENTE').trim();
+            const starburstTop = (appState.bfStarburstTop || 'BAIXOU').trim();
+            const discountLabel = getComputedBfDiscountLabel();
+            const flashTag = (appState.bfFlashTag ?? '🔥 OFERTA RELÂMPAGO').trim();
+            const frameH = Math.min(Math.max(appState.photoFrameHeight || 124, 95), 136);
+
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-3.5 py-3.5 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[9px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[8px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- 1. HEADER EXPLOSIVO DE LIQUIDAÇÃO BLACK FRIDAY -->
+                <div class="w-[94%] mx-auto relative z-10 mt-1">
+                    <div class="flex items-center gap-2.5">
+                        <!-- Logo / Mascote @atpromoo com Sombra Dura Amarela -->
+                        <div class="relative w-[50px] h-[50px] shrink-0">
+                            <div style="position: absolute; top: 3px; left: 3px; width: 50px; height: 50px; background-color: #FFE600; border-radius: 12px;"></div>
+                            <div class="relative w-[50px] h-[50px] rounded-xl bg-[#FAF6EE] border-[2.5px] border-black flex items-center justify-center p-0.5 overflow-hidden">
+                                <img
+                                    src="${appState.mascotSlot1Raw}"
+                                    alt="Mascote ATpromo"
+                                    class="w-full h-full object-contain"
+                                    crossorigin="anonymous"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Banner Tipográfico Gigante Inclinado com Sombra Dura Vermelha -->
+                        <div class="relative flex-1 min-w-0">
+                            <div style="position: absolute; top: 4px; left: 4px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 12px; transform: rotate(-1deg);"></div>
+                            <div class="relative bg-[#FFE600] border-[3px] border-black rounded-xl px-2.5 py-1 transform -rotate-1">
+                                <div class="flex items-center justify-between gap-1 text-[8px] font-display font-black uppercase text-black leading-none mb-0.5">
+                                    <span class="truncate">${escapeHtml(headerSubtitle)}</span>
+                                    ${urgentTag ? `
+                                        <span class="bg-[#FF2E00] text-white px-1.5 py-0.5 rounded text-[7.5px] font-display font-black shrink-0 leading-none">
+                                            ${escapeHtml(urgentTag)}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                                <div class="font-impact text-[24px] leading-[0.94] tracking-wider uppercase text-black truncate">
+                                    ${escapeHtml(campaignTitle)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gatilho + Nome do Produto -->
+                    <div class="mt-2 bg-[#16161A] border-2 border-[#FFE600] rounded-lg px-2.5 py-1 flex items-center gap-1.5 overflow-hidden">
+                        ${appState.badge ? `
+                            <span class="text-[#FFE600] font-display font-black text-[11px] uppercase italic shrink-0 leading-tight">
+                                ${escapeHtml(appState.badge)}
+                            </span>
+                        ` : ''}
+                        <h2 class="font-display font-extrabold text-[13px] text-white truncate leading-tight">
+                            ${escapeHtml(appState.title)}
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 2. PRODUTO EM DESTAQUE + EXPLOSÃO STARBURST 16 PONTAS -->
+                <div class="relative w-[94%] mx-auto my-0.5 z-10">
+                    <!-- Explosão Starburst 16 Pontas com Sombra Física Embutida no SVG -->
+                    <div class="absolute -top-3.5 -right-2.5 z-30 w-[64px] h-[64px] flex items-center justify-center transform rotate-12 pointer-events-none">
+                        <svg viewBox="0 0 106 106" class="w-full h-full absolute inset-0 overflow-visible">
+                            <polygon
+                                points="53,5 66,20 85,13 86,33 101,45 89,61 96,80 76,84 69,101 53,90 37,101 30,84 10,80 17,61 5,45 20,33 21,13 40,20"
+                                fill="#000000"
+                            />
+                            <polygon
+                                points="50,2 63,17 82,10 83,30 98,42 86,58 93,77 73,81 66,98 50,87 34,98 27,81 7,77 14,58 2,42 17,30 18,10 37,17"
+                                fill="#FF2E00"
+                                stroke="#000000"
+                                stroke-width="4.5"
+                            />
+                        </svg>
+                        <div class="relative z-10 text-center leading-none px-1">
+                            ${starburstTop ? `
+                                <span class="block text-[6.5px] font-display font-black text-[#FFE600] uppercase leading-none">
+                                    ${escapeHtml(starburstTop)}
+                                </span>
+                            ` : ''}
+                            <span class="font-impact text-[13px] text-white tracking-wide leading-none block mt-0.5">
+                                ${escapeHtml(discountLabel)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Etiqueta Lateral "🔥 OFERTA RELÂMPAGO" -->
+                    ${flashTag ? `
+                        <div class="absolute bottom-[30px] -left-1.5 z-30 transform -rotate-2 pointer-events-none">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 6px;"></div>
+                            <div class="relative bg-[#FFE600] text-black border-2 border-black px-2 py-0.5 rounded text-[8px] font-display font-black uppercase leading-tight">
+                                ${escapeHtml(flashTag)}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Container do Produto com Sombra Dura Amarela -->
+                    <div class="relative w-full">
+                        <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 14px;"></div>
+                        <div class="relative rounded-[14px] border-[3px] border-black bg-white overflow-hidden flex flex-col">
+                            ${appState.condition ? `
+                                <div class="bg-[#FF2E00] text-white py-1 px-3 border-b-[3px] border-black text-center">
+                                    <span class="font-display font-black text-[9px] uppercase tracking-wider text-white block leading-tight">
+                                        ${escapeHtml(appState.condition)}
+                                    </span>
+                                </div>
+                            ` : ''}
+
+                            <!-- Palco Branco Limpo para Foto do Produto -->
+                            <div
+                                onclick="document.getElementById('fileUploadInput').click()"
+                                class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden transition-all duration-150"
+                                style="height: ${frameH}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
+                                title="Clique ou dê Ctrl+V para colar a foto do produto"
+                            >
+                                ${hasProductPhoto ? `
+                                    <img
+                                        src="${activeProductImg}"
+                                        alt="Produto"
+                                        style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});"
+                                        crossorigin="anonymous"
+                                    />
+                                ` : `
+                                    <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-3 py-1 hover:border-[#FF2E00] transition">
+                                        <span class="text-base mb-0.5">📋</span>
+                                        <p class="font-display font-extrabold text-[10px] text-[#141414] leading-snug">
+                                            Clique ou dê <span class="text-[#FF2E00]">Ctrl+V</span> para colar a foto real
+                                        </p>
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- Barra Inferior Amarela (#FFE600) com Submodelo e Loja -->
+                            <div class="bg-[#FFE600] py-1.5 px-2.5 border-t-[3px] border-black flex items-center justify-between gap-2 text-black">
+                                <span class="font-display font-black text-[9px] uppercase tracking-tight text-black truncate">
+                                    ${escapeHtml(appState.subtitle || appState.title)}
+                                </span>
+                                <span class="bg-black text-white px-2 py-0.5 rounded font-display font-black text-[8.5px] uppercase shrink-0">
+                                    🛒 ${escapeHtml(appState.store)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CUPOM DE PREÇO AGRESSIVO COM ENTALHES LATERAIS E CAMADA DUPLA FÍSICA -->
+                <div class="relative w-[94%] mx-auto my-0.5 z-10">
+                    <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 14px;"></div>
+                    <div class="relative bg-[#FF2E00] border-[3px] border-black rounded-[14px] px-4 py-1.5 flex flex-col items-center justify-center text-center overflow-hidden">
+                        <!-- Entalhes Laterais de Ticket (Recortes Físicos Indestrutíveis no PNG) -->
+                        <div style="position: absolute; left: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 16px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+                        <div style="position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 16px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+
+                        <div class="flex items-center justify-center gap-1.5">
+                            ${appState.oldPrice ? `
+                                <span class="bg-black text-[#FFE600] px-2 py-0.5 rounded text-[9px] font-display font-extrabold uppercase line-through leading-none">
+                                    DE ${escapeHtml(appState.oldPrice)}
+                                </span>
+                            ` : ''}
+                            <span class="text-[9px] font-display font-black text-white uppercase tracking-wider leading-none">
+                                POR APENAS:
+                            </span>
+                        </div>
+
+                        <!-- Preço Gigante em Fonte Anton com Camada Dupla Física -->
+                        <div class="relative w-full h-[38px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; text-align: center;" class="font-impact text-[34px] leading-none tracking-wide text-black select-none pointer-events-none" aria-hidden="true">
+                                ${escapeHtml(appState.price)}
+                            </span>
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-impact text-[34px] leading-none tracking-wide text-[#FFE600] block">
+                                ${escapeHtml(appState.price)}
+                            </span>
+                        </div>
+
+                        <!-- Pílula Branca de Parcelamento / PIX -->
+                        <div class="relative mt-0.5 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 9999px;"></div>
+                            <div class="relative px-3.5 py-0.5 rounded-full bg-white border-2 border-black flex items-center justify-center">
+                                <span class="font-display font-black text-[9.5px] text-black uppercase block leading-normal">
+                                    ${escapeHtml(appState.installments)}
+                                </span>
+                            </div>
+                        </div>
+
+                        ${appState.coupon ? `
+                            <div class="mt-1 px-2 py-0.5 rounded bg-black text-[#FFE600] font-mono font-extrabold text-[8px] uppercase">
+                                CUPOM: ${escapeHtml(appState.coupon)}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- 4. RODAPÉ -->
+                <div class="w-[94%] mx-auto flex items-center justify-between pb-1 pt-0.5 z-10">
+                    <span class="font-mono font-bold text-[9.5px] text-zinc-200 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700">
+                        ${escapeHtml(appState.siteUrl)}
+                    </span>
+                    <span class="font-display font-black text-[10px] text-[#FFE600] uppercase tracking-tight">
+                        ${showArrasta ? 'ARRASTA PRO LADO ➔' : '🔗 LINK NA BIO'}
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        function buildBfExplosivaSlide2Html() {
+            const campaignTitle = (appState.bfCampaignTitle || 'BLACK FRIDAY').trim();
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 flex flex-col justify-between px-4 py-4 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[9px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[8px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- TOPO: Mascote + "💡 VALE A PENA NA BLACK?" -->
+                <div class="flex items-center gap-2.5 pt-1 relative z-10">
+                    <div class="relative w-[52px] h-[52px] shrink-0">
+                        <div style="position: absolute; top: 3px; left: 3px; width: 52px; height: 52px; background-color: #FFE600; border-radius: 12px;"></div>
+                        <div class="relative w-[52px] h-[52px] rounded-xl bg-[#FAF6EE] border-[2.5px] border-black flex items-center justify-center p-0.5 overflow-hidden">
+                            <img
+                                src="${appState.mascotSlot1Raw}"
+                                alt="Mascote ATpromo"
+                                class="w-full h-full object-contain"
+                                crossorigin="anonymous"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-start min-w-0 flex-1">
+                        <span class="text-[8.5px] font-mono font-extrabold uppercase text-[#FFE600] tracking-wider">
+                            ⚡ RAIO-X ${escapeHtml(campaignTitle)}
+                        </span>
+                        <h2 class="font-impact text-[22px] leading-none text-white uppercase tracking-wide mt-0.5">
+                            💡 VALE A PENA?
+                        </h2>
+                        <div class="relative mt-1 max-w-full inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 9999px;"></div>
+                            <div class="relative px-2.5 py-0.5 rounded-full bg-[#FFE600] border-2 border-black">
+                                <span class="font-display font-black text-[9px] text-black uppercase tracking-wide block truncate">
+                                    ${escapeHtml(appState.title)} • ${escapeHtml(appState.price)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CENTRO: 4 FAIXAS HORIZONTAIS NO ESTILO BLACK FRIDAY EXPLOSIVA -->
+                <div class="flex flex-col gap-2 my-auto py-1 relative z-10">
+                    ${appState.highlights.slice(0, 4).map((item, idx) => {
+                        const parsed = parseHorizontalHighlightRow(item, idx);
+                        const shadowColor = idx % 2 === 0 ? '#FFE600' : '#FF2E00';
+                        return `
+                        <div class="relative w-full">
+                            <div style="position: absolute; top: 4px; left: 4px; width: 100%; height: 100%; background-color: ${shadowColor}; border-radius: 14px;"></div>
+                            <div class="relative bg-white border-[2.5px] border-black rounded-[14px] px-3 py-2 flex items-center gap-2.5 text-[#141414]">
+                                <div class="relative shrink-0">
+                                    <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 8px;"></div>
+                                    <div class="relative w-8 h-8 rounded-lg bg-[#FFE600] border-2 border-black flex items-center justify-center font-display font-black text-xs text-black">
+                                        ${escapeHtml(parsed.iconOrNum)}
+                                    </div>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-display font-extrabold text-[11px] text-[#141414] leading-snug">
+                                        ${escapeHtml(parsed.rowTitle)}
+                                    </h3>
+                                    <p class="font-sans font-semibold text-[9.5px] text-neutral-700 leading-snug mt-0.5">
+                                        ${escapeHtml(parsed.rowDesc)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+
+                <!-- RODAPÉ -->
+                <div class="w-full flex items-center justify-between pb-1 pt-0.5 relative z-10">
+                    <span class="font-mono font-bold text-[9.5px] text-zinc-200 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700">
+                        ${escapeHtml(appState.siteUrl)}
+                    </span>
+                    <span class="font-display font-black text-[10.5px] text-[#FFE600] uppercase">
+                        ARRASTA PRO LADO ➔
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        function buildBfExplosivaSlide3CtaHtml() {
+            if (appState.slide3UseCustom && appState.slide3CustomImageSrc) {
+                return `
+                <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 relative overflow-hidden p-0 bg-[#0E0E10] flex items-center justify-center">
+                    <img
+                        src="${appState.slide3CustomImageSrc}"
+                        alt="Post Institucional Slide 3"
+                        class="w-full h-full object-cover"
+                        crossorigin="anonymous"
+                    />
+                </div>`;
+            }
+
+            const ctaLines = (appState.commentTrigger || 'Comente *EU QUERO* / ou acesse pelo / link da bio')
+                .split('/')
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            const formatBfCtaLine = (str) => {
+                const safe = escapeHtml(str || '');
+                return safe.replace(/\*([^*]+)\*/g, '<em class="italic text-[#FFE600] font-black">$1</em>');
+            };
+
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center text-center px-5 py-4 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[9px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[8px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- 1. TOPO -->
+                <div class="pt-1 relative z-10">
+                    <span class="px-3 py-0.5 rounded-full bg-[#FFE600] text-black border-2 border-black font-display font-black text-[10px] uppercase tracking-wider shadow-[2px_2px_0px_#FF2E00]">
+                        🚨 ${escapeHtml(appState.bfCampaignTitle || 'BLACK FRIDAY')} • ${escapeHtml(appState.brandHandle)}
+                    </span>
+                </div>
+
+                <!-- 2. CENTRO: Sticker Redondo do Mascote + Chamada Explosiva -->
+                <div class="my-auto flex flex-col items-center relative z-10">
+                    <div class="relative w-[146px] h-[146px] mx-auto">
+                        <div style="position: absolute; top: 4px; left: 4px; width: 146px; height: 146px; background-color: #FFE600; border-radius: 9999px;"></div>
+                        <div class="relative w-[146px] h-[146px] rounded-full border-[3px] border-black overflow-hidden bg-[#FAF6EE] flex items-center justify-center">
+                            <img
+                                src="${appState.mascotSlot2Raw}"
+                                alt="Mascote Oficial ATpromo"
+                                class="w-full h-full object-cover"
+                                style="object-position: center 10%;"
+                                crossorigin="anonymous"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="mt-2 flex items-center justify-center">
+                        <span class="font-display font-black text-[22px] tracking-tight leading-none">
+                            <span class="text-[#FF6B1A]">AT</span><span class="text-white">promo</span>
+                        </span>
+                    </div>
+
+                    <p class="font-display font-extrabold text-[16px] text-zinc-100 tracking-tight mt-1">
+                        ${formatBfCtaLine(appState.ctaHeadline)}
+                    </p>
+
+                    <div class="my-0.5 flex justify-center">
+                        <svg width="28" height="32" viewBox="0 0 38 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 3 C14 12, 14 24, 19 36" stroke="#FFE600" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                            <path d="M10 29 C14 34, 17 38, 19.5 40 C22 36, 25 31, 29 28" stroke="#FFE600" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h2 class="font-display font-black text-[19px] leading-[1.14] tracking-tight text-white">
+                            ${ctaLines.map(line => `<span class="block">${formatBfCtaLine(line)}</span>`).join('')}
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 3. RODAPÉ -->
+                <div class="pb-1 relative z-10">
+                    <span class="font-mono font-bold text-[10px] text-[#FFE600]">
+                        ${escapeHtml(appState.siteUrl)} • ${escapeHtml(appState.brandHandle)}
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        function buildBfExplosivaStoryHtml() {
+            const isWhiteBox = appState.photoBoxStyle === 'white-card';
+            const imgScaleNum = (appState.imgScale || 100) / 100;
+            const hasProductPhoto = Boolean(appState.productImageSrc && appState.productImageSrc.trim() !== '');
+            const activeProductImg = isWhiteBox
+                ? appState.productImageSrc
+                : (appState.productImageTransparentSrc || appState.productImageSrc);
+
+            const campaignTitle = (appState.bfCampaignTitle || 'BLACK FRIDAY').trim();
+            const headerSubtitle = (appState.bfHeaderSubtitle || '🚨 LIQUIDAÇÃO @ATPROMOO').trim();
+            const urgentTag = (appState.bfUrgentTag || 'URGENTE').trim();
+            const starburstTop = (appState.bfStarburstTop || 'BAIXOU').trim();
+            const discountLabel = getComputedBfDiscountLabel();
+            const flashTag = (appState.bfFlashTag ?? '🔥 OFERTA RELÂMPAGO').trim();
+
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-9-16 flex flex-col justify-between p-4 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[10px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[10px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- 1. TOPO STORY BLACK FRIDAY -->
+                <div class="w-[94%] mx-auto relative z-10 mt-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="relative w-[56px] h-[56px] shrink-0">
+                            <div style="position: absolute; top: 3px; left: 3px; width: 56px; height: 56px; background-color: #FFE600; border-radius: 12px;"></div>
+                            <div class="relative w-[56px] h-[56px] rounded-xl bg-[#FAF6EE] border-[2.5px] border-black flex items-center justify-center p-0.5 overflow-hidden">
+                                <img
+                                    src="${appState.mascotSlot1Raw}"
+                                    alt="Mascote ATpromo"
+                                    class="w-full h-full object-contain"
+                                    crossorigin="anonymous"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="relative flex-1 min-w-0">
+                            <div style="position: absolute; top: 4px; left: 4px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 12px; transform: rotate(-1deg);"></div>
+                            <div class="relative bg-[#FFE600] border-[3px] border-black rounded-xl px-3 py-1.5 transform -rotate-1">
+                                <div class="flex items-center justify-between gap-1 text-[8.5px] font-display font-black uppercase text-black leading-none mb-0.5">
+                                    <span class="truncate">${escapeHtml(headerSubtitle)}</span>
+                                    ${urgentTag ? `<span class="bg-[#FF2E00] text-white px-1.5 py-0.5 rounded text-[7.5px] shrink-0">${escapeHtml(urgentTag)}</span>` : ''}
+                                </div>
+                                <div class="font-impact text-[26px] leading-[0.94] tracking-wider uppercase text-black truncate">
+                                    ${escapeHtml(campaignTitle)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2.5 bg-[#16161A] border-2 border-[#FFE600] rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                        ${appState.badge ? `<span class="text-[#FFE600] font-display font-black text-[12px] uppercase italic shrink-0">${escapeHtml(appState.badge)}</span>` : ''}
+                        <h2 class="font-display font-extrabold text-[14px] text-white truncate leading-tight">${escapeHtml(appState.title)}</h2>
+                    </div>
+                </div>
+
+                <!-- 2. VITRINE DO PRODUTO STORY + STARBURST -->
+                <div class="relative w-[94%] mx-auto my-1 z-10">
+                    <div class="absolute -top-4 -right-2.5 z-30 w-[68px] h-[68px] flex items-center justify-center transform rotate-12 pointer-events-none">
+                        <svg viewBox="0 0 106 106" class="w-full h-full absolute inset-0 overflow-visible">
+                            <polygon points="53,5 66,20 85,13 86,33 101,45 89,61 96,80 76,84 69,101 53,90 37,101 30,84 10,80 17,61 5,45 20,33 21,13 40,20" fill="#000000"/>
+                            <polygon points="50,2 63,17 82,10 83,30 98,42 86,58 93,77 73,81 66,98 50,87 34,98 27,81 7,77 14,58 2,42 17,30 18,10 37,17" fill="#FF2E00" stroke="#000000" stroke-width="4.5"/>
+                        </svg>
+                        <div class="relative z-10 text-center leading-none">
+                            ${starburstTop ? `<span class="block text-[7px] font-display font-black text-[#FFE600] uppercase">${escapeHtml(starburstTop)}</span>` : ''}
+                            <span class="font-impact text-[14px] text-white tracking-wide block mt-0.5">${escapeHtml(discountLabel)}</span>
+                        </div>
+                    </div>
+
+                    ${flashTag ? `
+                        <div class="absolute bottom-[32px] -left-1.5 z-30 transform -rotate-2 pointer-events-none">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 6px;"></div>
+                            <div class="relative bg-[#FFE600] text-black border-2 border-black px-2.5 py-0.5 rounded text-[8.5px] font-display font-black uppercase">
+                                ${escapeHtml(flashTag)}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="relative w-full">
+                        <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 16px;"></div>
+                        <div class="relative rounded-[16px] border-[3px] border-black bg-white overflow-hidden flex flex-col">
+                            ${appState.condition ? `
+                                <div class="bg-[#FF2E00] text-white py-1 px-3 border-b-[3px] border-black text-center">
+                                    <span class="font-display font-black text-[9.5px] uppercase tracking-wider text-white block leading-tight">${escapeHtml(appState.condition)}</span>
+                                </div>
+                            ` : ''}
+
+                            <div
+                                onclick="document.getElementById('fileUploadInput').click()"
+                                class="w-full flex items-center justify-center bg-white cursor-pointer overflow-hidden"
+                                style="height: 180px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};"
+                            >
+                                ${hasProductPhoto ? `
+                                    <img src="${activeProductImg}" alt="Produto" style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'}; transform: scale(${imgScaleNum});" crossorigin="anonymous"/>
+                                ` : `
+                                    <div class="w-full h-full rounded-xl border-2 border-dashed border-neutral-300 flex flex-col items-center justify-center text-center px-4">
+                                        <span class="text-2xl mb-1">📋</span>
+                                        <p class="font-display font-extrabold text-xs text-[#141414]">Clique ou dê <span class="text-[#FF2E00]">Ctrl+V</span> para colar a foto do produto</p>
+                                    </div>
+                                `}
+                            </div>
+
+                            <div class="bg-[#FFE600] py-1.5 px-3 border-t-[3px] border-black flex items-center justify-between text-black">
+                                <span class="font-display font-black text-[9.5px] uppercase truncate pr-2">${escapeHtml(appState.subtitle || appState.title)}</span>
+                                <span class="bg-black text-white px-2 py-0.5 rounded font-display font-black text-[9px] uppercase shrink-0">🛒 ${escapeHtml(appState.store)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. BLOCO DE PREÇO STORY -->
+                <div class="relative w-[94%] mx-auto my-1 z-10">
+                    <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 16px;"></div>
+                    <div class="relative bg-[#FF2E00] border-[3px] border-black rounded-[16px] py-2.5 px-4 flex flex-col items-center justify-center text-center overflow-hidden">
+                        <div style="position: absolute; left: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 18px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+                        <div style="position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 18px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+
+                        <div class="flex items-center justify-center gap-2">
+                            ${appState.oldPrice ? `<span class="bg-black text-[#FFE600] px-2 py-0.5 rounded text-[10px] font-display font-extrabold uppercase line-through">DE ${escapeHtml(appState.oldPrice)}</span>` : ''}
+                            <span class="text-[10px] font-display font-black text-white uppercase tracking-wider">POR APENAS:</span>
+                        </div>
+
+                        <div class="relative w-full h-[44px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 3px; left: 3px; width: 100%; text-align: center;" class="font-impact text-[38px] leading-none tracking-wide text-black select-none pointer-events-none" aria-hidden="true">${escapeHtml(appState.price)}</span>
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-impact text-[38px] leading-none tracking-wide text-[#FFE600] block">${escapeHtml(appState.price)}</span>
+                        </div>
+
+                        <div class="relative mt-1 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 9999px;"></div>
+                            <div class="relative px-3.5 py-1 rounded-full bg-white border-2 border-black font-display font-black text-[10.5px] text-black uppercase leading-normal">
+                                ${escapeHtml(appState.installments)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CARD DE STICKER DE LINK DO STORY -->
+                <div class="relative w-[94%] mx-auto my-1 z-10">
+                    <div style="position: absolute; top: 4px; left: 4px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 14px;"></div>
+                    <div class="relative bg-[#FFE600] border-[3px] border-black rounded-[14px] py-2 px-4 text-center">
+                        <p class="font-display font-black text-xs uppercase text-black leading-normal">🔗 CLIQUE NO LINK AQUI 👇</p>
+                        <p class="text-[9.5px] font-extrabold text-neutral-800 mt-0.5 leading-normal">(Cole a figurinha de Link do Instagram aqui)</p>
+                    </div>
+                </div>
+
+                <div class="text-center pb-1.5 relative z-10">
+                    <span class="font-mono font-bold text-[10px] text-[#FFE600] leading-normal">${escapeHtml(appState.siteUrl)}</span>
+                </div>
+            </div>`;
+        }
+
+        function buildBfExplosivaGiroHookSlideHtml() {
+            const totalCount = appState.giroProducts.length || 1;
+            const hookTitle = appState.giroTitle || 'As 4 Melhores Ofertas de Hoje';
+            const campaignTitle = (appState.bfCampaignTitle || 'BLACK FRIDAY').trim();
+
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-4 py-4 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[9px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[8px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- 1. TOPO: Mascote + @atpromoo + Badge de Contagem -->
+                <div class="w-[94%] mx-auto flex items-center justify-between pt-1 relative z-10">
+                    <div class="flex items-center gap-2.5">
+                        <div class="relative w-[52px] h-[52px] shrink-0">
+                            <div style="position: absolute; top: 3px; left: 3px; width: 52px; height: 52px; background-color: #FFE600; border-radius: 12px;"></div>
+                            <div class="relative w-[52px] h-[52px] rounded-xl bg-[#FAF6EE] border-[2.5px] border-black flex items-center justify-center p-0.5 overflow-hidden">
+                                <img
+                                    src="${appState.mascotSlot1Raw}"
+                                    alt="Mascote ATpromo"
+                                    class="w-full h-full object-contain"
+                                    crossorigin="anonymous"
+                                />
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-start min-w-0">
+                            <span class="font-display font-black text-[12px] text-zinc-200 tracking-tight">
+                                ${escapeHtml(appState.brandHandle)}
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-[#FFE600] text-black border-2 border-black font-display font-black text-[8.5px] uppercase tracking-wide">
+                                🚨 ${escapeHtml(campaignTitle)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Badge de Ofertas Verificadas com Sombra Dura Vermelha -->
+                    <div class="relative inline-block shrink-0">
+                        <div style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 9999px;"></div>
+                        <div class="relative px-3 py-1 rounded-full bg-black border-2 border-[#FFE600]">
+                            <span class="font-display font-black text-[9.5px] text-[#FFE600] uppercase tracking-wider block leading-none">
+                                ⚡ ${totalCount} ${totalCount === 1 ? 'OFERTA' : 'OFERTAS'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CENTRO: HEADLINE GANCHO + CARD CENTRAL DO GIRO BLACK FRIDAY -->
+                <div class="my-auto w-[94%] mx-auto flex flex-col items-center text-center relative z-10">
+                    <div class="relative inline-block mb-1.5">
+                        <div style="position: absolute; top: 3px; left: 3px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 10px; transform: rotate(-1deg);"></div>
+                        <div class="relative bg-[#FFE600] border-[2.5px] border-black rounded-lg px-3.5 py-0.5 transform -rotate-1">
+                            <h2 class="font-impact text-[25px] leading-[1.05] tracking-wider text-black uppercase">
+                                🔥 GIRO <span class="text-[#FF2E00]">${escapeHtml(campaignTitle)}</span>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Card Central do Mascote / Sticker do Giro com Sombra Dura Amarela -->
+                    <div class="relative w-full my-1">
+                        <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 18px;"></div>
+                        <div class="relative bg-white border-[3px] border-black rounded-[18px] w-full overflow-hidden flex flex-col items-center p-3 text-center">
+                            <div class="relative w-[118px] h-[118px] my-0.5">
+                                <div style="position: absolute; top: 3px; left: 3px; width: 118px; height: 118px; background-color: #FF2E00; border-radius: 9999px;"></div>
+                                <div class="relative w-[118px] h-[118px] rounded-full border-[3px] border-black overflow-hidden bg-[#FAF6EE] flex items-center justify-center">
+                                    <img
+                                        src="${appState.mascotSlot2Raw}"
+                                        alt="Mascote Oficial ATpromo"
+                                        class="w-full h-full object-cover"
+                                        style="object-position: center 10%;"
+                                        crossorigin="anonymous"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="mt-2 w-full">
+                                <div class="relative inline-block w-full">
+                                    <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 10px;"></div>
+                                    <div class="relative w-full py-1.5 px-2 bg-[#FF2E00] border-2 border-black rounded-lg">
+                                        <span class="font-display font-black text-[11px] text-[#FFE600] uppercase tracking-wide block leading-tight">
+                                            ${escapeHtml(hookTitle)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="font-sans font-extrabold text-[9.5px] text-neutral-800 mt-2 leading-tight">
+                                Liquidação verificada a dedo pelo monitoramento @atpromoo 👇
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. RODAPÉ -->
+                <div class="w-[94%] mx-auto flex items-center justify-between pb-1 pt-0.5 relative z-10">
+                    <span class="font-mono font-bold text-[9.5px] text-zinc-200 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700">
+                        ${escapeHtml(appState.siteUrl)}
+                    </span>
+                    <span class="font-display font-black text-[10.5px] text-[#FFE600] uppercase">
+                        ARRASTA PRO LADO ➔
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        function buildBfExplosivaGiroProductSlideHtml(prod, offerNumber) {
+            const hasPhoto = Boolean(prod.image && prod.image.trim() !== '');
+            const campaignTitle = (appState.bfCampaignTitle || 'BLACK FRIDAY').trim();
+            const starburstTop = (appState.bfStarburstTop || 'BAIXOU').trim();
+            const flashTag = (appState.bfFlashTag ?? '🔥 OFERTA RELÂMPAGO').trim();
+            const frameH = Math.min(Math.max(appState.photoFrameHeight || 122, 95), 132);
+
+            // Calcula % OFF individual da oferta do Giro
+            let prodDiscount = 'OFERTA';
+            const customDisc = (appState.bfDiscountCustom || '').trim();
+            const oldVal = parseCurrencyValue(prod.oldPrice);
+            const newVal = parseCurrencyValue(prod.price);
+            if (oldVal > newVal && newVal > 0) {
+                const pct = Math.round(((oldVal - newVal) / oldVal) * 100);
+                if (pct >= 1 && pct <= 95) prodDiscount = `${pct}% OFF`;
+            } else if (customDisc) {
+                prodDiscount = customDisc;
+            } else {
+                prodDiscount = '22% OFF';
+            }
+
+            return `
+            <div data-bg-color="#0E0E10" class="exportable-slide slide-canvas-4-5 flex flex-col justify-between items-center px-3.5 py-3.5 bg-[#0E0E10] text-white relative overflow-hidden">
+                <!-- Fitas Diagonais de Liquidação no Topo e Base -->
+                <div class="absolute top-0 left-0 right-0 h-[9px] bg-hazard-stripes border-b-2 border-black z-20"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-[8px] bg-hazard-stripes border-t-2 border-black z-20"></div>
+
+                <!-- 1. HEADER DO PRODUTO NO GIRO BLACK FRIDAY -->
+                <div class="w-[94%] mx-auto relative z-10 mt-1">
+                    <div class="flex items-center gap-2.5">
+                        <div class="relative w-[50px] h-[50px] shrink-0">
+                            <div style="position: absolute; top: 3px; left: 3px; width: 50px; height: 50px; background-color: #FFE600; border-radius: 12px;"></div>
+                            <div class="relative w-[50px] h-[50px] rounded-xl bg-[#FAF6EE] border-[2.5px] border-black flex items-center justify-center p-0.5 overflow-hidden">
+                                <img
+                                    src="${appState.mascotSlot1Raw}"
+                                    alt="Mascote ATpromo"
+                                    class="w-full h-full object-contain"
+                                    crossorigin="anonymous"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="relative flex-1 min-w-0">
+                            <div style="position: absolute; top: 4px; left: 4px; width: 100%; height: 100%; background-color: #FF2E00; border-radius: 12px; transform: rotate(-1deg);"></div>
+                            <div class="relative bg-[#FFE600] border-[3px] border-black rounded-xl px-2.5 py-1 transform -rotate-1">
+                                <div class="flex items-center justify-between gap-1 text-[8px] font-display font-black uppercase text-black leading-none mb-0.5">
+                                    <span class="truncate">🚨 GIRO ${escapeHtml(appState.brandHandle)}</span>
+                                    <span class="bg-[#FF2E00] text-white px-1.5 py-0.5 rounded text-[7.5px] font-display font-black shrink-0 leading-none">
+                                        OFERTA #${offerNumber}
+                                    </span>
+                                </div>
+                                <div class="font-impact text-[23px] leading-[0.94] tracking-wider uppercase text-black truncate">
+                                    ${escapeHtml(campaignTitle)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-2 bg-[#16161A] border-2 border-[#FFE600] rounded-lg px-2.5 py-1 flex items-center gap-1.5 overflow-hidden">
+                        <span class="text-[#FFE600] font-display font-black text-[11px] uppercase italic shrink-0 leading-tight">
+                            ${escapeHtml(prod.badge || `Oferta #${offerNumber}:`)}
+                        </span>
+                        <h2 class="font-display font-extrabold text-[13px] text-white truncate leading-tight">
+                            ${escapeHtml(prod.title)}
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 2. CARD PRODUTO GIRO + STARBURST 16 PONTAS -->
+                <div class="relative w-[94%] mx-auto my-0.5 z-10">
+                    <div class="absolute -top-3.5 -right-2.5 z-30 w-[64px] h-[64px] flex items-center justify-center transform rotate-12 pointer-events-none">
+                        <svg viewBox="0 0 106 106" class="w-full h-full absolute inset-0 overflow-visible">
+                            <polygon points="53,5 66,20 85,13 86,33 101,45 89,61 96,80 76,84 69,101 53,90 37,101 30,84 10,80 17,61 5,45 20,33 21,13 40,20" fill="#000000"/>
+                            <polygon points="50,2 63,17 82,10 83,30 98,42 86,58 93,77 73,81 66,98 50,87 34,98 27,81 7,77 14,58 2,42 17,30 18,10 37,17" fill="#FF2E00" stroke="#000000" stroke-width="4.5"/>
+                        </svg>
+                        <div class="relative z-10 text-center leading-none px-1">
+                            ${starburstTop ? `<span class="block text-[6.5px] font-display font-black text-[#FFE600] uppercase leading-none">${escapeHtml(starburstTop)}</span>` : ''}
+                            <span class="font-impact text-[13px] text-white tracking-wide leading-none block mt-0.5">${escapeHtml(prodDiscount)}</span>
+                        </div>
+                    </div>
+
+                    ${flashTag ? `
+                        <div class="absolute bottom-[30px] -left-1.5 z-30 transform -rotate-2 pointer-events-none">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 6px;"></div>
+                            <div class="relative bg-[#FFE600] text-black border-2 border-black px-2 py-0.5 rounded text-[8px] font-display font-black uppercase leading-tight">
+                                ${escapeHtml(flashTag)}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="relative w-full">
+                        <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 14px;"></div>
+                        <div class="relative rounded-[14px] border-[3px] border-black bg-white overflow-hidden flex flex-col">
+                            ${prod.condition ? `
+                                <div class="bg-[#FF2E00] text-white py-1 px-3 border-b-[3px] border-black text-center">
+                                    <span class="font-display font-black text-[9px] uppercase tracking-wider text-white block leading-tight">
+                                        ${escapeHtml(prod.condition)}
+                                    </span>
+                                </div>
+                            ` : ''}
+
+                            <div class="w-full flex items-center justify-center bg-white overflow-hidden transition-all duration-150" style="height: ${frameH}px; padding: ${appState.photoFit === 'cover' ? '0px' : '8px'};">
+                                ${hasPhoto ? `
+                                    <img src="${prod.image}" alt="Produto" style="width: 100%; height: 100%; object-fit: ${appState.photoFit || 'contain'};" crossorigin="anonymous"/>
+                                ` : `
+                                    <span class="text-xs font-bold text-neutral-400">Selecione a Oferta #${offerNumber} e cole a foto (Ctrl+V)</span>
+                                `}
+                            </div>
+
+                            <div class="bg-[#FFE600] py-1.5 px-2.5 border-t-[3px] border-black flex items-center justify-between gap-2 text-black">
+                                <span class="font-display font-black text-[9px] uppercase tracking-tight text-black truncate">${escapeHtml(prod.subtitle)}</span>
+                                <span class="bg-black text-white px-2 py-0.5 rounded font-display font-black text-[8.5px] uppercase shrink-0">🛒 ${escapeHtml(prod.store)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. BLOCO PREÇO GIRO BLACK FRIDAY -->
+                <div class="relative w-[94%] mx-auto my-0.5 z-10">
+                    <div style="position: absolute; top: 5px; left: 5px; width: 100%; height: 100%; background-color: #FFE600; border-radius: 14px;"></div>
+                    <div class="relative bg-[#FF2E00] border-[3px] border-black rounded-[14px] px-4 py-1.5 flex flex-col items-center justify-center text-center overflow-hidden">
+                        <div style="position: absolute; left: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 16px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+                        <div style="position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 16px; background-color: #0E0E10; border: 2.5px solid #000000; border-radius: 4px;"></div>
+
+                        <div class="flex items-center justify-center gap-1.5">
+                            ${prod.oldPrice ? `
+                                <span class="bg-black text-[#FFE600] px-2 py-0.5 rounded text-[9px] font-display font-extrabold uppercase line-through leading-none">
+                                    DE ${escapeHtml(prod.oldPrice)}
+                                </span>
+                            ` : ''}
+                            <span class="text-[9px] font-display font-black text-white uppercase tracking-wider leading-none">POR APENAS:</span>
+                        </div>
+
+                        <div class="relative w-full h-[36px] flex items-center justify-center my-0.5">
+                            <span style="position: absolute; top: 2.5px; left: 2.5px; width: 100%; text-align: center;" class="font-impact text-[33px] leading-none tracking-wide text-black select-none pointer-events-none" aria-hidden="true">${escapeHtml(prod.price)}</span>
+                            <span style="position: absolute; top: 0px; left: 0px; width: 100%; text-align: center;" class="font-impact text-[33px] leading-none tracking-wide text-[#FFE600] block">${escapeHtml(prod.price)}</span>
+                        </div>
+
+                        <div class="relative mt-0.5 inline-block">
+                            <div style="position: absolute; top: 2px; left: 2px; width: 100%; height: 100%; background-color: #000000; border-radius: 9999px;"></div>
+                            <div class="relative px-3.5 py-0.5 rounded-full bg-white border-2 border-black flex items-center justify-center">
+                                <span class="font-display font-black text-[9.5px] text-black uppercase block leading-normal">${escapeHtml(prod.installments)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. RODAPÉ -->
+                <div class="w-[94%] mx-auto flex items-center justify-between pb-1 pt-0.5 z-10">
+                    <span class="font-mono font-bold text-[9.5px] text-zinc-200 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700">${escapeHtml(appState.siteUrl)}</span>
+                    <span class="font-display font-black text-[10px] text-[#FFE600] uppercase">ARRASTA PRO LADO ➔</span>
+                </div>
+            </div>`;
+        }
+
+        // ============================================================================
         // 10. MOTOR DE EXPORTAÇÃO EM ALTA RESOLUÇÃO (PNG 1080p)
         // ============================================================================
         // Motor principal: html-to-image. Ele serializa o DOM real e deixa o PRÓPRIO NAVEGADOR
@@ -2566,6 +3685,7 @@ Ofertas esgotam, verifique o frete!`;
         }
 
         async function renderSlideToCanvas(slideEl) {
+            const slideBgColor = slideEl.getAttribute('data-bg-color') || '#FAF6EE';
             if (window.htmlToImage) {
                 try {
                     const isStory = slideEl.classList.contains('slide-canvas-9-16') || appState.postMode === 'story';
@@ -2573,7 +3693,7 @@ Ofertas esgotam, verifique o frete!`;
                         width: 360,
                         height: isStory ? 640 : 450,
                         pixelRatio: 3, // 360px * 3 = 1080px (1080x1350 ou 1080x1920)
-                        backgroundColor: '#FAF6EE',
+                        backgroundColor: slideBgColor,
                         fontEmbedCSS: await getFontEmbedCss()
                     };
                     // Safari costuma desenhar imagens/fontes em branco na 1ª passada
@@ -2588,11 +3708,13 @@ Ofertas esgotam, verifique o frete!`;
 
         // Plano B (motor anterior, via html2canvas com clone + ajustes manuais)
         async function renderSlideToCanvasLegacy(slideEl) {
-            // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat) estarem 100% carregadas
+            const slideBgColor = slideEl.getAttribute('data-bg-color') || '#FAF6EE';
+            // 1. Aguardar todas as fontes da página (Plus Jakarta Sans, Montserrat, Anton) estarem 100% carregadas
             if (document.fonts) {
                 await document.fonts.ready;
                 try {
                     await Promise.all([
+                        document.fonts.load('400 34px "Anton"'),
                         document.fonts.load('900 30px "Plus Jakarta Sans"'),
                         document.fonts.load('800 21px "Plus Jakarta Sans"'),
                         document.fonts.load('800 11px "Plus Jakarta Sans"'),
@@ -2618,7 +3740,7 @@ Ofertas esgotam, verifique o frete!`;
             sandbox.style.opacity = '1';
             sandbox.style.pointerEvents = 'none';
             sandbox.style.overflow = 'hidden';
-            sandbox.style.backgroundColor = '#FAF6EE';
+            sandbox.style.backgroundColor = slideBgColor;
 
             // 4. Clonar o elemento do slide para renderização isolada
             const clone = slideEl.cloneNode(true);
@@ -2728,7 +3850,7 @@ Ofertas esgotam, verifique o frete!`;
                     windowHeight: targetHeight,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: '#FAF6EE',
+                    backgroundColor: slideBgColor,
                     scrollX: 0,
                     scrollY: 0,
                     x: 0,
@@ -2929,32 +4051,86 @@ Ofertas esgotam, verifique o frete!`;
         // ============================================================================
         // 11. UTILITÁRIOS DE UI
         // ============================================================================
+        function setVisualTheme(theme) {
+            appState.visualTheme = theme;
+            updateThemeAndModeUI();
+            renderGiroOfferTabs();
+            renderSlidesStage();
+            updateCaptionOutput();
+            if (theme === 'novembro-black') {
+                showToast('Tema 💣 Novembro Black ativado para todos os formatos (Carrossel, Post, Story e Giro)!');
+            } else {
+                showToast('Tema 🎨 Editorial Padrão ativado!');
+            }
+        }
+
         function setPostMode(mode) {
-            appState.postMode = mode;
+            if (mode === 'novembro-black') {
+                appState.visualTheme = 'novembro-black';
+            } else {
+                appState.postMode = mode;
+            }
+            updateThemeAndModeUI();
+            renderGiroOfferTabs();
+            renderSlidesStage();
+            updateCaptionOutput();
+        }
+
+        function updateThemeAndModeUI() {
+            const isBlack = appState.visualTheme === 'novembro-black';
+            const btnEditorial = document.getElementById('themeBtn-editorial');
+            const btnBlack = document.getElementById('themeBtn-novembro-black');
+
+            if (btnEditorial && btnBlack) {
+                if (isBlack) {
+                    btnEditorial.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer';
+                    btnBlack.className = 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap bg-[#FFE600] text-black shadow border border-black cursor-pointer';
+                } else {
+                    btnEditorial.className = 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
+                    btnBlack.className = 'px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap text-[#FFE600] hover:bg-zinc-900 cursor-pointer';
+                }
+            }
+
             const modes = ['carousel-x', 'single-feed', 'story', 'multi-giro'];
             modes.forEach(m => {
                 const btn = document.getElementById(`modeBtn-${m}`);
                 if (btn) {
-                    if (m === mode) {
-                        btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
+                    if (m === appState.postMode) {
+                        btn.className = isBlack
+                            ? 'mode-tab px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all whitespace-nowrap bg-[#FFE600] text-black shadow cursor-pointer'
+                            : 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap bg-[#FF6B1A] text-white shadow cursor-pointer';
                     } else {
                         btn.className = 'mode-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap text-slate-400 hover:text-white cursor-pointer';
+                    }
+                }
+
+                const bfSubBtn = document.getElementById(`bfSubBtn-${m}`);
+                if (bfSubBtn) {
+                    if (m === appState.postMode) {
+                        bfSubBtn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-extrabold bg-[#FFE600] text-black shadow transition cursor-pointer';
+                    } else {
+                        bfSubBtn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-bold text-zinc-400 hover:text-white transition cursor-pointer';
                     }
                 }
             });
 
             const giroCard = document.getElementById('giroSelectorCard');
             if (giroCard) {
-                if (mode === 'multi-giro') {
+                if (appState.postMode === 'multi-giro') {
                     giroCard.classList.remove('hidden');
                 } else {
                     giroCard.classList.add('hidden');
                 }
             }
 
-            renderGiroOfferTabs();
-            renderSlidesStage();
-            updateCaptionOutput();
+            const bfCard = document.getElementById('bfSelectorCard');
+            if (bfCard) {
+                if (isBlack) {
+                    bfCard.classList.remove('hidden');
+                } else {
+                    bfCard.classList.add('hidden');
+                }
+            }
         }
 
         function switchEditorTab(tabId) {
